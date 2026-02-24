@@ -14,7 +14,7 @@ public class SecurityConfig {
 		http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"));
 		http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
 		http.authorizeHttpRequests(auth -> auth
-			.requestMatchers("/h2-console/**", "/actuator/health").permitAll()
+			.requestMatchers("/h2-console/**", "/actuator/health", "/api/health").permitAll()
 			.anyRequest().authenticated()
 		);
 		http.httpBasic(Customizer.withDefaults());
