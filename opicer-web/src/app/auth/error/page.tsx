@@ -1,29 +1,29 @@
-type Props = {
-  searchParams?: {
-    reason?: string;
-  };
-};
+import Link from "next/link";
 
-export default function AuthErrorPage({ searchParams }: Props) {
-  const reason = searchParams?.reason ?? "unknown";
+export default function AuthError({
+  searchParams,
+}: {
+  searchParams: { reason?: string };
+}) {
+  const reason = searchParams.reason ?? "unknown";
 
   return (
-    <main className="min-h-screen px-6 py-20 text-[var(--ink)]">
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 rounded-3xl border border-black/5 bg-white/80 p-10 shadow-[0_40px_80px_-60px_rgba(27,124,122,0.8)] backdrop-blur">
-        <h1 className="text-3xl font-semibold">Login failed</h1>
-        <p className="text-base text-[var(--muted)]">
-          OAuth login failed. Reason: <span className="font-mono">{reason}</span>
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 text-[var(--ink)]">
+      <div className="w-full max-w-sm text-center">
+        <p className="text-xs uppercase tracking-[0.25em] text-[var(--muted)]">
+          로그인 실패
         </p>
-        <a
-          className="inline-flex items-center justify-center rounded-full border border-black/10 px-6 py-3 text-sm font-semibold text-[var(--accent-strong)] transition hover:border-transparent hover:bg-[var(--accent)] hover:text-white"
-          href="/login"
+        <h1 className="mt-3 text-2xl font-semibold">
+          카카오 로그인에 실패했습니다
+        </h1>
+        <p className="mt-2 text-sm text-[var(--muted)]">오류 코드: {reason}</p>
+        <Link
+          href="/"
+          className="mt-8 inline-block rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)]"
         >
-          Try again
-        </a>
-        <a className="text-sm text-[var(--muted)] underline" href="/">
-          Back to home
-        </a>
+          다시 시도하기
+        </Link>
       </div>
-    </main>
+    </div>
   );
 }
