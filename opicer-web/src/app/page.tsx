@@ -131,7 +131,7 @@ function LoginPage() {
 function HomeScreen({ user }: { user: User }) {
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    window.location.reload();
+    window.location.href = "/";
   };
 
   const menus = [
