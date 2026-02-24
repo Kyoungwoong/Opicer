@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/opicer
+    driver-class-name: org.postgresql.Driver
+    username: ${OPICER_DB_USER:opicer}
+    password: ${OPICER_DB_PASSWORD:opicer}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
