@@ -103,7 +103,7 @@ function LoginPage() {
             SNS 계정으로 바로 시작하세요
           </p>
           <a
-            href="/api/auth/kakao"
+            href="/api/auth/login/kakao"
             className="flex w-full items-center justify-center gap-2.5 rounded-xl py-3.5 text-sm font-bold transition active:scale-[0.98]"
             style={{ backgroundColor: "#FEE500", color: "#3C1E1E" }}
           >
