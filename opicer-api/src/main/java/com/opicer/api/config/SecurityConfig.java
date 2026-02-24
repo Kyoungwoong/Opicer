@@ -6,6 +6,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
+import org.springframework.http.HttpStatus;
 
 import com.opicer.api.auth.JwtAuthenticationFilter;
 import com.opicer.api.auth.OAuth2LoginSuccessHandler;
@@ -37,6 +40,10 @@ public class SecurityConfig {
 		);
 		http.oauth2Login(oauth2 -> oauth2.successHandler(oAuth2LoginSuccessHandler));
 		http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
+		http.exceptionHandling(handler -> handler
+			.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+			.accessDeniedHandler(new AccessDeniedHandlerImpl())
+		);
 		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
