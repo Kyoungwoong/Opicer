@@ -10,5 +10,11 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  return NextResponse.json({}, { status: res.status });
+  const headers = new Headers();
+  const setCookie = res.headers.get("set-cookie");
+  if (setCookie) {
+    headers.set("set-cookie", setCookie);
+  }
+
+  return new NextResponse(null, { status: res.status, headers });
 }
