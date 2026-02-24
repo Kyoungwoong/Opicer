@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ROUTES } from "@/lib/routes";
 
 export default function AuthError({
   searchParams,
@@ -18,7 +19,7 @@ export default function AuthError({
         </h1>
         <p className="mt-2 text-sm text-[var(--muted)]">오류 코드: {reason}</p>
         <Link
-          href="/login"
+          href={ROUTES.login}
           className="mt-8 inline-block rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)]"
         >
           다시 시도하기
