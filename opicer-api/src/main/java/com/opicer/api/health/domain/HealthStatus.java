@@ -1,4 +1,4 @@
-package com.opicer.api.health;
+package com.opicer.api.health.domain;
 
 import java.time.Instant;
 

@@ -1,5 +1,6 @@
-package com.opicer.api.auth;
+package com.opicer.api.auth.presentation;
 
+import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.config.AuthProperties;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.UUID;

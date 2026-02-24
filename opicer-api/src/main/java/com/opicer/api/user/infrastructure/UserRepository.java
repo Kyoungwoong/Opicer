@@ -1,5 +1,7 @@
-package com.opicer.api.user;
+package com.opicer.api.user.infrastructure;
 
+import com.opicer.api.user.domain.AuthProvider;
+import com.opicer.api.user.domain.User;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;

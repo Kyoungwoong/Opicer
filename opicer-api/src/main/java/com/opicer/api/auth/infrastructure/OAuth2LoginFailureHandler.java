@@ -1,4 +1,4 @@
-package com.opicer.api.auth;
+package com.opicer.api.auth.infrastructure;
 
 import com.opicer.api.config.AuthProperties;
 import jakarta.servlet.http.HttpServletRequest;
