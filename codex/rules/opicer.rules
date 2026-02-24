@@ -1,0 +1,223 @@
+# ./codex/rules/opicer.rules
+# Project-level Codex execution policy for Opicer.
+# See https://developers.openai.com/codex/rules
+
+# --- Read-only safe commands ---
+prefix_rule(
+    pattern = ["pwd"],
+    decision = "allow",
+    justification = "Read-only context command.",
+    match = ["pwd"],
+)
+
+prefix_rule(
+    pattern = ["whoami"],
+    decision = "allow",
+    justification = "Read-only context command.",
+    match = ["whoami"],
+)
+
+prefix_rule(
+    pattern = ["date"],
+    decision = "allow",
+    justification = "Read-only context command.",
+    match = ["date"],
+)
+
+prefix_rule(
+    pattern = ["uname"],
+    decision = "allow",
+    justification = "Read-only context command.",
+    match = ["uname -a"],
+)
+
+prefix_rule(
+    pattern = ["which"],
+    decision = "allow",
+    justification = "Read-only context command.",
+    match = ["which rg"],
+)
+
+prefix_rule(
+    pattern = ["ls"],
+    decision = "allow",
+    justification = "Read-only directory listing.",
+    match = ["ls", "ls -la"],
+)
+
+prefix_rule(
+    pattern = ["stat"],
+    decision = "allow",
+    justification = "Read-only file metadata.",
+    match = ["stat README.md"],
+)
+
+prefix_rule(
+    pattern = ["file"],
+    decision = "allow",
+    justification = "Read-only file type inspection.",
+    match = ["file README.md"],
+)
+
+prefix_rule(
+    pattern = ["rg"],
+    decision = "allow",
+    justification = "Fast, read-only search.",
+    match = ["rg --files", "rg \"Opicer\" -n"],
+)
+
+prefix_rule(
+    pattern = ["find"],
+    decision = "allow",
+    justification = "Read-only file discovery.",
+    match = ["find . -maxdepth 2 -type f"],
+)
+
+prefix_rule(
+    pattern = ["cat"],
+    decision = "allow",
+    justification = "Read-only file view.",
+    match = ["cat README.md"],
+)
+
+prefix_rule(
+    pattern = ["sed"],
+    decision = "allow",
+    justification = "Read-only file view.",
+    match = ["sed -n '1,120p' Opicer.md"],
+)
+
+prefix_rule(
+    pattern = ["head"],
+    decision = "allow",
+    justification = "Read-only file view.",
+    match = ["head -n 20 Opicer.md"],
+)
+
+prefix_rule(
+    pattern = ["tail"],
+    decision = "allow",
+    justification = "Read-only file view.",
+    match = ["tail -n 20 Opicer.md"],
+)
+
+prefix_rule(
+    pattern = ["wc"],
+    decision = "allow",
+    justification = "Read-only file stats.",
+    match = ["wc -l Opicer.md"],
+)
+
+# --- Git read-only ---
+prefix_rule(
+    pattern = ["git", ["status", "diff", "log", "show", "ls-tree", "rev-parse"]],
+    decision = "allow",
+    justification = "Read-only git commands are safe.",
+    match = ["git status", "git diff", "git log --oneline", "git show HEAD"],
+)
+
+# --- Git state-changing commands ---
+prefix_rule(
+    pattern = ["git", ["add", "commit", "push", "pull", "checkout", "switch", "merge", "rebase", "reset", "clean", "stash", "tag"]],
+    decision = "prompt",
+    justification = "State-changing git commands require approval.",
+    match = ["git add .", "git commit -m test", "git push"],
+)
+
+# --- Build / test / package managers ---
+prefix_rule(
+    pattern = ["./gradlew", ["test", "build", "check", "bootRun"]],
+    decision = "allow",
+    justification = "Project-level builds/tests are allowed by default.",
+    match = ["./gradlew test"],
+)
+
+prefix_rule(
+    pattern = ["gradle"],
+    decision = "allow",
+    justification = "Project-level builds/tests are allowed by default.",
+    match = ["gradle test"],
+)
+
+prefix_rule(
+    pattern = ["mvn"],
+    decision = "allow",
+    justification = "Project-level builds/tests are allowed by default.",
+    match = ["mvn test"],
+)
+
+prefix_rule(
+    pattern = [["npm", "yarn", "pnpm", "bun"]],
+    decision = "prompt",
+    justification = "Package installs/execs require approval.",
+    match = ["npm install", "pnpm install"],
+)
+
+prefix_rule(
+    pattern = [["pip", "pip3", "uv"]],
+    decision = "prompt",
+    justification = "Python package installs/execs require approval.",
+    match = ["pip install requests"],
+)
+
+prefix_rule(
+    pattern = [["brew", "apt", "apt-get"]],
+    decision = "prompt",
+    justification = "System package installs/updates require approval.",
+    match = ["brew install rg", "apt-get update"],
+)
+
+# --- Language runtimes (can execute arbitrary scripts) ---
+prefix_rule(
+    pattern = [["python", "python3", "node", "ruby", "perl", "php"]],
+    decision = "prompt",
+    justification = "Script runtimes can modify files or system state.",
+    match = ["python -V", "node -v"],
+)
+
+# --- File/system mutation commands ---
+prefix_rule(
+    pattern = [["cp", "mv", "mkdir", "touch", "chmod", "chown", "ln"]],
+    decision = "allow",
+    justification = "File mutations are allowed by default.",
+    match = ["mkdir -p tmp", "cp a b", "chmod 644 file"],
+)
+
+# --- Docker / Compose ---
+prefix_rule(
+    pattern = [["docker", "docker-compose", "docker", "compose"]],
+    decision = "prompt",
+    justification = "Docker commands can change system state.",
+    match = ["docker ps", "docker compose up -d"],
+)
+
+# --- Network fetches ---
+prefix_rule(
+    pattern = [["curl", "wget", "scp"]],
+    decision = "allow",
+    justification = "Network access is allowed by default.",
+    match = ["curl https://example.com"],
+)
+
+# --- Shell wrappers (can hide multiple commands) ---
+prefix_rule(
+    pattern = [["bash", "zsh", "sh"], ["-lc", "-c"]],
+    decision = "prompt",
+    justification = "Shell wrappers can hide multiple actions.",
+    match = ["bash -lc \"git status\""],
+)
+
+# --- Explicitly forbidden destructive commands ---
+prefix_rule(
+    pattern = ["rm", "-rf"],
+    decision = "forbidden",
+    justification = "Destructive command. Use a safer alternative or delete files explicitly.",
+    match = ["rm -rf /tmp/foo"],
+)
+
+prefix_rule(
+    pattern = ["sudo"],
+    decision = "forbidden",
+    justification = "Elevated privileges are not allowed in this project policy.",
+    match = ["sudo rm -rf /"],
+)
