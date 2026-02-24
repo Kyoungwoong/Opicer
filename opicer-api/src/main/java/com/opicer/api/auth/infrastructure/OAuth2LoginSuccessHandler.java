@@ -1,10 +1,12 @@
-package com.opicer.api.auth;
+package com.opicer.api.auth.infrastructure;
 
+import com.opicer.api.auth.application.JwtService;
+import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.config.AuthProperties;
-import com.opicer.api.user.AuthProvider;
-import com.opicer.api.user.User;
-import com.opicer.api.user.UserRole;
-import com.opicer.api.user.UserService;
+import com.opicer.api.user.application.UserService;
+import com.opicer.api.user.domain.AuthProvider;
+import com.opicer.api.user.domain.User;
+import com.opicer.api.user.domain.UserRole;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

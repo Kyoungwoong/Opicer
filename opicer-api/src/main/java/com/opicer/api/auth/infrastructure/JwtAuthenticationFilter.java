@@ -1,5 +1,7 @@
-package com.opicer.api.auth;
+package com.opicer.api.auth.infrastructure;
 
+import com.opicer.api.auth.application.JwtService;
+import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.config.AuthProperties;
 import java.io.IOException;
 import java.util.List;

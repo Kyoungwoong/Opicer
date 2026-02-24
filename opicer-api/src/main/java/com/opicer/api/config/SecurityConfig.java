@@ -10,10 +10,10 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.http.HttpStatus;
 
-import com.opicer.api.auth.JwtAuthenticationFilter;
-import com.opicer.api.auth.KakaoOAuth2UserService;
-import com.opicer.api.auth.OAuth2LoginFailureHandler;
-import com.opicer.api.auth.OAuth2LoginSuccessHandler;
+import com.opicer.api.auth.infrastructure.JwtAuthenticationFilter;
+import com.opicer.api.auth.infrastructure.KakaoOAuth2UserService;
+import com.opicer.api.auth.infrastructure.OAuth2LoginFailureHandler;
+import com.opicer.api.auth.infrastructure.OAuth2LoginSuccessHandler;
 
 @Configuration
 public class SecurityConfig {

@@ -1,4 +1,4 @@
-package com.opicer.api.auth;
+package com.opicer.api.auth.infrastructure;
 
 import java.util.Collections;
 import org.slf4j.Logger;

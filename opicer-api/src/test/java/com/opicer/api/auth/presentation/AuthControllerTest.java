@@ -1,8 +1,10 @@
-package com.opicer.api.auth;
+package com.opicer.api.auth.presentation;
 
+import com.opicer.api.auth.application.JwtService;
+import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.config.AuthProperties;
-import com.opicer.api.user.AuthProvider;
-import com.opicer.api.user.UserRole;
+import com.opicer.api.user.domain.AuthProvider;
+import com.opicer.api.user.domain.UserRole;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

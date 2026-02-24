@@ -1,5 +1,6 @@
-package com.opicer.api.health;
+package com.opicer.api.health.application;
 
+import com.opicer.api.health.domain.HealthStatus;
 import java.time.Instant;
 import org.springframework.stereotype.Service;
 

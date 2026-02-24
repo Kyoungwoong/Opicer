@@ -1,5 +1,7 @@
-package com.opicer.api.health;
+package com.opicer.api.health.presentation;
 
+import com.opicer.api.health.application.HealthService;
+import com.opicer.api.health.domain.HealthStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
