@@ -52,3 +52,7 @@ out/
 
 # OS
 .DS_Store
+
+# env
+.env
+.env.*
