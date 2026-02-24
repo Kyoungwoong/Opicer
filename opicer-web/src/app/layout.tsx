@@ -13,8 +13,8 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Opicer",
-  description: "OPIC speaking coach — health check console",
+  title: "Opicer — AI OPIC 스피킹 코치",
+  description: "내가 어떻게 말하는지 기억하는 AI OPIC 코치. 주제별 연습부터 레벨업까지.",
 };
 
 export default function RootLayout({
