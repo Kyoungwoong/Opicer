@@ -18,3 +18,33 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
+opicer:
+  auth:
+    jwt-secret: ${JWT_SECRET:change-me-please-change-me-please-32bytes}
+    jwt-ttl-seconds: ${JWT_TTL_SECONDS:3600}
+    cookie-name: OPICER_AUTH
+    cookie-secure: ${JWT_COOKIE_SECURE:false}
+    admin-allowlist: ${ADMIN_EMAIL_ALLOWLIST:}
+    frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:3000}
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID:}
+            client-secret: ${KAKAO_CLIENT_SECRET:}
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8080/login/oauth2/code/kakao}
+            scope:
+              - profile_nickname
+              - account_email
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
