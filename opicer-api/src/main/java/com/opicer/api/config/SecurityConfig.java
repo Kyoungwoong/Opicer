@@ -11,6 +11,8 @@ import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.http.HttpStatus;
 
 import com.opicer.api.auth.JwtAuthenticationFilter;
+import com.opicer.api.auth.KakaoOAuth2UserService;
+import com.opicer.api.auth.OAuth2LoginFailureHandler;
 import com.opicer.api.auth.OAuth2LoginSuccessHandler;
 
 @Configuration
@@ -18,11 +20,17 @@ public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+	private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+	private final KakaoOAuth2UserService kakaoOAuth2UserService;
 
 	public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-		OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
+		OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
+		OAuth2LoginFailureHandler oAuth2LoginFailureHandler,
+		KakaoOAuth2UserService kakaoOAuth2UserService) {
 		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
 		this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
+		this.oAuth2LoginFailureHandler = oAuth2LoginFailureHandler;
+		this.kakaoOAuth2UserService = kakaoOAuth2UserService;
 	}
 
 	@Bean
@@ -38,7 +46,10 @@ public class SecurityConfig {
 			.requestMatchers("/api/**").authenticated()
 			.anyRequest().permitAll()
 		);
-		http.oauth2Login(oauth2 -> oauth2.successHandler(oAuth2LoginSuccessHandler));
+		http.oauth2Login(oauth2 -> oauth2
+			.successHandler(oAuth2LoginSuccessHandler)
+			.failureHandler(oAuth2LoginFailureHandler)
+			.userInfoEndpoint(userInfo -> userInfo.userService(kakaoOAuth2UserService)));
 		http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 		http.exceptionHandling(handler -> handler
 			.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
