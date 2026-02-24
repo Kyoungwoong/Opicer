@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
 
-const baseUrl = process.env.OPICER_API_BASE_URL || "http://localhost:8080";
-
-export async function GET() {
-  return NextResponse.redirect(`${baseUrl}/oauth2/authorization/kakao`);
+export function GET() {
+  const apiBase = process.env.OPICER_API_BASE_URL ?? "http://localhost:8080";
+  redirect(`${apiBase}/oauth2/authorization/kakao`);
 }
