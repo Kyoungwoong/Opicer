@@ -239,7 +239,7 @@ export function MyPageView({ userLabel, onLogout }: Props) {
           </p>
         </section>
 
-        <div className="grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,420px)]">
+        <div className="grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)]">
           <aside className="space-y-6">
             <CategoryList
               activeType={activeType}
@@ -248,28 +248,30 @@ export function MyPageView({ userLabel, onLogout }: Props) {
             />
           </aside>
 
-          <section className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-                  {SECTION_META[activeType].label}
-                </p>
-                <h2 className="mt-1 text-2xl font-semibold">{SECTION_META[activeType].label}</h2>
-                <p className="mt-2 text-sm text-[var(--muted)]">
-                  {SECTION_META[activeType].helper}
-                </p>
-              </div>
-              <span className="text-xs text-[var(--muted)]">{items.length}건</span>
-            </div>
-
-            <div className="mt-6">
-              <HistoryList items={items} selectedId={selected?.id} onSelect={setSelected} />
-            </div>
-          </section>
-
-          <aside>
+          {selected ? (
             <HistoryDetail item={selected} onBack={() => setSelected(null)} />
-          </aside>
+          ) : (
+            <section className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
+                    {SECTION_META[activeType].label}
+                  </p>
+                  <h2 className="mt-1 text-2xl font-semibold">
+                    {SECTION_META[activeType].label}
+                  </h2>
+                  <p className="mt-2 text-sm text-[var(--muted)]">
+                    {SECTION_META[activeType].helper}
+                  </p>
+                </div>
+                <span className="text-xs text-[var(--muted)]">{items.length}건</span>
+              </div>
+
+              <div className="mt-6">
+                <HistoryList items={items} selectedId={selected?.id} onSelect={setSelected} />
+              </div>
+            </section>
+          )}
         </div>
       </div>
     </div>
