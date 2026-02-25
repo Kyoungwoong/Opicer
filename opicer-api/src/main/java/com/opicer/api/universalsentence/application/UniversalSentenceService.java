@@ -7,6 +7,7 @@ import com.opicer.api.universalsentence.domain.UniversalSentenceType;
 import com.opicer.api.universalsentence.infrastructure.UniversalSentenceRepository;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -96,7 +97,7 @@ public class UniversalSentenceService {
 				throw new ApiException(ErrorCode.UNIVERSAL_SENTENCE_DAILY_NOT_READY,
 					"Missing type for daily set: " + type);
 			}
-			int index = (int) Math.floorMod(dayIndex, typed.size());
+			int index = Math.floorMod(Objects.hash(dayIndex, type.name()), typed.size());
 			dailySet.add(typed.get(index));
 		}
 		return dailySet;

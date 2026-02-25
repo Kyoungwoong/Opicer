@@ -43,7 +43,7 @@ class UniversalSentenceServiceTest {
 		assertThat(result).extracting(UniversalSentence::getType)
 			.containsExactly(UniversalSentenceType.values());
 		assertThat(result).extracting(UniversalSentence::getTitle)
-			.containsExactly("Opinion 2", "Past 2", "Compare 2", "Unexpected 2");
+			.containsExactlyElementsOf(expectedTitles());
 	}
 
 	@Test
@@ -82,5 +82,20 @@ class UniversalSentenceServiceTest {
 			new UniversalSentence(UniversalSentenceType.UNEXPECTED_SITUATION, "Unexpected 1", "Sentence", List.of("unexpected"), true),
 			new UniversalSentence(UniversalSentenceType.UNEXPECTED_SITUATION, "Unexpected 2", "Sentence", List.of("unexpected"), true)
 		);
+	}
+
+	private List<String> expectedTitles() {
+		long dayIndex = 1L;
+		return List.of(
+			pickTitle(dayIndex, UniversalSentenceType.OPINION, List.of("Opinion 1", "Opinion 2")),
+			pickTitle(dayIndex, UniversalSentenceType.PAST_EXPERIENCE, List.of("Past 1", "Past 2")),
+			pickTitle(dayIndex, UniversalSentenceType.COMPARE_CONTRAST, List.of("Compare 1", "Compare 2")),
+			pickTitle(dayIndex, UniversalSentenceType.UNEXPECTED_SITUATION, List.of("Unexpected 1", "Unexpected 2"))
+		);
+	}
+
+	private String pickTitle(long dayIndex, UniversalSentenceType type, List<String> titles) {
+		int index = Math.floorMod(java.util.Objects.hash(dayIndex, type.name()), titles.size());
+		return titles.get(index);
 	}
 }
