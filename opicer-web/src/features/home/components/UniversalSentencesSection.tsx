@@ -22,7 +22,7 @@ export function UniversalSentencesSection() {
 
   useEffect(() => {
     let mounted = true;
-    fetchUniversalSentences(4)
+    fetchUniversalSentences()
       .then((data) => {
         if (!mounted || data.length === 0) return;
         setSentences(data);
