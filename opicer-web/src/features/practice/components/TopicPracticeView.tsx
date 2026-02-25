@@ -222,9 +222,9 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
       recorderRef.current = recorder;
       recorder.start();
       setIsRecording(true);
-      startTimer();
+      // timer는 오디오 재생 완료 후 시작됨 (playQuestion의 onended/onend 콜백에서 호출)
     } catch (err) {
-      setError("마이크 접근이 필요합니다. 권한을 확인해주세요.");
+      setError("마이크 접근이 필요합니다. 브라우저에서 마이크 권한을 허용해주세요.");
     }
   };
 
@@ -296,7 +296,19 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
     );
   };
 
-  const playQuestion = () => {
+  // 재생 종료 후 동작을 콜백으로 분리
+  const onFirstPlayEnded = () => {
+    startReplayWindow();
+    startRecording();
+    startTimer();
+  };
+
+  const onReplayEnded = () => {
+    startRecording();
+    startTimer();
+  };
+
+  const playQuestion = (onEnded: () => void) => {
     if (!currentQuestion) return;
     if (currentQuestion.promptAudioUrl) {
       if (!audioRef.current) {
@@ -304,6 +316,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
       } else {
         audioRef.current.src = currentQuestion.promptAudioUrl;
       }
+      audioRef.current.onended = onEnded;
       audioRef.current.play().catch(() => {
         setError("오디오 재생에 실패했습니다.");
       });
@@ -313,22 +326,22 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
       utterance.rate = 0.9;
       const femaleVoice = getEnglishFemaleVoice();
       if (femaleVoice) utterance.voice = femaleVoice;
+      utterance.onend = onEnded;
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(utterance);
-    }
-    if (!hasPlayed) {
-      setHasPlayed(true);
-      startReplayWindow();
-      startRecording();
     }
   };
 
   const handlePlayButton = () => {
     if (!hasPlayed) {
-      playQuestion();
+      setHasPlayed(true);
+      playQuestion(onFirstPlayEnded);
     } else if (!hasReplayed && replayWindow > 0) {
       setHasReplayed(true);
-      playQuestion();
+      stopRecording();  // 현재 녹음 중단
+      stopTimers();     // 타이머/리플레이 윈도우 중단
+      setReplayWindow(0);
+      playQuestion(onReplayEnded);  // 다시 재생 → 끝나면 처음부터 재녹음
     }
   };
 
