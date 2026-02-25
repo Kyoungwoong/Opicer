@@ -47,24 +47,28 @@ export function OpicIntroSection() {
                 level: "AL",
                 detail: "자연스러운 흐름 / 설득력 있는 전개",
                 width: "w-2/3",
+                inset: 18,
                 color: "bg-red-600",
               },
               {
                 level: "IH",
                 detail: "복잡한 구조 / 높은 논리성",
                 width: "w-4/5",
+                inset: 14,
                 color: "bg-blue-700",
               },
               {
                 level: "IM",
                 detail: "논리적 흐름 / 예시·근거 활용",
                 width: "w-5/6",
+                inset: 10,
                 color: "bg-emerald-700",
               },
               {
                 level: "IL / NL",
                 detail: "기본 문장 / 단순 시제",
                 width: "w-full",
+                inset: 6,
                 color: "bg-slate-700",
               },
             ].map((item) => (
@@ -83,7 +87,9 @@ export function OpicIntroSection() {
                   <div
                     className={`relative flex ${item.width} items-center justify-center px-4 py-3 text-sm font-bold text-white`}
                     style={{
-                      clipPath: "polygon(6% 0, 94% 0, 100% 100%, 0 100%)",
+                      clipPath: `polygon(${item.inset}% 0, ${
+                        100 - item.inset
+                      }% 0, 100% 100%, 0 100%)`,
                     }}
                   >
                     <div className={`absolute inset-0 -z-10 ${item.color}`} />
