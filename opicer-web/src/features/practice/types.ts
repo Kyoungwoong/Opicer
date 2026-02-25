@@ -26,3 +26,21 @@ export type TopicSelection = {
   topicId: string;
   selectedAt: string;
 };
+
+export type PracticeQuestion = {
+  id: string;
+  topic: string;
+  type: string;
+  promptText: string;
+  promptAudioUrl?: string | null;
+  structuralHint?: string | null;
+  targetLevels?: string[];
+  keyExpressions?: string[];
+};
+
+export type PracticeAnswer = {
+  questionId: string;
+  questionText: string;
+  audioUrl?: string;
+  recordedAt?: string;
+};

@@ -1,4 +1,8 @@
-import type { TopicItem, TopicSelection } from "@/features/practice/types";
+import type {
+  PracticeQuestion,
+  TopicItem,
+  TopicSelection,
+} from "@/features/practice/types";
 
 export async function fetchTopics(): Promise<TopicItem[]> {
   const res = await fetch(`/api/topics`, { cache: "no-store" });
@@ -22,4 +26,16 @@ export async function submitTopicSelection(
     throw new Error(message);
   }
   return (await res.json()) as TopicSelection;
+}
+
+export async function fetchPracticeQuestions(
+  topicId: string
+): Promise<PracticeQuestion[]> {
+  const res = await fetch(`/api/practice/topics/${topicId}/questions`, {
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new Error("Failed to load practice questions");
+  }
+  return (await res.json()) as PracticeQuestion[];
 }
