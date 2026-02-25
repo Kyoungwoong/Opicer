@@ -1,3 +1,6 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import { GuideHeader } from "@/features/guide/components/GuideHeader";
 import { GuideNav } from "@/features/guide/components/GuideNav";
 import { OpicIntroSection } from "@/features/guide/components/OpicIntroSection";
@@ -7,6 +10,20 @@ import { OpicTipsSection } from "@/features/guide/components/OpicTipsSection";
 import { GUIDE_SECTIONS } from "@/features/guide/data";
 
 export default function GuidePage() {
+  const [activeId, setActiveId] = useState(GUIDE_SECTIONS[0]?.id ?? "intro");
+  const ActiveSection = useMemo(() => {
+    switch (activeId) {
+      case "schedule":
+        return OpicScheduleSection;
+      case "reviews":
+        return OpicReviewsSection;
+      case "tips":
+        return OpicTipsSection;
+      default:
+        return OpicIntroSection;
+    }
+  }, [activeId]);
+
   return (
     <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
       <main className="mx-auto flex max-w-6xl flex-col gap-8">
@@ -16,12 +33,13 @@ export default function GuidePage() {
         />
 
         <div className="grid gap-8 lg:grid-cols-[0.8fr_2.2fr]">
-          <GuideNav sections={GUIDE_SECTIONS} />
+          <GuideNav
+            sections={GUIDE_SECTIONS}
+            activeId={activeId}
+            onSelect={setActiveId}
+          />
           <div className="space-y-8">
-            <OpicIntroSection />
-            <OpicScheduleSection />
-            <OpicReviewsSection />
-            <OpicTipsSection />
+            <ActiveSection />
           </div>
         </div>
       </main>
