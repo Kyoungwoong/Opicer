@@ -49,21 +49,21 @@ export function OpicIntroSection() {
                   className="h-full w-full"
                   aria-label="OPIC level pyramid"
                 >
-                  <polygon points="150,0 200,60 100,60" fill="#dc2626" />
-                  <polygon points="100,60 200,60 250,120 50,120" fill="#1d4ed8" />
-                  <polygon points="50,120 250,120 275,180 25,180" fill="#047857" />
-                  <polygon points="25,180 275,180 300,240 0,240" fill="#334155" />
+                  <polygon points="150,0 187.5,60 112.5,60" fill="#dc2626" />
+                  <polygon points="112.5,60 187.5,60 225,120 75,120" fill="#1d4ed8" />
+                  <polygon points="75,120 225,120 262.5,180 37.5,180" fill="#047857" />
+                  <polygon points="37.5,180 262.5,180 300,240 0,240" fill="#334155" />
 
-                  <text x="150" y="38" textAnchor="middle" className="fill-white font-bold" fontSize="18">
+                  <text x="150" y="34" textAnchor="middle" className="fill-white font-bold" fontSize="18">
                     AL
                   </text>
-                  <text x="150" y="98" textAnchor="middle" className="fill-white font-bold" fontSize="18">
+                  <text x="150" y="94" textAnchor="middle" className="fill-white font-bold" fontSize="18">
                     IH
                   </text>
-                  <text x="150" y="158" textAnchor="middle" className="fill-white font-bold" fontSize="18">
+                  <text x="150" y="154" textAnchor="middle" className="fill-white font-bold" fontSize="18">
                     IM
                   </text>
-                  <text x="150" y="218" textAnchor="middle" className="fill-white font-bold" fontSize="16">
+                  <text x="150" y="214" textAnchor="middle" className="fill-white font-bold" fontSize="16">
                     IL / NL
                   </text>
                 </svg>
