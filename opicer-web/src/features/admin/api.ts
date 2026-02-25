@@ -10,7 +10,7 @@ import type {
 const BASE = "/api/admin";
 
 type ApiResponse<T> = {
-  status: number;
+  status: string;
   message: string;
   data: T;
 };
