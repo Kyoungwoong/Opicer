@@ -41,7 +41,7 @@ public class AdminDailySentenceController {
 	}
 
 	@PostMapping
-	public ResponseEntity<?> create(@Valid @RequestBody DailySentenceRequest request) {
+	public ResponseEntity<Object> create(@Valid @RequestBody DailySentenceRequest request) {
 		try {
 			DailySentence sentence = dailySentenceService.create(
 				request.date(), request.text(), request.level(), request.audioUrl());
@@ -53,12 +53,12 @@ public class AdminDailySentenceController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<?> update(@PathVariable UUID id,
+	public ResponseEntity<Object> update(@PathVariable UUID id,
 		@Valid @RequestBody DailySentenceRequest request) {
 		try {
 			return dailySentenceService.update(id, request.date(), request.text(), request.level(),
 					request.audioUrl(), request.active() != null ? request.active() : true)
-				.map(s -> ResponseEntity.ok(DailySentenceResponse.from(s)))
+				.<ResponseEntity<Object>>map(s -> ResponseEntity.ok(DailySentenceResponse.from(s)))
 				.orElseGet(() -> ResponseEntity.status(404)
 					.body(ErrorResponse.of("SENTENCE_NOT_FOUND", "DailySentence not found: " + id)));
 		} catch (DuplicateDateException e) {
@@ -68,7 +68,7 @@ public class AdminDailySentenceController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> delete(@PathVariable UUID id) {
+	public ResponseEntity<Object> delete(@PathVariable UUID id) {
 		if (dailySentenceService.delete(id)) {
 			return ResponseEntity.noContent().build();
 		}

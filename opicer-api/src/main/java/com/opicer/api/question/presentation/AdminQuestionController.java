@@ -48,17 +48,17 @@ public class AdminQuestionController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<?> update(@PathVariable UUID id, @Valid @RequestBody QuestionRequest request) {
+	public ResponseEntity<Object> update(@PathVariable UUID id, @Valid @RequestBody QuestionRequest request) {
 		return questionService.update(id, request.topic(), request.type(), request.promptText(),
 				request.promptAudioUrl(), request.structuralHint(), request.targetLevels(),
 				request.keyExpressions(), request.active() != null ? request.active() : true)
-			.map(q -> ResponseEntity.ok(QuestionResponse.from(q)))
+			.<ResponseEntity<Object>>map(q -> ResponseEntity.ok(QuestionResponse.from(q)))
 			.orElseGet(() -> ResponseEntity.status(404)
 				.body(ErrorResponse.of("QUESTION_NOT_FOUND", "Question not found: " + id)));
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> delete(@PathVariable UUID id) {
+	public ResponseEntity<Object> delete(@PathVariable UUID id) {
 		if (questionService.delete(id)) {
 			return ResponseEntity.noContent().build();
 		}

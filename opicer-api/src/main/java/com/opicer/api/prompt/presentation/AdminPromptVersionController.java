@@ -47,25 +47,25 @@ public class AdminPromptVersionController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<?> update(@PathVariable UUID id,
+	public ResponseEntity<Object> update(@PathVariable UUID id,
 		@Valid @RequestBody PromptVersionRequest request) {
 		return promptVersionService.update(id, request.useCase(), request.version(),
 				request.name(), request.template())
-			.map(v -> ResponseEntity.ok(PromptVersionResponse.from(v)))
+			.<ResponseEntity<Object>>map(v -> ResponseEntity.ok(PromptVersionResponse.from(v)))
 			.orElseGet(() -> ResponseEntity.status(404)
 				.body(ErrorResponse.of("PROMPT_NOT_FOUND", "PromptVersion not found: " + id)));
 	}
 
 	@PostMapping("/{id}/activate")
-	public ResponseEntity<?> activate(@PathVariable UUID id) {
+	public ResponseEntity<Object> activate(@PathVariable UUID id) {
 		return promptVersionService.activate(id)
-			.map(v -> ResponseEntity.ok(PromptVersionResponse.from(v)))
+			.<ResponseEntity<Object>>map(v -> ResponseEntity.ok(PromptVersionResponse.from(v)))
 			.orElseGet(() -> ResponseEntity.status(404)
 				.body(ErrorResponse.of("PROMPT_NOT_FOUND", "PromptVersion not found: " + id)));
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> delete(@PathVariable UUID id) {
+	public ResponseEntity<Object> delete(@PathVariable UUID id) {
 		if (promptVersionService.delete(id)) {
 			return ResponseEntity.noContent().build();
 		}
