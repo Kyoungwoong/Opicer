@@ -155,11 +155,19 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
   };
 
   const startPractice = async () => {
-    if (!selectedTopic) return;
+    if (!selectedTopic || !selectedTopic.id) {
+      setError("주제를 선택한 뒤 연습을 시작해주세요.");
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {
       const data = await fetchPracticeQuestions(selectedTopic.id);
+      if (data.length === 0) {
+        setError("선택한 주제에 등록된 질문이 없습니다.");
+        setIsLoading(false);
+        return;
+      }
       setQuestions(data);
       setCurrentIndex(0);
       setAnswers([]);
