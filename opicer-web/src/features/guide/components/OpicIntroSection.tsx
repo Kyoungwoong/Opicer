@@ -19,15 +19,19 @@ export function OpicIntroSection() {
               { step: "3", label: "녹음" },
               { step: "4", label: "제출" },
               { step: "5", label: "리포트" },
-            ].map((item) => (
-              <div
-                key={item.step}
-                className="relative rounded-2xl border border-black/5 bg-white/80 px-4 py-3 text-center"
-              >
-                <span className="text-xs font-semibold text-[var(--accent-strong)]">
-                  STEP {item.step}
-                </span>
-                <p className="mt-2 text-sm font-semibold">{item.label}</p>
+            ].map((item, index) => (
+              <div key={item.step} className="relative">
+                <div className="rounded-2xl border border-black/5 bg-white/80 px-4 py-3 text-center">
+                  <span className="text-xs font-semibold text-[var(--accent-strong)]">
+                    STEP {item.step}
+                  </span>
+                  <p className="mt-2 text-sm font-semibold">{item.label}</p>
+                </div>
+                {index < 4 && (
+                  <span className="absolute right-[-14px] top-1/2 hidden -translate-y-1/2 text-lg text-[var(--muted)] md:block">
+                    →
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -37,37 +41,43 @@ export function OpicIntroSection() {
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">
             레벨 기준 (Pyramid)
           </p>
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 space-y-3">
             {[
               {
                 level: "AL",
                 detail: "자연스러운 흐름, 설득력 있는 전개",
                 width: "w-2/3",
+                color: "bg-emerald-200/80",
               },
               {
                 level: "IH",
                 detail: "복잡한 구조, 높은 논리성",
                 width: "w-4/5",
+                color: "bg-teal-200/80",
               },
               {
                 level: "IM",
                 detail: "논리적 흐름, 예시/근거 활용",
                 width: "w-5/6",
+                color: "bg-cyan-200/80",
               },
               {
                 level: "IL / NL",
                 detail: "기본 문장, 단순 시제",
                 width: "w-full",
+                color: "bg-slate-200/80",
               },
             ].map((item) => (
               <div key={item.level} className="flex justify-center">
                 <div
-                  className={`flex ${item.width} items-center justify-between rounded-2xl border border-black/5 bg-white/80 px-4 py-3`}
+                  className={`relative flex ${item.width} items-center justify-between px-4 py-3 text-xs font-semibold text-slate-800`}
+                  style={{
+                    clipPath: "polygon(6% 0, 94% 0, 100% 100%, 0 100%)",
+                  }}
                 >
-                  <span className="text-sm font-semibold text-[var(--accent-strong)]">
-                    {item.level}
-                  </span>
-                  <span className="text-xs text-[var(--muted)]">
+                  <div className={`absolute inset-0 -z-10 ${item.color}`} />
+                  <span>{item.level}</span>
+                  <span className="text-[11px] font-normal text-slate-700">
                     {item.detail}
                   </span>
                 </div>
