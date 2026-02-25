@@ -47,39 +47,43 @@ export function OpicIntroSection() {
                 level: "AL",
                 detail: "자연스러운 흐름, 설득력 있는 전개",
                 width: "w-2/3",
-                color: "bg-emerald-200/80",
+                color: "bg-red-600",
               },
               {
                 level: "IH",
                 detail: "복잡한 구조, 높은 논리성",
                 width: "w-4/5",
-                color: "bg-teal-200/80",
+                color: "bg-blue-700",
               },
               {
                 level: "IM",
                 detail: "논리적 흐름, 예시/근거 활용",
                 width: "w-5/6",
-                color: "bg-cyan-200/80",
+                color: "bg-emerald-700",
               },
               {
                 level: "IL / NL",
                 detail: "기본 문장, 단순 시제",
                 width: "w-full",
-                color: "bg-slate-200/80",
+                color: "bg-slate-700",
               },
             ].map((item) => (
-              <div key={item.level} className="flex justify-center">
-                <div
-                  className={`relative flex ${item.width} items-center justify-between px-4 py-3 text-xs font-semibold text-slate-800`}
-                  style={{
-                    clipPath: "polygon(6% 0, 94% 0, 100% 100%, 0 100%)",
-                  }}
-                >
-                  <div className={`absolute inset-0 -z-10 ${item.color}`} />
-                  <span>{item.level}</span>
-                  <span className="text-[11px] font-normal text-slate-700">
+              <div key={item.level} className="flex items-center gap-4">
+                <div className="flex w-32 justify-end text-right">
+                  <span className="text-xs text-[var(--muted)]">
                     {item.detail}
                   </span>
+                </div>
+                <div className="flex flex-1 justify-center">
+                  <div
+                    className={`relative flex ${item.width} items-center justify-center px-4 py-3 text-sm font-bold text-white`}
+                    style={{
+                      clipPath: "polygon(6% 0, 94% 0, 100% 100%, 0 100%)",
+                    }}
+                  >
+                    <div className={`absolute inset-0 -z-10 ${item.color}`} />
+                    {item.level}
+                  </div>
                 </div>
               </div>
             ))}
