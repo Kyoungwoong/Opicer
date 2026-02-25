@@ -51,10 +51,19 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
   const replayTimerRef = useRef<number | null>(null);
   const [replayWindow, setReplayWindow] = useState(0);
   const [hasReplayed, setHasReplayed] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
+
+  useEffect(() => {
+    if (!("speechSynthesis" in window)) return;
+    const load = () => { voicesRef.current = window.speechSynthesis.getVoices(); };
+    load();
+    window.speechSynthesis.addEventListener("voiceschanged", load);
+    return () => { window.speechSynthesis.removeEventListener("voiceschanged", load); };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -271,6 +280,22 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
     }
   };
 
+  const getEnglishFemaleVoice = (): SpeechSynthesisVoice | null => {
+    const voices = voicesRef.current.length
+      ? voicesRef.current
+      : window.speechSynthesis.getVoices();
+    const enVoices = voices.filter((v) => v.lang.startsWith("en"));
+    const femaleNames = [
+      "Samantha", "Karen", "Ava", "Victoria", "Susan", "Allison",
+      "Google US English", "Google UK English Female",
+    ];
+    return (
+      enVoices.find((v) => femaleNames.some((name) => v.name.includes(name))) ??
+      enVoices[0] ??
+      null
+    );
+  };
+
   const playQuestion = () => {
     if (!currentQuestion) return;
     if (currentQuestion.promptAudioUrl) {
@@ -285,6 +310,9 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
     } else if ("speechSynthesis" in window) {
       const utterance = new SpeechSynthesisUtterance(currentQuestion.promptText);
       utterance.lang = "en-US";
+      utterance.rate = 0.9;
+      const femaleVoice = getEnglishFemaleVoice();
+      if (femaleVoice) utterance.voice = femaleVoice;
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(utterance);
     }
@@ -295,10 +323,13 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
     }
   };
 
-  const replayQuestion = () => {
-    if (hasReplayed || replayWindow <= 0) return;
-    setHasReplayed(true);
-    playQuestion();
+  const handlePlayButton = () => {
+    if (!hasPlayed) {
+      playQuestion();
+    } else if (!hasReplayed && replayWindow > 0) {
+      setHasReplayed(true);
+      playQuestion();
+    }
   };
 
   const goToNext = () => {
@@ -513,26 +544,21 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                onClick={playQuestion}
-                className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--accent-strong)]"
-              >
-                재생하기
-              </button>
-              <button
-                type="button"
-                onClick={replayQuestion}
-                disabled={hasReplayed || replayWindow <= 0}
-                className={`rounded-full border px-4 py-2 text-sm font-semibold ${
-                  hasReplayed || replayWindow <= 0
-                    ? "cursor-not-allowed border-black/10 text-[var(--muted)]"
-                    : "border-[var(--accent)]/40 text-[var(--accent-strong)]"
+                onClick={handlePlayButton}
+                disabled={hasPlayed && (hasReplayed || replayWindow <= 0)}
+                className={`rounded-full px-4 py-2 text-sm font-semibold ${
+                  hasPlayed && (hasReplayed || replayWindow <= 0)
+                    ? "cursor-not-allowed bg-black/10 text-[var(--muted)]"
+                    : "bg-[var(--accent)] text-white hover:bg-[var(--accent-strong)]"
                 }`}
               >
-                다시 듣기 {replayWindow > 0 ? `(${replayWindow}s)` : ""}
+                재생하기{hasPlayed && !hasReplayed && replayWindow > 0 ? ` (${replayWindow}s)` : ""}
               </button>
-              <span className="text-xs text-[var(--muted)]">
-                5초 안에 1번만 다시 들을 수 있어요.
-              </span>
+              {hasPlayed && !hasReplayed && replayWindow > 0 && (
+                <span className="text-xs text-[var(--muted)]">
+                  5초 안에 한 번 더 들을 수 있어요
+                </span>
+              )}
             </div>
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
