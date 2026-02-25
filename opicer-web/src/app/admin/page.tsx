@@ -8,12 +8,14 @@ import { LoadingScreen } from "@/components/common/LoadingScreen";
 import { QuestionTab } from "@/features/admin/QuestionTab";
 import { DailySentenceTab } from "@/features/admin/DailySentenceTab";
 import { PromptVersionTab } from "@/features/admin/PromptVersionTab";
+import { UniversalSentenceTab } from "@/features/admin/UniversalSentenceTab";
 
-type Tab = "questions" | "daily-sentences" | "prompts";
+type Tab = "questions" | "daily-sentences" | "prompts" | "universal-sentences";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "questions", label: "질문 관리" },
   { id: "daily-sentences", label: "오늘의 문장" },
+  { id: "universal-sentences", label: "만능 문장" },
   { id: "prompts", label: "프롬프트 버전" },
 ];
 
@@ -88,6 +90,7 @@ export default function AdminPage() {
         <div>
           {activeTab === "questions" && <QuestionTab />}
           {activeTab === "daily-sentences" && <DailySentenceTab />}
+          {activeTab === "universal-sentences" && <UniversalSentenceTab />}
           {activeTab === "prompts" && <PromptVersionTab />}
         </div>
       </div>

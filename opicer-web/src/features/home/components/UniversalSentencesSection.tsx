@@ -1,7 +1,37 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { fetchUniversalSentences } from "@/features/home/api";
 import { UNIVERSAL_SENTENCES } from "@/features/home/data";
 import { SectionShell } from "@/features/home/components/SectionShell";
+import type { UniversalSentence } from "@/features/home/types";
+
+const TYPE_LABELS: Record<UniversalSentence["type"], string> = {
+  OPINION: "Opinion",
+  PAST_EXPERIENCE: "Past Experience",
+  COMPARE_CONTRAST: "Compare/Contrast",
+  UNEXPECTED_SITUATION: "Unexpected Situation",
+};
 
 export function UniversalSentencesSection() {
+  const [sentences, setSentences] =
+    useState<UniversalSentence[]>(UNIVERSAL_SENTENCES);
+
+  useEffect(() => {
+    let mounted = true;
+    fetchUniversalSentences(4)
+      .then((data) => {
+        if (!mounted || data.length === 0) return;
+        setSentences(data);
+      })
+      .catch(() => {
+        // fallback to local data
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <SectionShell
       title="Universal sentences"
@@ -13,7 +43,7 @@ export function UniversalSentencesSection() {
       }
     >
       <div className="grid gap-4 md:grid-cols-2">
-        {UNIVERSAL_SENTENCES.map((item) => (
+        {sentences.map((item) => (
           <div
             key={item.id}
             className="rounded-2xl border border-black/5 bg-white/80 p-4 shadow-sm"
@@ -21,7 +51,7 @@ export function UniversalSentencesSection() {
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm font-semibold">{item.title}</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
-                {item.situation}
+                {TYPE_LABELS[item.type]}
               </span>
             </div>
             <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
