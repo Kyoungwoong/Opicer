@@ -9,6 +9,12 @@ import type {
 
 const BASE = "/api/admin";
 
+type ApiResponse<T> = {
+  status: number;
+  message: string;
+  data: T;
+};
+
 async function request<T>(
   path: string,
   options?: RequestInit
@@ -23,7 +29,9 @@ async function request<T>(
     throw new Error(`${res.status}: ${body}`);
   }
   const text = await res.text();
-  return text ? (JSON.parse(text) as T) : (undefined as T);
+  if (!text) return undefined as T;
+  const body = JSON.parse(text) as ApiResponse<T>;
+  return body.data;
 }
 
 // ── Questions ─────────────────────────────────────────────
