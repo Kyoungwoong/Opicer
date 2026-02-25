@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 const baseUrl = process.env.OPICER_API_BASE_URL || "http://localhost:8080";
 
 type ApiResponse<T> = {
-  status: string;
+  status: number;
   message: string;
   data: T;
 };
