@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UniversalSentenceRepository extends JpaRepository<UniversalSentence, UUID> {
 	List<UniversalSentence> findByActiveTrue();
+	List<UniversalSentence> findByActiveTrueOrderByCreatedAtAscIdAsc();
 }

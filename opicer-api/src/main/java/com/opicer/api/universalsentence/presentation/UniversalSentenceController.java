@@ -33,6 +33,14 @@ public class UniversalSentenceController {
 		return ResponseEntity.ok(ApiResponse.ok("UNIVERSAL_SENTENCE_RANDOM_OK", responses));
 	}
 
+	@GetMapping("/daily")
+	public ResponseEntity<ApiResponse<List<UniversalSentenceResponse>>> daily() {
+		List<UniversalSentenceResponse> responses = universalSentenceService.findDailySet().stream()
+			.map(UniversalSentenceResponse::from)
+			.toList();
+		return ResponseEntity.ok(ApiResponse.ok("UNIVERSAL_SENTENCE_DAILY_OK", responses));
+	}
+
 	public record UniversalSentenceResponse(
 		UUID id,
 		UniversalSentenceType type,
