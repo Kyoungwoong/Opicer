@@ -8,7 +8,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { title: "OPIC 설명", href: "/guide" },
-  { title: "주제별 연습하기", href: "/practice", disabled: true },
+  { title: "주제별 연습하기", href: "/practice" },
   { title: "실전 연습하기", href: "/mock", disabled: true },
 ];
 
