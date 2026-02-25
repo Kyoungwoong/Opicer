@@ -4,6 +4,7 @@ import com.opicer.api.question.application.QuestionService;
 import com.opicer.api.question.domain.Question;
 import com.opicer.api.question.domain.QuestionType;
 import com.opicer.api.shared.domain.OpicLevel;
+import com.opicer.api.shared.presentation.ApiResponse;
 import com.opicer.api.shared.presentation.ErrorResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -32,19 +33,20 @@ public class AdminQuestionController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<QuestionResponse>> list() {
+	public ResponseEntity<ApiResponse<List<QuestionResponse>>> list() {
 		List<QuestionResponse> questions = questionService.findAll().stream()
 			.map(QuestionResponse::from)
 			.toList();
-		return ResponseEntity.ok(questions);
+		return ResponseEntity.ok(ApiResponse.ok("QUESTION_LIST_OK", questions));
 	}
 
 	@PostMapping
-	public ResponseEntity<QuestionResponse> create(@Valid @RequestBody QuestionRequest request) {
+	public ResponseEntity<ApiResponse<QuestionResponse>> create(@Valid @RequestBody QuestionRequest request) {
 		Question question = questionService.create(
 			request.topic(), request.type(), request.promptText(), request.promptAudioUrl(),
 			request.structuralHint(), request.targetLevels(), request.keyExpressions());
-		return ResponseEntity.status(201).body(QuestionResponse.from(question));
+		return ResponseEntity.status(201)
+			.body(ApiResponse.created("QUESTION_CREATED", QuestionResponse.from(question)));
 	}
 
 	@PutMapping("/{id}")
@@ -52,7 +54,8 @@ public class AdminQuestionController {
 		return questionService.update(id, request.topic(), request.type(), request.promptText(),
 				request.promptAudioUrl(), request.structuralHint(), request.targetLevels(),
 				request.keyExpressions(), request.active() != null ? request.active() : true)
-			.<ResponseEntity<Object>>map(q -> ResponseEntity.ok(QuestionResponse.from(q)))
+			.<ResponseEntity<Object>>map(q -> ResponseEntity.ok(
+				ApiResponse.ok("QUESTION_UPDATED", QuestionResponse.from(q))))
 			.orElseGet(() -> ResponseEntity.status(404)
 				.body(ErrorResponse.of("QUESTION_NOT_FOUND", "Question not found: " + id)));
 	}
@@ -60,7 +63,7 @@ public class AdminQuestionController {
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Object> delete(@PathVariable UUID id) {
 		if (questionService.delete(id)) {
-			return ResponseEntity.noContent().build();
+			return ResponseEntity.ok(ApiResponse.ok("QUESTION_DELETED", null));
 		}
 		return ResponseEntity.status(404)
 			.body(ErrorResponse.of("QUESTION_NOT_FOUND", "Question not found: " + id));

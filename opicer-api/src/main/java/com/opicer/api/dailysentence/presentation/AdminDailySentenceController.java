@@ -4,6 +4,7 @@ import com.opicer.api.dailysentence.application.DailySentenceService;
 import com.opicer.api.dailysentence.application.DailySentenceService.DuplicateDateException;
 import com.opicer.api.dailysentence.domain.DailySentence;
 import com.opicer.api.shared.domain.OpicLevel;
+import com.opicer.api.shared.presentation.ApiResponse;
 import com.opicer.api.shared.presentation.ErrorResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -33,11 +34,11 @@ public class AdminDailySentenceController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<DailySentenceResponse>> list() {
+	public ResponseEntity<ApiResponse<List<DailySentenceResponse>>> list() {
 		List<DailySentenceResponse> sentences = dailySentenceService.findAll().stream()
 			.map(DailySentenceResponse::from)
 			.toList();
-		return ResponseEntity.ok(sentences);
+		return ResponseEntity.ok(ApiResponse.ok("DAILY_SENTENCE_LIST_OK", sentences));
 	}
 
 	@PostMapping
@@ -45,7 +46,8 @@ public class AdminDailySentenceController {
 		try {
 			DailySentence sentence = dailySentenceService.create(
 				request.date(), request.text(), request.level(), request.audioUrl());
-			return ResponseEntity.status(201).body(DailySentenceResponse.from(sentence));
+			return ResponseEntity.status(201)
+				.body(ApiResponse.created("DAILY_SENTENCE_CREATED", DailySentenceResponse.from(sentence)));
 		} catch (DuplicateDateException e) {
 			return ResponseEntity.status(409)
 				.body(ErrorResponse.of("DUPLICATE_DATE", e.getMessage()));
@@ -58,7 +60,8 @@ public class AdminDailySentenceController {
 		try {
 			return dailySentenceService.update(id, request.date(), request.text(), request.level(),
 					request.audioUrl(), request.active() != null ? request.active() : true)
-				.<ResponseEntity<Object>>map(s -> ResponseEntity.ok(DailySentenceResponse.from(s)))
+				.<ResponseEntity<Object>>map(s -> ResponseEntity.ok(
+					ApiResponse.ok("DAILY_SENTENCE_UPDATED", DailySentenceResponse.from(s))))
 				.orElseGet(() -> ResponseEntity.status(404)
 					.body(ErrorResponse.of("SENTENCE_NOT_FOUND", "DailySentence not found: " + id)));
 		} catch (DuplicateDateException e) {
@@ -70,7 +73,7 @@ public class AdminDailySentenceController {
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Object> delete(@PathVariable UUID id) {
 		if (dailySentenceService.delete(id)) {
-			return ResponseEntity.noContent().build();
+			return ResponseEntity.ok(ApiResponse.ok("DAILY_SENTENCE_DELETED", null));
 		}
 		return ResponseEntity.status(404)
 			.body(ErrorResponse.of("SENTENCE_NOT_FOUND", "DailySentence not found: " + id));

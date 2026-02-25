@@ -2,6 +2,8 @@ package com.opicer.api.health.presentation;
 
 import com.opicer.api.health.application.HealthService;
 import com.opicer.api.health.domain.HealthStatus;
+import com.opicer.api.shared.presentation.ApiResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,7 +19,8 @@ public class HealthController {
 	}
 
 	@GetMapping
-	public HealthStatus getHealth() {
-		return healthService.getStatus();
+	public ResponseEntity<ApiResponse<HealthStatus>> getHealth() {
+		HealthStatus status = healthService.getStatus();
+		return ResponseEntity.ok(ApiResponse.ok("HEALTH_OK", status));
 	}
 }
