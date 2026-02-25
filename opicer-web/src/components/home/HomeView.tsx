@@ -32,14 +32,11 @@ export function HomeView({
           </p>
         </div>
 
-        <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="space-y-8">
-            <UniversalSentencesSection />
-            <RecentActivitySection />
-          </div>
-          <div className="space-y-8">
-            <OpicScheduleSection />
-          </div>
+        <UniversalSentencesSection />
+
+        <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <RecentActivitySection />
+          <OpicScheduleSection />
         </div>
       </main>
     </div>
