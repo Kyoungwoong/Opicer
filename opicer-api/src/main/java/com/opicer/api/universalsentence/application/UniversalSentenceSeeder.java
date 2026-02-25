@@ -56,7 +56,7 @@ public class UniversalSentenceSeeder {
 					"A few years ago, I went through an experience that taught me a lot.",
 					List.of("past", "intro")),
 				new UniversalSentence(UniversalSentenceType.PAST_EXPERIENCE, "과거 배경",
-					Back then, I was in a completely different environment than I am now.",
+					"Back then, I was in a completely different environment than I am now.",
 					List.of("past", "context")),
 				new UniversalSentence(UniversalSentenceType.PAST_EXPERIENCE, "과거 문제",
 					"At first, I was nervous because I didn't know what to expect.",
