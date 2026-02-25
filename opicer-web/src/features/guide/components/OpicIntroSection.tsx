@@ -49,10 +49,10 @@ export function OpicIntroSection() {
                   className="h-full w-full"
                   aria-label="OPIC level pyramid"
                 >
-                  <polygon points="150,0 190,60 110,60" fill="#dc2626" />
-                  <polygon points="110,60 190,60 230,120 70,120" fill="#1d4ed8" />
-                  <polygon points="70,120 230,120 270,180 30,180" fill="#047857" />
-                  <polygon points="30,180 270,180 300,240 0,240" fill="#334155" />
+                  <polygon points="150,0 200,60 100,60" fill="#dc2626" />
+                  <polygon points="100,60 200,60 250,120 50,120" fill="#1d4ed8" />
+                  <polygon points="50,120 250,120 275,180 25,180" fill="#047857" />
+                  <polygon points="25,180 275,180 300,240 0,240" fill="#334155" />
 
                   <text x="150" y="38" textAnchor="middle" className="fill-white font-bold" fontSize="18">
                     AL
