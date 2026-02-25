@@ -25,6 +25,11 @@ public class QuestionService {
 	}
 
 	@Transactional(readOnly = true)
+	public List<Question> findActiveByTopic(String topic) {
+		return questionRepository.findByActiveTrueAndTopicOrderByCreatedAtAscIdAsc(topic);
+	}
+
+	@Transactional(readOnly = true)
 	public Optional<Question> findById(UUID id) {
 		return questionRepository.findById(id);
 	}
