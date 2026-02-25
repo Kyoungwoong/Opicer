@@ -9,7 +9,9 @@ export function OpicReviewsSection() {
       subtitle="시험장 후기 스냅샷"
     >
       <div className="grid gap-4 md:grid-cols-2">
-        {REVIEW_ITEMS.map((review) => (
+        {REVIEW_ITEMS.map((review) => {
+          const safeRating = Math.min(5, Math.max(0, review.rating));
+          return (
           <div
             key={review.id}
             className="rounded-2xl border border-black/5 bg-white/80 p-4"
@@ -17,14 +19,15 @@ export function OpicReviewsSection() {
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-semibold">{review.classroom}</p>
               <span className="text-xs text-[var(--muted)]">
-                {"★".repeat(review.rating)}
+                {"★".repeat(safeRating)}
               </span>
             </div>
             <p className="mt-3 text-sm text-[var(--muted)]">
               {review.quote}
             </p>
           </div>
-        ))}
+        );
+        })}
       </div>
     </GuideSection>
   );
