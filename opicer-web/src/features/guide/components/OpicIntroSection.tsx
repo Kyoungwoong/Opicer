@@ -85,7 +85,7 @@ export function OpicIntroSection() {
                     <p className="text-sm font-semibold text-[var(--accent-strong)]">
                       {item.level}
                     </p>
-                    <p className="text-xs font-semibold leading-4 text-[var(--muted)]">
+                    <p className="text-xs font-bold leading-4 text-black">
                       {item.detail.split(" / ").map((chunk, idx, arr) => (
                         <span key={chunk}>
                           {chunk}
