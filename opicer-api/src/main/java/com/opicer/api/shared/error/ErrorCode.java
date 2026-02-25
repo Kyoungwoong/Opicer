@@ -10,6 +10,8 @@ public enum ErrorCode {
 	DUPLICATE_DATE("DUPLICATE_DATE", HttpStatus.CONFLICT, "DailySentence already exists for date"),
 	UNIVERSAL_SENTENCE_DAILY_NOT_READY("UNIVERSAL_SENTENCE_DAILY_NOT_READY", HttpStatus.CONFLICT,
 		"Universal sentences not ready for daily set"),
+	TOPIC_NOT_FOUND("TOPIC_NOT_FOUND", HttpStatus.NOT_FOUND, "Topic not found"),
+	TOPIC_INACTIVE("TOPIC_INACTIVE", HttpStatus.CONFLICT, "Topic is inactive"),
 	VALIDATION_ERROR("VALIDATION_ERROR", HttpStatus.BAD_REQUEST, "Validation failed"),
 	BAD_REQUEST("BAD_REQUEST", HttpStatus.BAD_REQUEST, "Bad request"),
 	DATA_INTEGRITY_VIOLATION("DATA_INTEGRITY_VIOLATION", HttpStatus.CONFLICT, "Data integrity violation"),
