@@ -1,0 +1,282 @@
+[
+  {
+    "type": "OPINION",
+    "title": "의견 시작",
+    "sentence": "From my perspective, this topic is quite important because ...",
+    "tags": ["opinion", "starter"],
+    "active": true
+  },
+  {
+    "type": "OPINION",
+    "title": "의견 강조",
+    "sentence": "I strongly believe that this is one of the most meaningful choices for me.",
+    "tags": ["opinion", "emphasis"],
+    "active": true
+  },
+  {
+    "type": "OPINION",
+    "title": "의견 근거",
+    "sentence": "The main reason I think so is that it affects my daily routine directly.",
+    "tags": ["opinion", "reason"],
+    "active": true
+  },
+  {
+    "type": "OPINION",
+    "title": "의견 확장",
+    "sentence": "On top of that, it helps me maintain balance between work and personal life.",
+    "tags": ["opinion", "expand"],
+    "active": true
+  },
+  {
+    "type": "OPINION",
+    "title": "의견 비교",
+    "sentence": "Compared to other options, this feels more realistic and sustainable.",
+    "tags": ["opinion", "compare"],
+    "active": true
+  },
+  {
+    "type": "OPINION",
+    "title": "의견 양보",
+    "sentence": "While some people may disagree, I still think it is worth trying.",
+    "tags": ["opinion", "concession"],
+    "active": true
+  },
+  {
+    "type": "OPINION",
+    "title": "의견 결론",
+    "sentence": "In short, this is the best decision for me at the moment.",
+    "tags": ["opinion", "summary"],
+    "active": true
+  },
+  {
+    "type": "OPINION",
+    "title": "의견 사례",
+    "sentence": "For example, last month I experienced a similar situation and it worked out.",
+    "tags": ["opinion", "example"],
+    "active": true
+  },
+  {
+    "type": "OPINION",
+    "title": "의견 자신감",
+    "sentence": "I'm confident this approach will lead to better results over time.",
+    "tags": ["opinion", "confidence"],
+    "active": true
+  },
+  {
+    "type": "OPINION",
+    "title": "의견 추천",
+    "sentence": "I would recommend it to anyone who wants a practical solution.",
+    "tags": ["opinion", "recommendation"],
+    "active": true
+  },
+  {
+    "type": "PAST_EXPERIENCE",
+    "title": "과거 회상",
+    "sentence": "I still remember the time when I had to deal with a similar issue.",
+    "tags": ["past", "memory"],
+    "active": true
+  },
+  {
+    "type": "PAST_EXPERIENCE",
+    "title": "과거 시작",
+    "sentence": "A few years ago, I went through an experience that taught me a lot.",
+    "tags": ["past", "intro"],
+    "active": true
+  },
+  {
+    "type": "PAST_EXPERIENCE",
+    "title": "과거 배경",
+    "sentence": "Back then, I was in a completely different environment than I am now.",
+    "tags": ["past", "context"],
+    "active": true
+  },
+  {
+    "type": "PAST_EXPERIENCE",
+    "title": "과거 문제",
+    "sentence": "At first, I was nervous because I didn't know what to expect.",
+    "tags": ["past", "challenge"],
+    "active": true
+  },
+  {
+    "type": "PAST_EXPERIENCE",
+    "title": "과거 해결",
+    "sentence": "Eventually, I managed it by focusing on the basics and staying calm.",
+    "tags": ["past", "solution"],
+    "active": true
+  },
+  {
+    "type": "PAST_EXPERIENCE",
+    "title": "과거 교훈",
+    "sentence": "That experience taught me to be more prepared and flexible.",
+    "tags": ["past", "lesson"],
+    "active": true
+  },
+  {
+    "type": "PAST_EXPERIENCE",
+    "title": "과거 감정",
+    "sentence": "I felt relieved afterward because everything went better than I expected.",
+    "tags": ["past", "emotion"],
+    "active": true
+  },
+  {
+    "type": "PAST_EXPERIENCE",
+    "title": "과거 비교",
+    "sentence": "Looking back, I realize how much I have grown since then.",
+    "tags": ["past", "reflection"],
+    "active": true
+  },
+  {
+    "type": "PAST_EXPERIENCE",
+    "title": "과거 디테일",
+    "sentence": "We spent most of the day talking and sharing stories.",
+    "tags": ["past", "detail"],
+    "active": true
+  },
+  {
+    "type": "PAST_EXPERIENCE",
+    "title": "과거 마무리",
+    "sentence": "Overall, it was a memorable moment that I still appreciate today.",
+    "tags": ["past", "summary"],
+    "active": true
+  },
+  {
+    "type": "COMPARE_CONTRAST",
+    "title": "비교 시작",
+    "sentence": "Compared to the past, things have become much more convenient.",
+    "tags": ["compare", "contrast"],
+    "active": true
+  },
+  {
+    "type": "COMPARE_CONTRAST",
+    "title": "비교 장점",
+    "sentence": "The biggest difference is that everything is faster and more efficient now.",
+    "tags": ["compare", "difference"],
+    "active": true
+  },
+  {
+    "type": "COMPARE_CONTRAST",
+    "title": "비교 단점",
+    "sentence": "However, it also means people spend less time talking face-to-face.",
+    "tags": ["compare", "downside"],
+    "active": true
+  },
+  {
+    "type": "COMPARE_CONTRAST",
+    "title": "비교 중립",
+    "sentence": "In some ways, both options have their own strengths.",
+    "tags": ["compare", "balanced"],
+    "active": true
+  },
+  {
+    "type": "COMPARE_CONTRAST",
+    "title": "비교 예시",
+    "sentence": "For instance, studying online is flexible, but it can feel isolating.",
+    "tags": ["compare", "example"],
+    "active": true
+  },
+  {
+    "type": "COMPARE_CONTRAST",
+    "title": "비교 변화",
+    "sentence": "These changes have affected the way I plan my daily schedule.",
+    "tags": ["compare", "impact"],
+    "active": true
+  },
+  {
+    "type": "COMPARE_CONTRAST",
+    "title": "비교 결론",
+    "sentence": "If I had to choose, I would still prefer the current approach.",
+    "tags": ["compare", "preference"],
+    "active": true
+  },
+  {
+    "type": "COMPARE_CONTRAST",
+    "title": "비교 배경",
+    "sentence": "When I was younger, I relied more on traditional methods.",
+    "tags": ["compare", "background"],
+    "active": true
+  },
+  {
+    "type": "COMPARE_CONTRAST",
+    "title": "비교 확대",
+    "sentence": "Overall, the gap between the two options is wider than I expected.",
+    "tags": ["compare", "summary"],
+    "active": true
+  },
+  {
+    "type": "COMPARE_CONTRAST",
+    "title": "비교 결과",
+    "sentence": "As a result, my habits have shifted toward the newer style.",
+    "tags": ["compare", "result"],
+    "active": true
+  },
+  {
+    "type": "UNEXPECTED_SITUATION",
+    "title": "문제 상황",
+    "sentence": "Suddenly, the plan changed and I had to react quickly.",
+    "tags": ["problem", "unexpected"],
+    "active": true
+  },
+  {
+    "type": "UNEXPECTED_SITUATION",
+    "title": "문제 해결",
+    "sentence": "In that situation, the first thing I did was to stay calm and assess.",
+    "tags": ["problem", "solution"],
+    "active": true
+  },
+  {
+    "type": "UNEXPECTED_SITUATION",
+    "title": "문제 대응",
+    "sentence": "Then I contacted the right people to fix the issue.",
+    "tags": ["problem", "action"],
+    "active": true
+  },
+  {
+    "type": "UNEXPECTED_SITUATION",
+    "title": "문제 대안",
+    "sentence": "Since the original option wasn't available, I chose a simple alternative.",
+    "tags": ["problem", "alternative"],
+    "active": true
+  },
+  {
+    "type": "UNEXPECTED_SITUATION",
+    "title": "문제 조정",
+    "sentence": "I adjusted my schedule to make sure everything still fit.",
+    "tags": ["problem", "adjustment"],
+    "active": true
+  },
+  {
+    "type": "UNEXPECTED_SITUATION",
+    "title": "문제 설명",
+    "sentence": "I explained the situation clearly so others could understand.",
+    "tags": ["problem", "explain"],
+    "active": true
+  },
+  {
+    "type": "UNEXPECTED_SITUATION",
+    "title": "문제 결과",
+    "sentence": "Luckily, the situation was resolved faster than expected.",
+    "tags": ["problem", "result"],
+    "active": true
+  },
+  {
+    "type": "UNEXPECTED_SITUATION",
+    "title": "문제 교훈",
+    "sentence": "It taught me to always have a backup plan.",
+    "tags": ["problem", "lesson"],
+    "active": true
+  },
+  {
+    "type": "UNEXPECTED_SITUATION",
+    "title": "문제 마무리",
+    "sentence": "Afterward, I felt more confident in handling similar issues.",
+    "tags": ["problem", "confidence"],
+    "active": true
+  },
+  {
+    "type": "UNEXPECTED_SITUATION",
+    "title": "문제 협력",
+    "sentence": "Working together made the solution much more efficient.",
+    "tags": ["problem", "teamwork"],
+    "active": true
+  }
+]
