@@ -155,14 +155,14 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
   };
 
   const startPractice = async () => {
-    if (!selectedTopic || !selectedTopic.id) {
+    if (!selectedId) {
       setError("주제를 선택한 뒤 연습을 시작해주세요.");
       return;
     }
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchPracticeQuestions(selectedTopic.id);
+      const data = await fetchPracticeQuestions(selectedId);
       if (data.length === 0) {
         setError("선택한 주제에 등록된 질문이 없습니다.");
         setIsLoading(false);
@@ -608,7 +608,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
               )}
               <button
                 type="button"
-                disabled={!selectedTopic || isSubmitting}
+                disabled={!selectedId || isSubmitting}
                 onClick={handleSubmit}
                 className={`mt-4 w-full rounded-full px-4 py-2 text-sm font-semibold transition ${
                   selectedTopic && !isSubmitting
@@ -620,7 +620,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
               </button>
               <button
                 type="button"
-                disabled={!selectedTopic || isSubmitting}
+                disabled={!selectedId || isSubmitting}
                 onClick={startPractice}
                 className={`mt-3 w-full rounded-full px-4 py-2 text-sm font-semibold transition ${
                   selectedTopic && !isSubmitting
