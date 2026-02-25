@@ -45,33 +45,38 @@ export function OpicIntroSection() {
             {[
               {
                 level: "AL",
-                detail: "자연스러운 흐름, 설득력 있는 전개",
+                detail: "자연스러운 흐름 / 설득력 있는 전개",
                 width: "w-2/3",
                 color: "bg-red-600",
               },
               {
                 level: "IH",
-                detail: "복잡한 구조, 높은 논리성",
+                detail: "복잡한 구조 / 높은 논리성",
                 width: "w-4/5",
                 color: "bg-blue-700",
               },
               {
                 level: "IM",
-                detail: "논리적 흐름, 예시/근거 활용",
+                detail: "논리적 흐름 / 예시·근거 활용",
                 width: "w-5/6",
                 color: "bg-emerald-700",
               },
               {
                 level: "IL / NL",
-                detail: "기본 문장, 단순 시제",
+                detail: "기본 문장 / 단순 시제",
                 width: "w-full",
                 color: "bg-slate-700",
               },
             ].map((item) => (
               <div key={item.level} className="flex items-center gap-4">
-                <div className="flex w-32 justify-end text-right">
-                  <span className="text-xs text-[var(--muted)]">
-                    {item.detail}
+                <div className="flex w-32 justify-end text-center">
+                  <span className="text-xs font-semibold leading-4 text-[var(--muted)]">
+                    {item.detail.split(" / ").map((chunk, idx, arr) => (
+                      <span key={chunk}>
+                        {chunk}
+                        {idx < arr.length - 1 && <br />}
+                      </span>
+                    ))}
                   </span>
                 </div>
                 <div className="flex flex-1 justify-center">
