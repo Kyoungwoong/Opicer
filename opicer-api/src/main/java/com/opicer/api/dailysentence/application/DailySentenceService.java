@@ -3,6 +3,8 @@ package com.opicer.api.dailysentence.application;
 import com.opicer.api.dailysentence.domain.DailySentence;
 import com.opicer.api.dailysentence.infrastructure.DailySentenceRepository;
 import com.opicer.api.shared.domain.OpicLevel;
+import com.opicer.api.shared.error.ApiException;
+import com.opicer.api.shared.error.ErrorCode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -34,27 +36,21 @@ public class DailySentenceService {
 		return dailySentenceRepository.findByDate(date);
 	}
 
-	/**
-	 * @throws DuplicateDateException if the date already exists
-	 */
 	@Transactional
 	public DailySentence create(LocalDate date, String text, OpicLevel level, String audioUrl) {
 		if (dailySentenceRepository.existsByDate(date)) {
-			throw new DuplicateDateException(date);
+			throw new ApiException(ErrorCode.DUPLICATE_DATE);
 		}
 		DailySentence sentence = new DailySentence(date, text, level, audioUrl);
 		return dailySentenceRepository.save(sentence);
 	}
 
-	/**
-	 * @throws DuplicateDateException if the new date conflicts with another record
-	 */
 	@Transactional
 	public Optional<DailySentence> update(UUID id, LocalDate date, String text, OpicLevel level,
 		String audioUrl, boolean active) {
 		return dailySentenceRepository.findById(id).map(sentence -> {
 			if (dailySentenceRepository.existsByDateAndIdNot(date, id)) {
-				throw new DuplicateDateException(date);
+				throw new ApiException(ErrorCode.DUPLICATE_DATE);
 			}
 			sentence.update(date, text, level, audioUrl, active);
 			return dailySentenceRepository.save(sentence);
@@ -70,9 +66,4 @@ public class DailySentenceService {
 		return true;
 	}
 
-	public static class DuplicateDateException extends RuntimeException {
-		public DuplicateDateException(LocalDate date) {
-			super("DailySentence already exists for date: " + date);
-		}
-	}
 }

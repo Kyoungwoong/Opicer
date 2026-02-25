@@ -1,11 +1,11 @@
 package com.opicer.api.dailysentence.presentation;
 
 import com.opicer.api.dailysentence.application.DailySentenceService;
-import com.opicer.api.dailysentence.application.DailySentenceService.DuplicateDateException;
 import com.opicer.api.dailysentence.domain.DailySentence;
 import com.opicer.api.shared.domain.OpicLevel;
+import com.opicer.api.shared.error.ApiException;
+import com.opicer.api.shared.error.ErrorCode;
 import com.opicer.api.shared.presentation.ApiResponse;
-import com.opicer.api.shared.presentation.ErrorResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -43,31 +43,22 @@ public class AdminDailySentenceController {
 
 	@PostMapping
 	public ResponseEntity<Object> create(@Valid @RequestBody DailySentenceRequest request) {
-		try {
-			DailySentence sentence = dailySentenceService.create(
-				request.date(), request.text(), request.level(), request.audioUrl());
-			return ResponseEntity.status(201)
-				.body(ApiResponse.created("DAILY_SENTENCE_CREATED", DailySentenceResponse.from(sentence)));
-		} catch (DuplicateDateException e) {
-			return ResponseEntity.status(409)
-				.body(ErrorResponse.of("DUPLICATE_DATE", e.getMessage()));
-		}
+		DailySentence sentence = dailySentenceService.create(
+			request.date(), request.text(), request.level(), request.audioUrl());
+		return ResponseEntity.status(201)
+			.body(ApiResponse.created("DAILY_SENTENCE_CREATED", DailySentenceResponse.from(sentence)));
 	}
 
 	@PutMapping("/{id}")
 	public ResponseEntity<Object> update(@PathVariable UUID id,
 		@Valid @RequestBody DailySentenceRequest request) {
-		try {
-			return dailySentenceService.update(id, request.date(), request.text(), request.level(),
-					request.audioUrl(), request.active() != null ? request.active() : true)
-				.<ResponseEntity<Object>>map(s -> ResponseEntity.ok(
-					ApiResponse.ok("DAILY_SENTENCE_UPDATED", DailySentenceResponse.from(s))))
-				.orElseGet(() -> ResponseEntity.status(404)
-					.body(ErrorResponse.of("SENTENCE_NOT_FOUND", "DailySentence not found: " + id)));
-		} catch (DuplicateDateException e) {
-			return ResponseEntity.status(409)
-				.body(ErrorResponse.of("DUPLICATE_DATE", e.getMessage()));
-		}
+		return dailySentenceService.update(id, request.date(), request.text(), request.level(),
+				request.audioUrl(), request.active() != null ? request.active() : true)
+			.<ResponseEntity<Object>>map(s -> ResponseEntity.ok(
+				ApiResponse.ok("DAILY_SENTENCE_UPDATED", DailySentenceResponse.from(s))))
+			.orElseThrow(() -> new ApiException(
+				ErrorCode.SENTENCE_NOT_FOUND,
+				"DailySentence not found: " + id));
 	}
 
 	@DeleteMapping("/{id}")
@@ -75,8 +66,9 @@ public class AdminDailySentenceController {
 		if (dailySentenceService.delete(id)) {
 			return ResponseEntity.ok(ApiResponse.ok("DAILY_SENTENCE_DELETED", null));
 		}
-		return ResponseEntity.status(404)
-			.body(ErrorResponse.of("SENTENCE_NOT_FOUND", "DailySentence not found: " + id));
+		throw new ApiException(
+			ErrorCode.SENTENCE_NOT_FOUND,
+			"DailySentence not found: " + id);
 	}
 
 	public record DailySentenceRequest(
