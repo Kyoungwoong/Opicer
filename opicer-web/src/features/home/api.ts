@@ -1,9 +1,7 @@
 import type { UniversalSentence } from "@/features/home/types";
 
-export async function fetchUniversalSentences(
-  size: number = 4
-): Promise<UniversalSentence[]> {
-  const res = await fetch(`/api/universal-sentences/random?size=${size}`, {
+export async function fetchUniversalSentences(): Promise<UniversalSentence[]> {
+  const res = await fetch(`/api/universal-sentences/daily`, {
     cache: "no-store",
   });
   if (!res.ok) {

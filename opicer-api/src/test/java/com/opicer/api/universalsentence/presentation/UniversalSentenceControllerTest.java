@@ -94,6 +94,42 @@ class UniversalSentenceControllerTest {
 	}
 
 	@Test
+	void dailyEndpointReturnsFourSentences() throws Exception {
+		List<UniversalSentence> seeds = List.of(
+			new UniversalSentence(UniversalSentenceType.OPINION, "Opinion", "From my perspective ...",
+				List.of("opinion"), true),
+			new UniversalSentence(UniversalSentenceType.PAST_EXPERIENCE, "Past", "I remember ...",
+				List.of("past"), true),
+			new UniversalSentence(UniversalSentenceType.COMPARE_CONTRAST, "Compare", "Compared to ...",
+				List.of("compare"), true),
+			new UniversalSentence(UniversalSentenceType.UNEXPECTED_SITUATION, "Unexpected", "In that situation ...",
+				List.of("unexpected"), true)
+		);
+		universalSentenceRepository.saveAll(seeds);
+
+		mockMvc.perform(get("/api/universal-sentences/daily").cookie(userCookie))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.length()").value(4));
+	}
+
+	@Test
+	void dailyEndpointMissingTypeReturnsErrorCode() throws Exception {
+		List<UniversalSentence> seeds = List.of(
+			new UniversalSentence(UniversalSentenceType.OPINION, "Opinion", "From my perspective ...",
+				List.of("opinion"), true),
+			new UniversalSentence(UniversalSentenceType.PAST_EXPERIENCE, "Past", "I remember ...",
+				List.of("past"), true),
+			new UniversalSentence(UniversalSentenceType.COMPARE_CONTRAST, "Compare", "Compared to ...",
+				List.of("compare"), true)
+		);
+		universalSentenceRepository.saveAll(seeds);
+
+		mockMvc.perform(get("/api/universal-sentences/daily").cookie(userCookie))
+			.andExpect(status().isConflict())
+			.andExpect(jsonPath("$.code").value("UNIVERSAL_SENTENCE_DAILY_NOT_READY"));
+	}
+
+	@Test
 	void adminUpdateNotFoundReturnsErrorCode() throws Exception {
 		mockMvc.perform(put("/api/admin/universal-sentences/{id}", UUID.randomUUID())
 				.cookie(adminCookie)
