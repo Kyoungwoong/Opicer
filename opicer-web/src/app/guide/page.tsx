@@ -8,6 +8,7 @@ import { OpicScheduleSection } from "@/features/guide/components/OpicScheduleSec
 import { OpicReviewsSection } from "@/features/guide/components/OpicReviewsSection";
 import { OpicTipsSection } from "@/features/guide/components/OpicTipsSection";
 import { GUIDE_SECTIONS } from "@/features/guide/data";
+import { TopNav } from "@/components/common/TopNav";
 
 export default function GuidePage() {
   const [activeId, setActiveId] = useState(GUIDE_SECTIONS[0]?.id ?? "intro");
@@ -27,6 +28,7 @@ export default function GuidePage() {
   return (
     <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
       <main className="mx-auto flex max-w-6xl flex-col gap-8">
+        <TopNav />
         <GuideHeader
           title="오픽 가이드"
           description="시험 구조부터 일정, 후기, 꿀팁까지 한 번에 정리했습니다."
