@@ -1,4 +1,7 @@
 import type { User } from "@/types/auth";
+import { UniversalSentencesSection } from "@/features/home/components/UniversalSentencesSection";
+import { RecentActivitySection } from "@/features/home/components/RecentActivitySection";
+import { OpicScheduleSection } from "@/features/home/components/OpicScheduleSection";
 
 type MenuItem = {
   title: string;
@@ -80,7 +83,7 @@ export function HomeView({
         </div>
       </header>
 
-      <main className="mx-auto mt-14 flex max-w-2xl flex-col gap-10">
+      <main className="mx-auto mt-12 flex max-w-5xl flex-col gap-8">
         <div className="flex flex-col gap-2">
           <p className="text-xs uppercase tracking-[0.25em] text-[var(--muted)]">
             Welcome back
@@ -91,6 +94,16 @@ export function HomeView({
           <p className="text-sm text-[var(--muted)]">
             오늘도 말하기 연습을 시작해볼까요?
           </p>
+        </div>
+
+        <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
+          <div className="space-y-8">
+            <UniversalSentencesSection />
+            <RecentActivitySection />
+          </div>
+          <div className="space-y-8">
+            <OpicScheduleSection />
+          </div>
         </div>
       </main>
     </div>
