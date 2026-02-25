@@ -63,7 +63,7 @@ export function UniversalSentencesSection() {
         </span>
       }
     >
-      <div className="flex flex-col gap-4 rounded-3xl border border-black/5 bg-white/70 p-6 shadow-sm">
+      <div className="flex flex-col gap-4 rounded-3xl border border-black/5 bg-white/70 p-6 shadow-sm min-h-[220px]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-[var(--accent-strong)]">
@@ -93,7 +93,7 @@ export function UniversalSentencesSection() {
           </div>
         </div>
 
-        <p className="text-lg font-semibold leading-relaxed text-[var(--ink)]">
+        <p className="text-lg font-semibold leading-relaxed text-[var(--ink)] break-words">
           {current?.sentence ?? "데이터를 준비 중입니다."}
         </p>
 
