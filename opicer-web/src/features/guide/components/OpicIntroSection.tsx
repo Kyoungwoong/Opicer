@@ -43,34 +43,34 @@ export function OpicIntroSection() {
           </p>
           <div className="mt-4 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="flex justify-center">
-              <div className="w-full max-w-sm">
+              <div className="h-[240px] w-full max-w-sm">
                 <svg
-                  viewBox="0 0 300 260"
-                  className="w-full"
+                  viewBox="0 0 300 240"
+                  className="h-full w-full"
                   aria-label="OPIC level pyramid"
                 >
-                  <polygon points="150,0 210,65 90,65" fill="#dc2626" />
-                  <polygon points="90,65 210,65 250,140 50,140" fill="#1d4ed8" />
-                  <polygon points="50,140 250,140 290,210 10,210" fill="#047857" />
-                  <polygon points="10,210 290,210 300,260 0,260" fill="#334155" />
+                  <polygon points="150,0 190,60 110,60" fill="#dc2626" />
+                  <polygon points="110,60 190,60 230,120 70,120" fill="#1d4ed8" />
+                  <polygon points="70,120 230,120 270,180 30,180" fill="#047857" />
+                  <polygon points="30,180 270,180 300,240 0,240" fill="#334155" />
 
-                  <text x="150" y="42" textAnchor="middle" className="fill-white font-bold" fontSize="18">
+                  <text x="150" y="38" textAnchor="middle" className="fill-white font-bold" fontSize="18">
                     AL
                   </text>
-                  <text x="150" y="110" textAnchor="middle" className="fill-white font-bold" fontSize="18">
+                  <text x="150" y="98" textAnchor="middle" className="fill-white font-bold" fontSize="18">
                     IH
                   </text>
-                  <text x="150" y="182" textAnchor="middle" className="fill-white font-bold" fontSize="18">
+                  <text x="150" y="158" textAnchor="middle" className="fill-white font-bold" fontSize="18">
                     IM
                   </text>
-                  <text x="150" y="238" textAnchor="middle" className="fill-white font-bold" fontSize="16">
+                  <text x="150" y="218" textAnchor="middle" className="fill-white font-bold" fontSize="16">
                     IL / NL
                   </text>
                 </svg>
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="grid h-[240px] grid-rows-4 gap-3">
               {[
                 { level: "AL", detail: "자연스러운 흐름 / 설득력 있는 전개" },
                 { level: "IH", detail: "복잡한 구조 / 높은 논리성" },
@@ -79,19 +79,21 @@ export function OpicIntroSection() {
               ].map((item) => (
                 <div
                   key={item.level}
-                  className="rounded-2xl border border-black/5 bg-white/80 px-4 py-3"
+                  className="flex items-center rounded-2xl border border-black/5 bg-white/80 px-4 py-3"
                 >
-                  <p className="text-sm font-semibold text-[var(--accent-strong)]">
-                    {item.level}
-                  </p>
-                  <p className="text-xs font-semibold leading-4 text-[var(--muted)]">
-                    {item.detail.split(" / ").map((chunk, idx, arr) => (
-                      <span key={chunk}>
-                        {chunk}
-                        {idx < arr.length - 1 && <br />}
-                      </span>
-                    ))}
-                  </p>
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--accent-strong)]">
+                      {item.level}
+                    </p>
+                    <p className="text-xs font-semibold leading-4 text-[var(--muted)]">
+                      {item.detail.split(" / ").map((chunk, idx, arr) => (
+                        <span key={chunk}>
+                          {chunk}
+                          {idx < arr.length - 1 && <br />}
+                        </span>
+                      ))}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
