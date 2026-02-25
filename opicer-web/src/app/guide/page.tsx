@@ -9,8 +9,11 @@ import { OpicReviewsSection } from "@/features/guide/components/OpicReviewsSecti
 import { OpicTipsSection } from "@/features/guide/components/OpicTipsSection";
 import { GUIDE_SECTIONS } from "@/features/guide/data";
 import { TopNav } from "@/components/common/TopNav";
+import { logout } from "@/lib/auth-client";
+import { useAuthState } from "@/lib/use-auth-state";
 
 export default function GuidePage() {
+  const auth = useAuthState();
   const [activeId, setActiveId] = useState(GUIDE_SECTIONS[0]?.id ?? "intro");
   const ActiveSection = useMemo(() => {
     switch (activeId) {
@@ -25,10 +28,19 @@ export default function GuidePage() {
     }
   }, [activeId]);
 
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = "/login";
+  };
+
   return (
     <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
       <main className="mx-auto flex max-w-6xl flex-col gap-8">
-        <TopNav maxWidthClassName="max-w-6xl" />
+        <TopNav
+          maxWidthClassName="max-w-6xl"
+          userLabel={auth.status === "authenticated" ? auth.user.name ?? auth.user.email ?? "사용자" : undefined}
+          onLogout={auth.status === "authenticated" ? handleLogout : undefined}
+        />
         <GuideHeader
           title="오픽 가이드"
           description="시험 구조부터 일정, 후기, 꿀팁까지 한 번에 정리했습니다."
