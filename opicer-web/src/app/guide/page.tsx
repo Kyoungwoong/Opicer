@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { TopNav } from "@/components/common/TopNav";
 import { GuideHeader } from "@/features/guide/components/GuideHeader";
 import { GuideNav } from "@/features/guide/components/GuideNav";
 import { OpicIntroSection } from "@/features/guide/components/OpicIntroSection";
@@ -28,7 +29,7 @@ export default function GuidePage() {
   return (
     <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
       <main className="mx-auto flex max-w-6xl flex-col gap-8">
-        <TopNav />
+        <TopNav maxWidthClassName="max-w-6xl" />
         <GuideHeader
           title="오픽 가이드"
           description="시험 구조부터 일정, 후기, 꿀팁까지 한 번에 정리했습니다."
