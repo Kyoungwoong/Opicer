@@ -11,6 +11,20 @@ export type OpicScheduleItem = {
   note: string;
 };
 
+export type OpicCalendarEvent = {
+  id: string;
+  date: number;
+  label: string;
+  type: "exam" | "registration";
+};
+
+export type OpicCalendar = {
+  monthLabel: string;
+  startWeekday: number;
+  daysInMonth: number;
+  events: OpicCalendarEvent[];
+};
+
 export type ReviewItem = {
   id: string;
   classroom: string;

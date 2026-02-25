@@ -1,5 +1,6 @@
 import type {
   GuideSection,
+  OpicCalendar,
   OpicScheduleItem,
   ReviewItem,
   TipItem,
@@ -42,6 +43,16 @@ export const OPIC_SCHEDULE: OpicScheduleItem[] = [
     note: "오후 2시 시험 회차",
   },
 ];
+
+export const OPIC_CALENDAR: OpicCalendar = {
+  monthLabel: "2026년 3월",
+  startWeekday: 0,
+  daysInMonth: 31,
+  events: [
+    { id: "c1", date: 7, label: "접수 시작", type: "registration" },
+    { id: "c2", date: 21, label: "정기 시험", type: "exam" },
+  ],
+};
 
 export const REVIEW_ITEMS: ReviewItem[] = [
   {
