@@ -2,6 +2,7 @@ package com.opicer.api.auth.presentation;
 
 import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.config.AuthProperties;
+import com.opicer.api.shared.presentation.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.UUID;
 import org.springframework.http.ResponseCookie;
@@ -23,7 +24,7 @@ public class AuthController {
 	}
 
 	@GetMapping("/me")
-	public ResponseEntity<AuthMeResponse> me(Authentication authentication) {
+	public ResponseEntity<?> me(Authentication authentication) {
 		if (authentication == null || !(authentication.getPrincipal() instanceof AuthUserPrincipal principal)) {
 			return ResponseEntity.status(401).build();
 		}
@@ -34,11 +35,11 @@ public class AuthController {
 			principal.role().name(),
 			principal.provider().name()
 		);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(ApiResponse.ok("AUTH_ME_OK", response));
 	}
 
 	@PostMapping("/logout")
-	public ResponseEntity<Void> logout(HttpServletResponse response) {
+	public ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response) {
 		ResponseCookie cookie = ResponseCookie.from(authProperties.getCookieName(), "")
 			.httpOnly(true)
 			.secure(authProperties.isCookieSecure())
@@ -47,7 +48,7 @@ public class AuthController {
 			.maxAge(0)
 			.build();
 		response.addHeader("Set-Cookie", cookie.toString());
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(ApiResponse.ok("LOGOUT_OK", null));
 	}
 
 	public record AuthMeResponse(
