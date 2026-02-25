@@ -4,8 +4,9 @@ import com.opicer.api.question.application.QuestionService;
 import com.opicer.api.question.domain.Question;
 import com.opicer.api.question.domain.QuestionType;
 import com.opicer.api.shared.domain.OpicLevel;
+import com.opicer.api.shared.error.ApiException;
+import com.opicer.api.shared.error.ErrorCode;
 import com.opicer.api.shared.presentation.ApiResponse;
-import com.opicer.api.shared.presentation.ErrorResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -56,8 +57,8 @@ public class AdminQuestionController {
 				request.keyExpressions(), request.active() != null ? request.active() : true)
 			.<ResponseEntity<Object>>map(q -> ResponseEntity.ok(
 				ApiResponse.ok("QUESTION_UPDATED", QuestionResponse.from(q))))
-			.orElseGet(() -> ResponseEntity.status(404)
-				.body(ErrorResponse.of("QUESTION_NOT_FOUND", "Question not found: " + id)));
+			.orElseThrow(() -> new ApiException(
+				ErrorCode.QUESTION_NOT_FOUND, "Question not found: " + id));
 	}
 
 	@DeleteMapping("/{id}")
@@ -65,8 +66,7 @@ public class AdminQuestionController {
 		if (questionService.delete(id)) {
 			return ResponseEntity.ok(ApiResponse.ok("QUESTION_DELETED", null));
 		}
-		return ResponseEntity.status(404)
-			.body(ErrorResponse.of("QUESTION_NOT_FOUND", "Question not found: " + id));
+		throw new ApiException(ErrorCode.QUESTION_NOT_FOUND, "Question not found: " + id);
 	}
 
 	public record QuestionRequest(

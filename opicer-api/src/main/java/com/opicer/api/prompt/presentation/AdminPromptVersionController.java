@@ -3,8 +3,9 @@ package com.opicer.api.prompt.presentation;
 import com.opicer.api.prompt.application.PromptVersionService;
 import com.opicer.api.prompt.domain.PromptUseCase;
 import com.opicer.api.prompt.domain.PromptVersion;
+import com.opicer.api.shared.error.ApiException;
+import com.opicer.api.shared.error.ErrorCode;
 import com.opicer.api.shared.presentation.ApiResponse;
-import com.opicer.api.shared.presentation.ErrorResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -55,8 +56,8 @@ public class AdminPromptVersionController {
 				request.name(), request.template())
 			.<ResponseEntity<Object>>map(v -> ResponseEntity.ok(
 				ApiResponse.ok("PROMPT_UPDATED", PromptVersionResponse.from(v))))
-			.orElseGet(() -> ResponseEntity.status(404)
-				.body(ErrorResponse.of("PROMPT_NOT_FOUND", "PromptVersion not found: " + id)));
+			.orElseThrow(() -> new ApiException(
+				ErrorCode.PROMPT_NOT_FOUND, "PromptVersion not found: " + id));
 	}
 
 	@PostMapping("/{id}/activate")
@@ -64,8 +65,8 @@ public class AdminPromptVersionController {
 		return promptVersionService.activate(id)
 			.<ResponseEntity<Object>>map(v -> ResponseEntity.ok(
 				ApiResponse.ok("PROMPT_ACTIVATED", PromptVersionResponse.from(v))))
-			.orElseGet(() -> ResponseEntity.status(404)
-				.body(ErrorResponse.of("PROMPT_NOT_FOUND", "PromptVersion not found: " + id)));
+			.orElseThrow(() -> new ApiException(
+				ErrorCode.PROMPT_NOT_FOUND, "PromptVersion not found: " + id));
 	}
 
 	@DeleteMapping("/{id}")
@@ -73,8 +74,7 @@ public class AdminPromptVersionController {
 		if (promptVersionService.delete(id)) {
 			return ResponseEntity.ok(ApiResponse.ok("PROMPT_DELETED", null));
 		}
-		return ResponseEntity.status(404)
-			.body(ErrorResponse.of("PROMPT_NOT_FOUND", "PromptVersion not found: " + id));
+		throw new ApiException(ErrorCode.PROMPT_NOT_FOUND, "PromptVersion not found: " + id);
 	}
 
 	public record PromptVersionRequest(
