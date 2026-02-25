@@ -38,7 +38,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [mode, setMode] = useState<"select" | "practice" | "summary">("select");
+  const [mode, setMode] = useState<"select" | "ready" | "practice" | "summary">("select");
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<PracticeAnswer[]>([]);
@@ -140,13 +140,13 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
   };
 
   const handleSubmit = async () => {
-    if (!selectedTopic) return;
+    if (!selectedId) return;
     setIsSubmitting(true);
     setError(null);
     setSuccessMessage(null);
     try {
-      await submitTopicSelection(selectedTopic.id);
-      setSuccessMessage("선택이 저장되었습니다. 연습을 시작할 준비가 되었어요.");
+      await submitTopicSelection(selectedId);
+      setMode("ready");
     } catch (err: any) {
       setError(err?.message ?? "선택 저장 중 문제가 발생했습니다.");
     } finally {
@@ -155,11 +155,19 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
   };
 
   const startPractice = async () => {
-    if (!selectedTopic) return;
+    if (!selectedId) {
+      setError("주제를 선택한 뒤 연습을 시작해주세요.");
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchPracticeQuestions(selectedTopic.id);
+      const data = await fetchPracticeQuestions(selectedId);
+      if (data.length === 0) {
+        setError("선택한 주제에 등록된 질문이 없습니다.");
+        setIsLoading(false);
+        return;
+      }
       setQuestions(data);
       setCurrentIndex(0);
       setAnswers([]);
@@ -329,6 +337,71 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
       }
     };
   }, []);
+
+  if (mode === "ready") {
+    return (
+      <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
+        <div className="mx-auto flex max-w-4xl flex-col gap-8">
+          <TopNav userLabel={userLabel} onLogout={onLogout} />
+
+          <div className="flex flex-col items-center justify-center gap-10 py-16">
+            <div className="text-center space-y-3">
+              <p className="text-xs uppercase tracking-[0.32em] text-[var(--muted)]">
+                Topic Practice
+              </p>
+              <h1 className="text-4xl font-semibold tracking-tight">
+                {selectedTopic?.title ?? ""}
+              </h1>
+              {selectedTopic?.englishTitle ? (
+                <p className="text-base text-[var(--muted)]">
+                  {selectedTopic.englishTitle}
+                </p>
+              ) : null}
+              {selectedTopic?.badges && selectedTopic.badges.length > 0 ? (
+                <div className="flex justify-center gap-2 pt-1">
+                  {selectedTopic.badges.map((badge) => (
+                    <span
+                      key={badge.label}
+                      className="rounded-full border border-[var(--accent)]/30 px-3 py-1 text-xs font-semibold text-[var(--accent-strong)]"
+                    >
+                      {badge.label}
+                      {badge.count != null ? ` ${badge.count}` : ""}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            <div className="flex flex-col items-center gap-4">
+              {error ? (
+                <p className="text-sm text-red-600">{error}</p>
+              ) : null}
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={startPractice}
+                className="rounded-full bg-[var(--accent)] px-10 py-4 text-base font-semibold text-white shadow-lg shadow-[var(--accent)]/20 transition hover:bg-[var(--accent-strong)] disabled:opacity-50"
+              >
+                {isLoading
+                  ? "질문 불러오는 중..."
+                  : `${selectedTopic?.title ?? ""}에 맞는 연습 시작하기`}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("select");
+                  setError(null);
+                }}
+                className="text-sm text-[var(--muted)] hover:underline"
+              >
+                ← 주제 다시 선택하기
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (mode === "summary") {
     return (
@@ -600,7 +673,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
               )}
               <button
                 type="button"
-                disabled={!selectedTopic || isSubmitting}
+                disabled={!selectedId || isSubmitting}
                 onClick={handleSubmit}
                 className={`mt-4 w-full rounded-full px-4 py-2 text-sm font-semibold transition ${
                   selectedTopic && !isSubmitting
@@ -612,7 +685,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
               </button>
               <button
                 type="button"
-                disabled={!selectedTopic || isSubmitting}
+                disabled={!selectedId || isSubmitting}
                 onClick={startPractice}
                 className={`mt-3 w-full rounded-full px-4 py-2 text-sm font-semibold transition ${
                   selectedTopic && !isSubmitting
