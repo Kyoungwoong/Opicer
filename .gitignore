@@ -57,5 +57,12 @@ out/
 .env
 .env.*
 
+# H2 file database
+data/
+opicer-api/data/
+*.mv.db
+*.trace.db
+*.lock.db
+
 # AI-study
 study/
