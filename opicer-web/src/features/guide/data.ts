@@ -2,7 +2,7 @@ import type {
   GuideSection,
   OpicCalendar,
   OpicScheduleItem,
-  ReviewItem,
+  ReviewGroup,
   TipItem,
 } from "@/features/guide/types";
 
@@ -54,24 +54,59 @@ export const OPIC_CALENDAR: OpicCalendar = {
   ],
 };
 
-export const REVIEW_ITEMS: ReviewItem[] = [
+export const REVIEW_GROUPS: ReviewGroup[] = [
   {
-    id: "r1",
+    id: "gangnam",
     classroom: "강남센터 3층",
-    quote: "조명이 밝고 마이크 음질이 깔끔했어요.",
-    rating: 5,
+    reviews: [
+      {
+        id: "g1",
+        quote: "조명이 밝고 마이크 음질이 깔끔했어요.",
+        rating: 5,
+      },
+      {
+        id: "g2",
+        quote: "대기 공간이 넓어서 긴장 완화에 도움이 됐습니다.",
+        rating: 4,
+      },
+      {
+        id: "g3",
+        quote: "시험실 공기가 약간 건조했지만 전반적으로 만족.",
+        rating: 4,
+      },
+    ],
   },
   {
-    id: "r2",
+    id: "jongro",
     classroom: "종로센터 5층",
-    quote: "좌석 간 간격이 넉넉해서 집중하기 좋았습니다.",
-    rating: 4,
+    reviews: [
+      {
+        id: "j1",
+        quote: "좌석 간 간격이 넉넉해서 집중하기 좋았습니다.",
+        rating: 4,
+      },
+      {
+        id: "j2",
+        quote: "모니터 높이가 적당해서 질문 보기 편했어요.",
+        rating: 5,
+      },
+    ],
   },
   {
-    id: "r3",
+    id: "busan",
     classroom: "부산센터 2층",
-    quote: "에어컨 소리가 조금 있었지만 전반적으로 조용했어요.",
-    rating: 4,
+    reviews: [
+      {
+        id: "b1",
+        quote: "에어컨 소리가 조금 있었지만 전반적으로 조용했어요.",
+        rating: 4,
+      },
+      {
+        id: "b2",
+        quote: "안내 직원 응대가 빠르고 친절했습니다.",
+        rating: 5,
+      },
+    ],
   },
 ];
 

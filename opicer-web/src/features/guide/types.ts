@@ -25,11 +25,16 @@ export type OpicCalendar = {
   events: OpicCalendarEvent[];
 };
 
-export type ReviewItem = {
+export type ReviewEntry = {
   id: string;
-  classroom: string;
   quote: string;
   rating: number;
+};
+
+export type ReviewGroup = {
+  id: string;
+  classroom: string;
+  reviews: ReviewEntry[];
 };
 
 export type TipItem = {
