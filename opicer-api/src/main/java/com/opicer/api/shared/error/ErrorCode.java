@@ -6,6 +6,7 @@ public enum ErrorCode {
 	QUESTION_NOT_FOUND("QUESTION_NOT_FOUND", HttpStatus.NOT_FOUND, "Question not found"),
 	PROMPT_NOT_FOUND("PROMPT_NOT_FOUND", HttpStatus.NOT_FOUND, "Prompt not found"),
 	SENTENCE_NOT_FOUND("SENTENCE_NOT_FOUND", HttpStatus.NOT_FOUND, "DailySentence not found"),
+	UNIVERSAL_SENTENCE_NOT_FOUND("UNIVERSAL_SENTENCE_NOT_FOUND", HttpStatus.NOT_FOUND, "Universal sentence not found"),
 	DUPLICATE_DATE("DUPLICATE_DATE", HttpStatus.CONFLICT, "DailySentence already exists for date"),
 	VALIDATION_ERROR("VALIDATION_ERROR", HttpStatus.BAD_REQUEST, "Validation failed"),
 	BAD_REQUEST("BAD_REQUEST", HttpStatus.BAD_REQUEST, "Bad request"),

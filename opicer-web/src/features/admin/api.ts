@@ -5,6 +5,8 @@ import type {
   PromptVersion,
   Question,
   QuestionType,
+  UniversalSentence,
+  UniversalSentenceType,
 } from "./types";
 
 const BASE = "/api/admin";
@@ -135,4 +137,37 @@ export const promptApi = {
     request<PromptVersion>(`prompts/${id}/activate`, { method: "POST" }),
   delete: (id: string) =>
     request<void>(`prompts/${id}`, { method: "DELETE" }),
+};
+
+// ── Universal Sentences ───────────────────────────────────
+
+export const universalSentenceApi = {
+  list: () => request<UniversalSentence[]>("universal-sentences"),
+  create: (data: {
+    type: UniversalSentenceType;
+    title: string;
+    sentence: string;
+    tags: string[];
+    active?: boolean;
+  }) =>
+    request<UniversalSentence>("universal-sentences", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  update: (
+    id: string,
+    data: {
+      type: UniversalSentenceType;
+      title: string;
+      sentence: string;
+      tags: string[];
+      active: boolean;
+    }
+  ) =>
+    request<UniversalSentence>(`universal-sentences/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  delete: (id: string) =>
+    request<void>(`universal-sentences/${id}`, { method: "DELETE" }),
 };

@@ -19,7 +19,7 @@ export function HomeView({
         maxWidthClassName="max-w-5xl"
       />
 
-      <main className="mx-auto mt-12 flex max-w-5xl flex-col gap-8">
+      <main className="mx-auto mt-10 flex max-w-5xl flex-col gap-6">
         <div className="flex flex-col gap-2">
           <p className="text-xs uppercase tracking-[0.25em] text-[var(--muted)]">
             Welcome back
@@ -32,14 +32,11 @@ export function HomeView({
           </p>
         </div>
 
-        <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="space-y-8">
-            <UniversalSentencesSection />
-            <RecentActivitySection />
-          </div>
-          <div className="space-y-8">
-            <OpicScheduleSection />
-          </div>
+        <UniversalSentencesSection />
+
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <RecentActivitySection />
+          <OpicScheduleSection />
         </div>
       </main>
     </div>

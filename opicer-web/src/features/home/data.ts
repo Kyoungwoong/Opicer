@@ -7,31 +7,31 @@ import type {
 export const UNIVERSAL_SENTENCES: UniversalSentence[] = [
   {
     id: "u1",
+    type: "OPINION",
     title: "의견 시작 템플릿",
     sentence: "From my perspective, this topic is quite important because...",
     tags: ["opinion", "starter"],
-    situation: "Opinion",
   },
   {
     id: "u2",
+    type: "PAST_EXPERIENCE",
     title: "경험 공유 템플릿",
     sentence: "I still remember the time when I had to deal with...",
     tags: ["experience", "past"],
-    situation: "Past Experience",
   },
   {
     id: "u3",
+    type: "COMPARE_CONTRAST",
     title: "비교/대조 템플릿",
     sentence: "Compared to the past, things have become much more...",
     tags: ["compare", "contrast"],
-    situation: "Compare/Contrast",
   },
   {
     id: "u4",
+    type: "UNEXPECTED_SITUATION",
     title: "문제 해결 템플릿",
     sentence: "In that situation, the first thing I did was to...",
     tags: ["solution", "structure"],
-    situation: "Unexpected Situation",
   },
 ];
 

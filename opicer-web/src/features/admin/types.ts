@@ -10,6 +10,11 @@ export type PromptUseCase =
   | "TRANSCRIPT_CLEANING"
   | "FEEDBACK"
   | "SCRIPT_IMPROVEMENT";
+export type UniversalSentenceType =
+  | "OPINION"
+  | "PAST_EXPERIENCE"
+  | "COMPARE_CONTRAST"
+  | "UNEXPECTED_SITUATION";
 
 export type Question = {
   id: string;
@@ -42,6 +47,17 @@ export type PromptVersion = {
   version: number;
   name: string;
   template: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UniversalSentence = {
+  id: string;
+  type: UniversalSentenceType;
+  title: string;
+  sentence: string;
+  tags: string[];
   active: boolean;
   createdAt: string;
   updatedAt: string;
