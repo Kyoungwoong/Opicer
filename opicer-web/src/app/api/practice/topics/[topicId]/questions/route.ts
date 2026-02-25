@@ -8,12 +8,12 @@ type ApiResponse<T> = {
   data: T;
 };
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { topicId: string } }
-) {
+type Context = { params: Promise<{ topicId: string }> };
+
+export async function GET(request: NextRequest, context: Context) {
+  const { topicId } = await context.params;
   const res = await fetch(
-    `${baseUrl}/api/practice/topics/${params.topicId}/questions`,
+    `${baseUrl}/api/practice/topics/${topicId}/questions`,
     {
       headers: {
         cookie: request.headers.get("cookie") ?? "",
