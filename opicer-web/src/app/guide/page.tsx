@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { TopNav } from "@/components/common/TopNav";
 import { GuideHeader } from "@/features/guide/components/GuideHeader";
 import { GuideNav } from "@/features/guide/components/GuideNav";
 import { OpicIntroSection } from "@/features/guide/components/OpicIntroSection";
