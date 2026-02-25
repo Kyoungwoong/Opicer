@@ -1,4 +1,8 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { ROUTES } from "@/lib/routes";
 
 type NavItem = {
   title: string;
@@ -23,6 +27,31 @@ export function TopNav({
   onLogout,
   maxWidthClassName = "max-w-5xl",
 }: Props) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleOutside = (event: MouseEvent) => {
+      if (!menuRef.current) return;
+      if (!menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
   return (
     <header
       className={`mx-auto flex w-full ${maxWidthClassName} items-center justify-between gap-6`}
@@ -57,7 +86,37 @@ export function TopNav({
 
       {userLabel && onLogout ? (
         <div className="flex shrink-0 items-center gap-3">
-          <span className="text-sm text-[var(--muted)]">{userLabel}</span>
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+              aria-haspopup="menu"
+              aria-expanded={isMenuOpen}
+              className="flex items-center gap-2 rounded-full border border-transparent px-3 py-1.5 text-sm text-[var(--muted)] transition hover:border-black/10 hover:bg-white"
+            >
+              <span>{userLabel}</span>
+              <span className={`text-xs transition ${isMenuOpen ? "rotate-180" : ""}`}>
+                ▾
+              </span>
+            </button>
+
+            {isMenuOpen ? (
+              <div
+                role="menu"
+                className="absolute right-0 mt-2 w-40 rounded-2xl border border-black/10 bg-white p-2 text-sm shadow-lg"
+              >
+                <Link
+                  href={ROUTES.mypage}
+                  role="menuitem"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block rounded-xl px-3 py-2 text-[var(--ink)] hover:bg-[var(--accent)]/10"
+                >
+                  마이페이지
+                </Link>
+              </div>
+            ) : null}
+          </div>
+
           <button
             onClick={onLogout}
             className="rounded-full border border-black/10 px-4 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:border-transparent hover:bg-[var(--accent)] hover:text-white"
