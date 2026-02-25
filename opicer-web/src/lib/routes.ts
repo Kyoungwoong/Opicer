@@ -2,6 +2,7 @@ export const ROUTES = {
   home: "/",
   login: "/login",
   admin: "/admin",
+  mypage: "/mypage",
   practice: "/practice",
   practiceSession: (topicId: string) => `/practice/${topicId}` as const,
   auth: {
