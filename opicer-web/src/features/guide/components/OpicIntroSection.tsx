@@ -41,63 +41,60 @@ export function OpicIntroSection() {
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">
             레벨 기준 (Pyramid)
           </p>
-          <div className="mt-4 space-y-3">
-            {[
-              {
-                level: "AL",
-                detail: "자연스러운 흐름 / 설득력 있는 전개",
-                width: "w-2/3",
-                inset: 18,
-                color: "bg-red-600",
-              },
-              {
-                level: "IH",
-                detail: "복잡한 구조 / 높은 논리성",
-                width: "w-4/5",
-                inset: 14,
-                color: "bg-blue-700",
-              },
-              {
-                level: "IM",
-                detail: "논리적 흐름 / 예시·근거 활용",
-                width: "w-5/6",
-                inset: 10,
-                color: "bg-emerald-700",
-              },
-              {
-                level: "IL / NL",
-                detail: "기본 문장 / 단순 시제",
-                width: "w-full",
-                inset: 6,
-                color: "bg-slate-700",
-              },
-            ].map((item) => (
-              <div key={item.level} className="flex items-center gap-4">
-                <div className="flex w-32 justify-end text-center">
-                  <span className="text-xs font-semibold leading-4 text-[var(--muted)]">
+          <div className="mt-4 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="flex justify-center">
+              <div className="w-full max-w-sm">
+                <svg
+                  viewBox="0 0 300 260"
+                  className="w-full"
+                  aria-label="OPIC level pyramid"
+                >
+                  <polygon points="150,0 210,65 90,65" fill="#dc2626" />
+                  <polygon points="90,65 210,65 250,140 50,140" fill="#1d4ed8" />
+                  <polygon points="50,140 250,140 290,210 10,210" fill="#047857" />
+                  <polygon points="10,210 290,210 300,260 0,260" fill="#334155" />
+
+                  <text x="150" y="42" textAnchor="middle" className="fill-white font-bold" fontSize="18">
+                    AL
+                  </text>
+                  <text x="150" y="110" textAnchor="middle" className="fill-white font-bold" fontSize="18">
+                    IH
+                  </text>
+                  <text x="150" y="182" textAnchor="middle" className="fill-white font-bold" fontSize="18">
+                    IM
+                  </text>
+                  <text x="150" y="238" textAnchor="middle" className="fill-white font-bold" fontSize="16">
+                    IL / NL
+                  </text>
+                </svg>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                { level: "AL", detail: "자연스러운 흐름 / 설득력 있는 전개" },
+                { level: "IH", detail: "복잡한 구조 / 높은 논리성" },
+                { level: "IM", detail: "논리적 흐름 / 예시·근거 활용" },
+                { level: "IL / NL", detail: "기본 문장 / 단순 시제" },
+              ].map((item) => (
+                <div
+                  key={item.level}
+                  className="rounded-2xl border border-black/5 bg-white/80 px-4 py-3"
+                >
+                  <p className="text-sm font-semibold text-[var(--accent-strong)]">
+                    {item.level}
+                  </p>
+                  <p className="text-xs font-semibold leading-4 text-[var(--muted)]">
                     {item.detail.split(" / ").map((chunk, idx, arr) => (
                       <span key={chunk}>
                         {chunk}
                         {idx < arr.length - 1 && <br />}
                       </span>
                     ))}
-                  </span>
+                  </p>
                 </div>
-                <div className="flex flex-1 justify-center">
-                  <div
-                    className={`relative flex ${item.width} items-center justify-center px-4 py-3 text-sm font-bold text-white`}
-                    style={{
-                      clipPath: `polygon(${item.inset}% 0, ${
-                        100 - item.inset
-                      }% 0, 100% 100%, 0 100%)`,
-                    }}
-                  >
-                    <div className={`absolute inset-0 -z-10 ${item.color}`} />
-                    {item.level}
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
