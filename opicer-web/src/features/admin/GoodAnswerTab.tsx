@@ -203,12 +203,11 @@ export function GoodAnswerTab() {
               type="file"
               accept="audio/*"
               className="hidden"
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  audio: e.currentTarget.files?.[0] ?? null,
-                }))
-              }
+              onChange={(e) => {
+                const input = e.target as HTMLInputElement | null;
+                const file = input?.files?.[0] ?? null;
+                setForm((f) => ({ ...f, audio: file }));
+              }}
             />
             <div className="text-[var(--ink)] font-semibold">
               {form.audio ? "파일 선택됨" : "파일을 드래그하거나 클릭"}
