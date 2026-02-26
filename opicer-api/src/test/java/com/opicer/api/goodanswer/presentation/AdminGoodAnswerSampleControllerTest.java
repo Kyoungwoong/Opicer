@@ -154,7 +154,7 @@ class AdminGoodAnswerSampleControllerTest {
 		ReflectionTestUtils.setField(sample, "updatedAt", java.time.Instant.now());
 
 		when(service.createFromAudio(eq(topicId), eq(OpicLevel.IM), any(), any(), anyList(), anyList()))
-			.thenReturn(sample);
+			.thenReturn(List.of(sample));
 
 		MockMultipartFile file = new MockMultipartFile(
 			"audio",
@@ -172,9 +172,9 @@ class AdminGoodAnswerSampleControllerTest {
 				.param("keyExpressions", "expr1")
 				.cookie(adminCookie))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data.id").exists())
-			.andExpect(jsonPath("$.data.sampleText").value("sample text"))
-			.andExpect(jsonPath("$.data.audioUrl").value("/media/good-answers/sample.webm"));
+			.andExpect(jsonPath("$.data[0].id").exists())
+			.andExpect(jsonPath("$.data[0].sampleText").value("sample text"))
+			.andExpect(jsonPath("$.data[0].audioUrl").value("/media/good-answers/sample.webm"));
 	}
 
 	@Test

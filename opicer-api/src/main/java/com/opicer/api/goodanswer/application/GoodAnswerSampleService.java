@@ -51,14 +51,21 @@ public class GoodAnswerSampleService {
 	}
 
 	@Transactional
-	public GoodAnswerSample createFromAudio(UUID topicId, OpicLevel level, MultipartFile audio,
+	public List<GoodAnswerSample> createFromAudio(UUID topicId, OpicLevel level, List<MultipartFile> audios,
 		String summary, List<String> tags, List<String> keyExpressions) {
-		String audioUrl = audioStorage.save(audio);
-		String transcript = transcriptionService.transcribe(audio);
-		if (transcript == null || transcript.isBlank()) {
-			throw new ApiException(ErrorCode.AI_TRANSCRIPTION_FAILED, "Empty transcript");
+		if (audios == null || audios.isEmpty()) {
+			throw new ApiException(ErrorCode.VALIDATION_ERROR, "Audio file is required");
 		}
-		return create(topicId, level, transcript.trim(), audioUrl, summary, tags, keyExpressions);
+		return audios.stream()
+			.map(audio -> {
+				String audioUrl = audioStorage.save(audio);
+				String transcript = transcriptionService.transcribe(audio);
+				if (transcript == null || transcript.isBlank()) {
+					throw new ApiException(ErrorCode.AI_TRANSCRIPTION_FAILED, "Empty transcript");
+				}
+				return create(topicId, level, transcript.trim(), audioUrl, summary, tags, keyExpressions);
+			})
+			.toList();
 	}
 
 	@Transactional(readOnly = true)
