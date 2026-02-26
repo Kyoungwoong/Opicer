@@ -43,4 +43,14 @@ export type PracticeAnswer = {
   questionText: string;
   audioUrl?: string;
   recordedAt?: string;
+  transcript?: string;
+  transcribeError?: string;
+};
+
+export type AnalysisResult = {
+  analysis: string;
+};
+
+export type ImprovementResult = {
+  improved: string;
 };

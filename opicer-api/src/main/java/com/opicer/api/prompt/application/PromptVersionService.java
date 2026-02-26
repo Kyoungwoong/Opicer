@@ -28,6 +28,11 @@ public class PromptVersionService {
 		return promptVersionRepository.findById(id);
 	}
 
+	@Transactional(readOnly = true)
+	public Optional<PromptVersion> findActiveByUseCase(PromptUseCase useCase) {
+		return promptVersionRepository.findByUseCaseAndActiveTrue(useCase);
+	}
+
 	@Transactional
 	public PromptVersion create(PromptUseCase useCase, int version, String name, String template) {
 		PromptVersion promptVersion = new PromptVersion(useCase, version, name, template);
