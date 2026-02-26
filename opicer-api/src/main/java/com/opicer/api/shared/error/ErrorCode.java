@@ -18,7 +18,9 @@ public enum ErrorCode {
 	INTERNAL_ERROR("INTERNAL_ERROR", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
 	AI_NOT_CONFIGURED("AI_NOT_CONFIGURED", HttpStatus.SERVICE_UNAVAILABLE, "AI service is not configured"),
 	AI_TRANSCRIPTION_FAILED("AI_TRANSCRIPTION_FAILED", HttpStatus.BAD_GATEWAY, "Audio transcription failed"),
-	AI_ANALYSIS_FAILED("AI_ANALYSIS_FAILED", HttpStatus.BAD_GATEWAY, "AI analysis failed");
+	AI_ANALYSIS_FAILED("AI_ANALYSIS_FAILED", HttpStatus.BAD_GATEWAY, "AI analysis failed"),
+	AI_EMBEDDING_FAILED("AI_EMBEDDING_FAILED", HttpStatus.BAD_GATEWAY, "Embedding generation failed"),
+	AI_RAG_FAILED("AI_RAG_FAILED", HttpStatus.BAD_GATEWAY, "RAG retrieval failed");
 
 	private final String code;
 	private final HttpStatus httpStatus;
