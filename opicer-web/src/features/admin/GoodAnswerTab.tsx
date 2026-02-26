@@ -14,7 +14,7 @@ type FormState = {
   summary: string;
   tags: string;
   keyExpressions: string;
-  audio: File | null;
+  audio: File[];
 };
 
 const emptyForm: FormState = {
@@ -23,7 +23,7 @@ const emptyForm: FormState = {
   summary: "",
   tags: "",
   keyExpressions: "",
-  audio: null,
+  audio: [],
 };
 
 export function GoodAnswerTab() {
@@ -70,7 +70,7 @@ export function GoodAnswerTab() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!form.topicId || !form.audio) {
+    if (!form.topicId || form.audio.length === 0) {
       setError("주제와 음성 파일을 선택해주세요.");
       return;
     }
@@ -84,7 +84,7 @@ export function GoodAnswerTab() {
         tags: form.tags || undefined,
         keyExpressions: form.keyExpressions || undefined,
       });
-      setForm((prev) => ({ ...prev, summary: "", tags: "", keyExpressions: "", audio: null }));
+      setForm((prev) => ({ ...prev, summary: "", tags: "", keyExpressions: "", audio: [] }));
       await loadSamples(form.topicId);
     } catch (err) {
       setError(String(err));
@@ -187,42 +187,46 @@ export function GoodAnswerTab() {
                 ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--ink)]"
                 : "border-black/10 bg-white/60 text-[var(--muted)] hover:border-[var(--accent)]"
             }`}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragActive(true);
-            }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragActive(true);
+              }}
             onDragLeave={() => setDragActive(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragActive(false);
-              const file = e.dataTransfer.files?.[0] ?? null;
-              setForm((f) => ({ ...f, audio: file }));
-            }}
-          >
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragActive(false);
+                const files = Array.from(e.dataTransfer.files ?? []);
+                setForm((f) => ({ ...f, audio: [...f.audio, ...files] }));
+              }}
+            >
             <input
               type="file"
               accept="audio/*"
               className="hidden"
+              multiple
               onChange={(e) => {
                 const input = e.target as HTMLInputElement | null;
-                const file = input?.files?.[0] ?? null;
-                setForm((f) => ({ ...f, audio: file }));
+                const files = Array.from(input?.files ?? []);
+                setForm((f) => ({ ...f, audio: [...f.audio, ...files] }));
               }}
             />
             <div className="text-[var(--ink)] font-semibold">
-              {form.audio ? "파일 선택됨" : "파일을 드래그하거나 클릭"}
+              {form.audio.length > 0 ? `${form.audio.length}개 파일 선택됨` : "파일을 드래그하거나 클릭"}
             </div>
             <div className="mt-1 text-xs text-[var(--muted)]">
-              {form.audio
-                ? `${form.audio.name} · ${(form.audio.size / 1024 / 1024).toFixed(2)}MB`
+              {form.audio.length > 0
+                ? form.audio
+                    .slice(0, 3)
+                    .map((file) => `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`)
+                    .join(" · ")
                 : "mp3, wav, m4a, webm 파일 지원"}
             </div>
-            {form.audio && (
+            {form.audio.length > 0 && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
-                  setForm((f) => ({ ...f, audio: null }));
+                  setForm((f) => ({ ...f, audio: [] }));
                 }}
                 className="mt-3 rounded-full border border-black/10 px-3 py-1 text-xs text-[var(--muted)] hover:bg-black/5"
               >
@@ -230,6 +234,32 @@ export function GoodAnswerTab() {
               </button>
             )}
           </label>
+          {form.audio.length > 0 && (
+            <div className="mt-3 space-y-2">
+              {form.audio.map((file, index) => (
+                <div
+                  key={`${file.name}-${index}`}
+                  className="flex items-center justify-between rounded-lg border border-black/10 bg-white/70 px-3 py-2 text-xs text-[var(--muted)]"
+                >
+                  <span className="truncate">
+                    {file.name} · {(file.size / 1024 / 1024).toFixed(2)}MB
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((f) => ({
+                        ...f,
+                        audio: f.audio.filter((_, i) => i !== index),
+                      }))
+                    }
+                    className="text-red-600 hover:underline"
+                  >
+                    제거
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <div className="flex justify-end">
           <button
