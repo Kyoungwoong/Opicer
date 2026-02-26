@@ -10,6 +10,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -47,6 +49,13 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
 		ErrorResponse response = ErrorResponse.from(ErrorCode.BAD_REQUEST, ex.getMessage());
 		return ResponseEntity.status(ErrorCode.BAD_REQUEST.getHttpStatus()).body(response);
+	}
+
+	@ExceptionHandler({MissingServletRequestParameterException.class, MissingServletRequestPartException.class})
+	public ResponseEntity<ErrorResponse> handleMissingParam(Exception ex) {
+		ErrorResponse response = ErrorResponse.from(ErrorCode.VALIDATION_ERROR,
+			ErrorCode.VALIDATION_ERROR.getDefaultMessage());
+		return ResponseEntity.status(ErrorCode.VALIDATION_ERROR.getHttpStatus()).body(response);
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
