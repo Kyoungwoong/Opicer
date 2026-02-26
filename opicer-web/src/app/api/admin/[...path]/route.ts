@@ -5,7 +5,8 @@ const baseUrl = process.env.OPICER_API_BASE_URL || "http://localhost:8080";
 type Context = { params: Promise<{ path: string[] }> };
 
 async function proxy(request: NextRequest, path: string[]) {
-  const backendUrl = `${baseUrl}/api/admin/${path.join("/")}`;
+  const search = request.nextUrl.search;
+  const backendUrl = `${baseUrl}/api/admin/${path.join("/")}${search}`;
 
   const hasBody =
     request.method !== "GET" && request.method !== "DELETE";
