@@ -3,12 +3,29 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TopNav } from "@/components/common/TopNav";
-import { fetchPracticeQuestions } from "@/features/practice/api";
+import {
+  analyzeAnswer,
+  fetchPracticeQuestions,
+  improveScript,
+  transcribeAudio,
+} from "@/features/practice/api";
 import { ROUTES } from "@/lib/routes";
 import type { PracticeAnswer, PracticeQuestion } from "@/features/practice/types";
+import { TranscriptDiff } from "@/features/practice/components/TranscriptDiff";
 
 const PRACTICE_DURATION_SECONDS = 120;
 const REPLAY_WINDOW_SECONDS = 5;
+
+type Mode = "loading" | "playing" | "recording" | "submitting" | "summary";
+
+type QuestionAiState = {
+  isAnalyzing: boolean;
+  analysis: string | null;
+  analyzeError: string | null;
+  isImproving: boolean;
+  improvement: string | null;
+  improveError: string | null;
+};
 
 type Props = {
   topicId: string;
@@ -23,8 +40,11 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<PracticeAnswer[]>([]);
-  const [mode, setMode] = useState<"loading" | "playing" | "recording" | "summary">("loading");
+  const [mode, setMode] = useState<Mode>("loading");
   const [error, setError] = useState<string | null>(null);
+
+  // ── AI state per question ───────────────────────────────────
+  const [aiStates, setAiStates] = useState<Record<string, QuestionAiState>>({});
 
   // ── Timer / replay state ────────────────────────────────────
   const [remainingSeconds, setRemainingSeconds] = useState(PRACTICE_DURATION_SECONDS);
@@ -42,6 +62,10 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
   // Stable ref to goToNext — updated every render to avoid stale closures
   const goToNextRef = useRef<() => void>(() => {});
+  // answersRef mirrors answers state for sync access inside async callbacks
+  const answersRef = useRef<PracticeAnswer[]>([]);
+  // pendingSubmitRef signals that onstop should trigger transcription
+  const pendingSubmitRef = useRef(false);
 
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
@@ -66,7 +90,10 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
         setQuestions(data);
         setMode("playing");
       })
-      .catch((err: any) => setError(err?.message ?? "질문을 불러오지 못했습니다."));
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : "질문을 불러오지 못했습니다.";
+        setError(message);
+      });
   }, [topicId]);
 
   // ── Helpers ─────────────────────────────────────────────────
@@ -119,8 +146,27 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
     }
   };
 
-  // ── startRecording: use recorderRef.current check (not isRecording state)
-  //    to avoid stale closure bug when called from audio onended callbacks
+  // ── Transcribe all answers and switch to summary ─────────────
+  const doTranscribeAndSummary = (snapshot: PracticeAnswer[]) => {
+    setMode("submitting");
+    Promise.all(
+      snapshot.map(async (a) => {
+        if (!a.audioUrl) return a;
+        try {
+          const transcript = await transcribeAudio(a.audioUrl, a.questionText);
+          return { ...a, transcript };
+        } catch (err) {
+          const transcribeError = err instanceof Error ? err.message : "전사 실패";
+          return { ...a, transcribeError };
+        }
+      })
+    ).then((updated) => {
+      answersRef.current = updated;
+      setAnswers(updated);
+      setMode("summary");
+    });
+  };
+
   const startRecording = async (question: PracticeQuestion) => {
     if (recorderRef.current && recorderRef.current.state !== "inactive") return;
     try {
@@ -134,18 +180,25 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
         stream.getTracks().forEach((t) => t.stop());
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         const url = URL.createObjectURL(blob);
-        setAnswers((prev) => {
-          const next = prev.filter((a) => a.questionId !== question.id);
-          return [
-            ...next,
-            {
-              questionId: question.id,
-              questionText: question.promptText,
-              audioUrl: url,
-              recordedAt: new Date().toISOString(),
-            },
-          ];
-        });
+        const newAnswer: PracticeAnswer = {
+          questionId: question.id,
+          questionText: question.promptText,
+          audioUrl: url,
+          recordedAt: new Date().toISOString(),
+        };
+        // Sync update answersRef first, then state
+        const nextAnswers = [
+          ...answersRef.current.filter((a) => a.questionId !== question.id),
+          newAnswer,
+        ];
+        answersRef.current = nextAnswers;
+        setAnswers(nextAnswers);
+
+        // If submit was requested while recording was active, now safe to transcribe
+        if (pendingSubmitRef.current) {
+          pendingSubmitRef.current = false;
+          doTranscribeAndSummary(nextAnswers);
+        }
       };
       recorderRef.current = recorder;
       recorder.start();
@@ -155,7 +208,6 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
     }
   };
 
-  // startTimer: only clears main timer (NOT replay timer)
   const startTimer = () => {
     clearMainTimer();
     setRemainingSeconds(PRACTICE_DURATION_SECONDS);
@@ -187,7 +239,6 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
     }, 1000);
   };
 
-  // ── Play audio for a question, call onEnded when done ───────
   const playQuestionAudio = (question: PracticeQuestion, onEnded: () => void) => {
     if (question.promptAudioUrl) {
       if (!audioRef.current) audioRef.current = new Audio(question.promptAudioUrl);
@@ -206,16 +257,24 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
     }
   };
 
-  // ── goToNext / goToSummary ───────────────────────────────────
   const goToNext = () => {
-    stopAll();
     setHasReplayed(false);
     setReplayWindow(0);
     setRemainingSeconds(PRACTICE_DURATION_SECONDS);
     setTimeExpired(false);
     if (isLastQuestion) {
-      setMode("summary");
+      if (recorderRef.current && recorderRef.current.state !== "inactive") {
+        // Recording is active → flag it; onstop will call doTranscribeAndSummary
+        pendingSubmitRef.current = true;
+        stopAll();
+        setMode("submitting");
+      } else {
+        // No active recording → safe to submit immediately
+        stopAll();
+        doTranscribeAndSummary(answersRef.current);
+      }
     } else {
+      stopAll();
       setMode("playing");
       setCurrentIndex((prev) => prev + 1);
     }
@@ -239,15 +298,11 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
     const question = questions[currentIndex];
     if (!question) return;
 
-    // Reset state
     setHasReplayed(false);
     setReplayWindow(0);
     setRemainingSeconds(PRACTICE_DURATION_SECONDS);
     setTimeExpired(false);
 
-    // Auto-play → when done: startReplayWindow + startRecording + startTimer
-    // Note: startReplayWindow MUST be called AFTER startTimer to avoid
-    //       startTimer's clearMainTimer accidentally clearing the replay timer
     playQuestionAudio(question, () => {
       setMode("recording");
       startRecording(question);
@@ -282,6 +337,57 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
     });
   };
 
+  // ── AI actions ───────────────────────────────────────────────
+  const getOrInitAiState = (questionId: string): QuestionAiState =>
+    aiStates[questionId] ?? {
+      isAnalyzing: false, analysis: null, analyzeError: null,
+      isImproving: false, improvement: null, improveError: null,
+    };
+
+  const handleAnalyze = async (answer: PracticeAnswer) => {
+    if (!answer.transcript) return;
+    const id = answer.questionId;
+    setAiStates((prev) => ({
+      ...prev,
+      [id]: { ...getOrInitAiState(id), isAnalyzing: true, analyzeError: null },
+    }));
+    try {
+      const analysis = await analyzeAnswer(answer.questionText, answer.transcript);
+      setAiStates((prev) => ({
+        ...prev,
+        [id]: { ...prev[id]!, isAnalyzing: false, analysis },
+      }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "분석에 실패했습니다.";
+      setAiStates((prev) => ({
+        ...prev,
+        [id]: { ...prev[id]!, isAnalyzing: false, analyzeError: message },
+      }));
+    }
+  };
+
+  const handleImprove = async (answer: PracticeAnswer) => {
+    if (!answer.transcript) return;
+    const id = answer.questionId;
+    setAiStates((prev) => ({
+      ...prev,
+      [id]: { ...getOrInitAiState(id), isImproving: true, improveError: null },
+    }));
+    try {
+      const improvement = await improveScript(answer.questionText, answer.transcript);
+      setAiStates((prev) => ({
+        ...prev,
+        [id]: { ...prev[id]!, isImproving: false, improvement },
+      }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "수정에 실패했습니다.";
+      setAiStates((prev) => ({
+        ...prev,
+        [id]: { ...prev[id]!, isImproving: false, improveError: message },
+      }));
+    }
+  };
+
   // ── Cleanup on unmount ───────────────────────────────────────
   useEffect(() => {
     return () => { stopAll(); };
@@ -290,6 +396,21 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
 
   const topicTitle = currentQuestion?.topic ?? questions[0]?.topic ?? "연습";
   const warning = remainingSeconds <= 10 && remainingSeconds > 0;
+
+  // ── Submitting screen ────────────────────────────────────────
+  if (mode === "submitting") {
+    return (
+      <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
+        <div className="mx-auto flex max-w-4xl flex-col gap-8">
+          <TopNav userLabel={userLabel} onLogout={onLogout} />
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
+            <p className="text-sm text-[var(--muted)]">답변 분석 중…</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // ── Summary screen ───────────────────────────────────────────
   if (mode === "summary") {
@@ -305,25 +426,91 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
           </section>
 
           <div className="space-y-6">
-            {answers.map((answer, idx) => (
-              <div
-                key={answer.questionId}
-                className="rounded-[24px] border border-black/10 bg-white/70 p-5 shadow-sm"
-              >
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-                  Question {idx + 1}
-                </p>
-                <p className="mt-2 text-base font-semibold">{answer.questionText}</p>
-                <div className="mt-4 rounded-2xl border border-[var(--accent)]/20 bg-[var(--accent)]/10 p-4">
-                  <p className="text-xs font-semibold text-[var(--accent-strong)]">Your Answer</p>
-                  {answer.audioUrl ? (
-                    <audio controls src={answer.audioUrl} className="mt-2 w-full" />
-                  ) : (
-                    <p className="mt-2 text-sm text-[var(--muted)]">녹음된 답변이 없습니다.</p>
+            {answers.map((answer, idx) => {
+              const ai = getOrInitAiState(answer.questionId);
+              return (
+                <div
+                  key={answer.questionId}
+                  className="rounded-[24px] border border-black/10 bg-white/70 p-5 shadow-sm"
+                >
+                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
+                    Question {idx + 1}
+                  </p>
+                  <p className="mt-2 text-base font-semibold">{answer.questionText}</p>
+
+                  {/* Transcript + audio */}
+                  <div className="mt-4 rounded-2xl border border-[var(--accent)]/20 bg-[var(--accent)]/10 p-4">
+                    <p className="text-xs font-semibold text-[var(--accent-strong)]">Your Answer</p>
+                    {answer.transcript ? (
+                      <p className="mt-2 text-sm leading-relaxed">{answer.transcript}</p>
+                    ) : answer.transcribeError ? (
+                      <p className="mt-2 text-sm text-red-500">전사 실패: {answer.transcribeError}</p>
+                    ) : (
+                      <p className="mt-2 text-sm text-[var(--muted)]">전사 텍스트 없음</p>
+                    )}
+                    {answer.audioUrl ? (
+                      <audio controls src={answer.audioUrl} className="mt-3 w-full" />
+                    ) : (
+                      <p className="mt-2 text-sm text-[var(--muted)]">녹음된 답변이 없습니다.</p>
+                    )}
+                  </div>
+
+                  {/* Action buttons — only if transcript exists */}
+                  {answer.transcript && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleAnalyze(answer)}
+                        disabled={ai.isAnalyzing || ai.analysis !== null}
+                        className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+                          ai.isAnalyzing || ai.analysis !== null
+                            ? "cursor-not-allowed bg-black/5 text-[var(--muted)]"
+                            : "bg-[var(--accent)] text-white hover:bg-[var(--accent-strong)]"
+                        }`}
+                      >
+                        {ai.isAnalyzing ? "분석 중…" : ai.analysis ? "분석 완료" : "분석하기"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleImprove(answer)}
+                        disabled={ai.isImproving || ai.improvement !== null}
+                        className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+                          ai.isImproving || ai.improvement !== null
+                            ? "cursor-not-allowed bg-black/5 text-[var(--muted)]"
+                            : "bg-black text-white hover:bg-black/80"
+                        }`}
+                      >
+                        {ai.isImproving ? "수정 중…" : ai.improvement ? "수정 완료" : "수정하기"}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Analysis result */}
+                  {ai.analyzeError && (
+                    <p className="mt-3 text-sm text-red-600">{ai.analyzeError}</p>
+                  )}
+                  {ai.analysis && (
+                    <div className="mt-4 rounded-2xl border border-black/10 bg-white/80 p-4 text-sm leading-relaxed whitespace-pre-wrap">
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">AI 분석</p>
+                      {ai.analysis}
+                    </div>
+                  )}
+
+                  {/* Improvement diff */}
+                  {ai.improveError && (
+                    <p className="mt-3 text-sm text-red-600">{ai.improveError}</p>
+                  )}
+                  {ai.improvement && answer.transcript && (
+                    <div className="mt-4">
+                      <TranscriptDiff
+                        original={answer.transcript}
+                        improved={ai.improvement}
+                      />
+                    </div>
                   )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="flex flex-col items-center gap-3 pb-10">
@@ -337,7 +524,9 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
             <button
               type="button"
               onClick={() => {
+                answersRef.current = [];
                 setAnswers([]);
+                setAiStates({});
                 setCurrentIndex(0);
                 setMode("playing");
               }}

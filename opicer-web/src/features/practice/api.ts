@@ -4,6 +4,7 @@ import type {
   TopicSelection,
 } from "@/features/practice/types";
 
+
 export async function fetchTopics(): Promise<TopicItem[]> {
   const res = await fetch(`/api/topics`, { cache: "no-store" });
   if (!res.ok) {
@@ -41,4 +42,60 @@ export async function fetchPracticeQuestions(
     throw new Error("Failed to load practice questions");
   }
   return (await res.json()) as PracticeQuestion[];
+}
+
+export async function transcribeAudio(
+  audioUrl: string,
+  questionText: string
+): Promise<string> {
+  const audioRes = await fetch(audioUrl);
+  const audioBlob = await audioRes.blob();
+  const formData = new FormData();
+  formData.append("audio", audioBlob, "audio.webm");
+  formData.append("questionText", questionText);
+
+  const res = await fetch("/api/practice/transcribe", {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.message ?? "Transcription failed");
+  }
+  const body = (await res.json()) as { transcript: string };
+  return body.transcript;
+}
+
+export async function analyzeAnswer(
+  questionText: string,
+  transcript: string
+): Promise<string> {
+  const res = await fetch("/api/practice/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ questionText, transcript }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.message ?? "Analysis failed");
+  }
+  const body = (await res.json()) as { analysis: string };
+  return body.analysis;
+}
+
+export async function improveScript(
+  questionText: string,
+  transcript: string
+): Promise<string> {
+  const res = await fetch("/api/practice/improve", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ questionText, transcript }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.message ?? "Improvement failed");
+  }
+  const body = (await res.json()) as { improved: string };
+  return body.improved;
 }
