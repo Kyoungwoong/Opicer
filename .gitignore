@@ -64,6 +64,10 @@ opicer-api/data/
 *.trace.db
 *.lock.db
 
+# Local media storage
+storage/
+opicer-api/storage/
+
 # AI-study
 study/
 

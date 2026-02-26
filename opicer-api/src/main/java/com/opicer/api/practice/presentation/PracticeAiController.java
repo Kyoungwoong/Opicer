@@ -4,6 +4,7 @@ import com.opicer.api.practice.application.PracticeAiService;
 import com.opicer.api.shared.presentation.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,22 +36,32 @@ public class PracticeAiController {
 
 	@PostMapping("/analyze")
 	public ApiResponse<Map<String, String>> analyze(@Valid @RequestBody AnalyzeRequest request) {
-		String analysis = practiceAiService.analyze(request.questionText(), request.transcript());
+		String analysis = practiceAiService.analyze(
+			request.topicId(),
+			request.questionText(),
+			request.transcript()
+		);
 		return ApiResponse.ok("Analysis complete", Map.of("analysis", analysis));
 	}
 
 	@PostMapping("/improve")
 	public ApiResponse<Map<String, String>> improve(@Valid @RequestBody ImproveRequest request) {
-		String improved = practiceAiService.improve(request.questionText(), request.transcript());
+		String improved = practiceAiService.improve(
+			request.topicId(),
+			request.questionText(),
+			request.transcript()
+		);
 		return ApiResponse.ok("Improvement complete", Map.of("improved", improved));
 	}
 
 	record AnalyzeRequest(
+		@NotNull java.util.UUID topicId,
 		@NotBlank String questionText,
 		@NotBlank String transcript
 	) {}
 
 	record ImproveRequest(
+		@NotNull java.util.UUID topicId,
 		@NotBlank String questionText,
 		@NotBlank String transcript
 	) {}

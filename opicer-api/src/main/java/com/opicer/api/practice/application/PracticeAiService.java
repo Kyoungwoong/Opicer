@@ -5,11 +5,15 @@ import com.opicer.api.config.AiProperties;
 import com.opicer.api.prompt.application.PromptVersionService;
 import com.opicer.api.prompt.domain.PromptUseCase;
 import com.opicer.api.prompt.domain.PromptVersion;
+import com.opicer.api.goodanswer.application.GoodAnswerSampleService;
+import com.opicer.api.goodanswer.domain.GoodAnswerSample;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
 import java.io.InputStream;
+import java.util.StringJoiner;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -40,11 +44,17 @@ public class PracticeAiService {
 
 	private final AiProperties aiProperties;
 	private final PromptVersionService promptVersionService;
+	private final GoodAnswerSampleService goodAnswerSampleService;
 	private final RestClient restClient;
 
-	public PracticeAiService(AiProperties aiProperties, PromptVersionService promptVersionService) {
+	public PracticeAiService(
+		AiProperties aiProperties,
+		PromptVersionService promptVersionService,
+		GoodAnswerSampleService goodAnswerSampleService
+	) {
 		this.aiProperties = aiProperties;
 		this.promptVersionService = promptVersionService;
+		this.goodAnswerSampleService = goodAnswerSampleService;
 		this.restClient = RestClient.create();
 	}
 
@@ -75,7 +85,7 @@ public class PracticeAiService {
 		}
 	}
 
-	public String analyze(String questionText, String transcript) {
+	public String analyze(UUID topicId, String questionText, String transcript) {
 		String apiKey = aiProperties.getAnthropicApiKey();
 		if (apiKey == null || apiKey.isBlank()) {
 			throw new ApiException(ErrorCode.AI_NOT_CONFIGURED);
@@ -86,10 +96,11 @@ public class PracticeAiService {
 		String prompt = template
 			.replace("{questionText}", questionText)
 			.replace("{transcript}", transcript);
+		prompt = attachRagContext(prompt, topicId, transcript);
 		return callClaude(apiKey, prompt);
 	}
 
-	public String improve(String questionText, String transcript) {
+	public String improve(UUID topicId, String questionText, String transcript) {
 		String apiKey = aiProperties.getAnthropicApiKey();
 		if (apiKey == null || apiKey.isBlank()) {
 			throw new ApiException(ErrorCode.AI_NOT_CONFIGURED);
@@ -100,7 +111,27 @@ public class PracticeAiService {
 		String prompt = template
 			.replace("{questionText}", questionText)
 			.replace("{transcript}", transcript);
+		prompt = attachRagContext(prompt, topicId, transcript);
 		return callClaude(apiKey, prompt);
+	}
+
+	private String attachRagContext(String prompt, UUID topicId, String transcript) {
+		List<GoodAnswerSample> samples = goodAnswerSampleService.findSimilar(topicId, transcript, 3);
+		if (samples.isEmpty()) return prompt;
+		StringJoiner joiner = new StringJoiner("\n\n");
+		joiner.add("### Similar Good Answer Samples");
+		for (int i = 0; i < samples.size(); i++) {
+			GoodAnswerSample sample = samples.get(i);
+			joiner.add(String.format(
+				"%d) Level: %s\nSummary: %s\nKey Expressions: %s\nSample: %s",
+				i + 1,
+				sample.getLevel(),
+				sample.getSummary() == null ? "-" : sample.getSummary(),
+				sample.getKeyExpressions() == null ? "-" : String.join(", ", sample.getKeyExpressions()),
+				sample.getSampleText()
+			));
+		}
+		return prompt + "\n\n" + joiner;
 	}
 
 	private String callClaude(String apiKey, String prompt) {

@@ -352,7 +352,7 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
       [id]: { ...getOrInitAiState(id), isAnalyzing: true, analyzeError: null },
     }));
     try {
-      const analysis = await analyzeAnswer(answer.questionText, answer.transcript);
+      const analysis = await analyzeAnswer(topicId, answer.questionText, answer.transcript);
       setAiStates((prev) => ({
         ...prev,
         [id]: { ...prev[id]!, isAnalyzing: false, analysis },
@@ -374,7 +374,7 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
       [id]: { ...getOrInitAiState(id), isImproving: true, improveError: null },
     }));
     try {
-      const improvement = await improveScript(answer.questionText, answer.transcript);
+      const improvement = await improveScript(topicId, answer.questionText, answer.transcript);
       setAiStates((prev) => ({
         ...prev,
         [id]: { ...prev[id]!, isImproving: false, improvement },

@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: ${OPICER_TEST_DB_URL:jdbc:postgresql://localhost:5432/opicer_test}
+    driver-class-name: org.postgresql.Driver
+    username: ${OPICER_DB_USER:opicer}
+    password: ${OPICER_DB_PASSWORD:opicer}
   jpa:
     hibernate:
       ddl-auto: create-drop

@@ -108,11 +108,11 @@ class PracticeAiControllerTest {
 	// T4: POST /analyze valid JSON + auth → 200
 	@Test
 	void analyze_validRequest_returns200() throws Exception {
-		when(practiceAiService.analyze(anyString(), anyString())).thenReturn("Analysis result");
+		when(practiceAiService.analyze(any(), anyString(), anyString())).thenReturn("Analysis result");
 
 		mockMvc.perform(post("/api/practice/analyze")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"questionText\":\"Tell me about yourself.\",\"transcript\":\"I am a student.\"}")
+				.content("{\"topicId\":\"11111111-1111-1111-1111-111111111111\",\"questionText\":\"Tell me about yourself.\",\"transcript\":\"I am a student.\"}")
 				.cookie(userCookie))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.analysis").value("Analysis result"));
@@ -123,7 +123,7 @@ class PracticeAiControllerTest {
 	void analyze_noAuth_returns401() throws Exception {
 		mockMvc.perform(post("/api/practice/analyze")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"questionText\":\"Tell me about yourself.\",\"transcript\":\"I am a student.\"}"))
+				.content("{\"topicId\":\"11111111-1111-1111-1111-111111111111\",\"questionText\":\"Tell me about yourself.\",\"transcript\":\"I am a student.\"}"))
 			.andExpect(status().isUnauthorized());
 	}
 
@@ -132,7 +132,7 @@ class PracticeAiControllerTest {
 	void analyze_blankFields_returns400() throws Exception {
 		mockMvc.perform(post("/api/practice/analyze")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"questionText\":\"\",\"transcript\":\"\"}")
+				.content("{\"topicId\":null,\"questionText\":\"\",\"transcript\":\"\"}")
 				.cookie(userCookie))
 			.andExpect(status().isBadRequest());
 	}
@@ -140,11 +140,11 @@ class PracticeAiControllerTest {
 	// T7: POST /improve valid JSON + auth → 200
 	@Test
 	void improve_validRequest_returns200() throws Exception {
-		when(practiceAiService.improve(anyString(), anyString())).thenReturn("Improved script");
+		when(practiceAiService.improve(any(), anyString(), anyString())).thenReturn("Improved script");
 
 		mockMvc.perform(post("/api/practice/improve")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"questionText\":\"Tell me about yourself.\",\"transcript\":\"I am a student.\"}")
+				.content("{\"topicId\":\"11111111-1111-1111-1111-111111111111\",\"questionText\":\"Tell me about yourself.\",\"transcript\":\"I am a student.\"}")
 				.cookie(userCookie))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.improved").value("Improved script"));
@@ -155,7 +155,7 @@ class PracticeAiControllerTest {
 	void improve_noAuth_returns401() throws Exception {
 		mockMvc.perform(post("/api/practice/improve")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"questionText\":\"Tell me about yourself.\",\"transcript\":\"I am a student.\"}"))
+				.content("{\"topicId\":\"11111111-1111-1111-1111-111111111111\",\"questionText\":\"Tell me about yourself.\",\"transcript\":\"I am a student.\"}"))
 			.andExpect(status().isUnauthorized());
 	}
 }
