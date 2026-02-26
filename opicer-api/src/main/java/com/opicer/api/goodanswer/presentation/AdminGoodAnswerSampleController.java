@@ -52,15 +52,15 @@ public class AdminGoodAnswerSampleController {
 	}
 
 	@PostMapping(value = "/audio", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ApiResponse<Map<String, Object>> createFromAudio(
-		@RequestPart("audio") MultipartFile audio,
+	public ApiResponse<List<Map<String, Object>>> createFromAudio(
+		@RequestPart("audio") List<MultipartFile> audio,
 		@RequestParam UUID topicId,
 		@RequestParam OpicLevel level,
 		@RequestParam(required = false) String summary,
 		@RequestParam(required = false) String tags,
 		@RequestParam(required = false) String keyExpressions
 	) {
-		GoodAnswerSample sample = service.createFromAudio(
+		List<GoodAnswerSample> samples = service.createFromAudio(
 			topicId,
 			level,
 			audio,
@@ -68,13 +68,16 @@ public class AdminGoodAnswerSampleController {
 			parseCsv(tags),
 			parseCsv(keyExpressions)
 		);
-		return ApiResponse.ok("Good answer sample created", Map.of(
-			"id", sample.getId(),
-			"createdAt", sample.getCreatedAt(),
-			"updatedAt", sample.getUpdatedAt(),
-			"audioUrl", sample.getSampleAudioUrl(),
-			"sampleText", sample.getSampleText()
-		));
+		List<Map<String, Object>> result = samples.stream()
+			.map(sample -> Map.of(
+				"id", sample.getId(),
+				"createdAt", sample.getCreatedAt(),
+				"updatedAt", sample.getUpdatedAt(),
+				"audioUrl", sample.getSampleAudioUrl(),
+				"sampleText", sample.getSampleText()
+			))
+			.toList();
+		return ApiResponse.ok("Good answer samples created", result);
 	}
 
 	@GetMapping

@@ -6,7 +6,7 @@ import type {
   Question,
   QuestionType,
   GoodAnswerSample,
-  GoodAnswerUploadResponse,
+  GoodAnswerUploadItem,
   UniversalSentence,
   UniversalSentenceType,
 } from "./types";
@@ -198,19 +198,19 @@ export const goodAnswerApi = {
   upload: (data: {
     topicId: string;
     level: OpicLevel;
-    audio: File;
+    audio: File[];
     summary?: string;
     tags?: string;
     keyExpressions?: string;
   }) => {
     const formData = new FormData();
-    formData.append("audio", data.audio);
+    data.audio.forEach((file) => formData.append("audio", file));
     formData.append("topicId", data.topicId);
     formData.append("level", data.level);
     if (data.summary) formData.append("summary", data.summary);
     if (data.tags) formData.append("tags", data.tags);
     if (data.keyExpressions) formData.append("keyExpressions", data.keyExpressions);
-    return requestForm<GoodAnswerUploadResponse>("good-answers/audio", formData);
+    return requestForm<GoodAnswerUploadItem[]>("good-answers/audio", formData);
   },
   delete: (id: string) =>
     request<void>(`good-answers/${id}`, { method: "DELETE" }),

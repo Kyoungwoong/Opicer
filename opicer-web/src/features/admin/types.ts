@@ -75,7 +75,7 @@ export type GoodAnswerSample = {
   createdAt: string;
 };
 
-export type GoodAnswerUploadResponse = {
+export type GoodAnswerUploadItem = {
   id: string;
   createdAt: string;
   updatedAt: string;
