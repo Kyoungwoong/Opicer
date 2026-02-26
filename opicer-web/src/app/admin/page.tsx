@@ -9,13 +9,20 @@ import { QuestionTab } from "@/features/admin/QuestionTab";
 import { DailySentenceTab } from "@/features/admin/DailySentenceTab";
 import { PromptVersionTab } from "@/features/admin/PromptVersionTab";
 import { UniversalSentenceTab } from "@/features/admin/UniversalSentenceTab";
+import { GoodAnswerTab } from "@/features/admin/GoodAnswerTab";
 
-type Tab = "questions" | "daily-sentences" | "prompts" | "universal-sentences";
+type Tab =
+  | "questions"
+  | "daily-sentences"
+  | "prompts"
+  | "universal-sentences"
+  | "good-answers";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "questions", label: "질문 관리" },
   { id: "daily-sentences", label: "오늘의 문장" },
   { id: "universal-sentences", label: "만능 문장" },
+  { id: "good-answers", label: "샘플 답변" },
   { id: "prompts", label: "프롬프트 버전" },
 ];
 
@@ -91,6 +98,7 @@ export default function AdminPage() {
           {activeTab === "questions" && <QuestionTab />}
           {activeTab === "daily-sentences" && <DailySentenceTab />}
           {activeTab === "universal-sentences" && <UniversalSentenceTab />}
+          {activeTab === "good-answers" && <GoodAnswerTab />}
           {activeTab === "prompts" && <PromptVersionTab />}
         </div>
       </div>

@@ -9,14 +9,23 @@ async function proxy(request: NextRequest, path: string[]) {
 
   const hasBody =
     request.method !== "GET" && request.method !== "DELETE";
-  const body = hasBody ? await request.text() : undefined;
+  const contentType = request.headers.get("content-type") ?? "";
+  let body: BodyInit | undefined;
+  const headers: Record<string, string> = {
+    cookie: request.headers.get("cookie") ?? "",
+  };
+  if (hasBody) {
+    if (contentType.includes("multipart/form-data")) {
+      body = await request.formData();
+    } else {
+      body = await request.text();
+      headers["Content-Type"] = contentType || "application/json";
+    }
+  }
 
   const res = await fetch(backendUrl, {
     method: request.method,
-    headers: {
-      "Content-Type": "application/json",
-      cookie: request.headers.get("cookie") ?? "",
-    },
+    headers,
     body,
     cache: "no-store",
   });

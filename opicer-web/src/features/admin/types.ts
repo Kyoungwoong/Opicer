@@ -62,3 +62,23 @@ export type UniversalSentence = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type GoodAnswerSample = {
+  id: string;
+  topicId: string;
+  level: OpicLevel;
+  sampleText: string;
+  sampleAudioUrl: string | null;
+  summary: string | null;
+  tags: string[];
+  keyExpressions: string[];
+  createdAt: string;
+};
+
+export type GoodAnswerUploadResponse = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  audioUrl: string;
+  sampleText: string;
+};
