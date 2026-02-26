@@ -4,13 +4,18 @@ import { useEffect, useMemo, useState } from "react";
 import { fetchTopics } from "@/features/practice/api";
 import type { TopicItem } from "@/features/practice/types";
 import { goodAnswerApi } from "./api";
-import type { GoodAnswerSample, OpicLevel } from "./types";
-
-const OPIC_LEVELS: OpicLevel[] = ["NL", "IL", "IM", "IH", "AL"];
+import type { GoodAnswerSample } from "./types";
+const SUMMARY_OPTIONS = [
+  "묘사",
+  "과거/현재/비교",
+  "육하원칙",
+  "의견 제시",
+  "이유 설명",
+  "상황 대처",
+];
 
 type FormState = {
   topicId: string;
-  level: OpicLevel;
   summary: string;
   tags: string;
   keyExpressions: string;
@@ -19,7 +24,6 @@ type FormState = {
 
 const emptyForm: FormState = {
   topicId: "",
-  level: "IM",
   summary: "",
   tags: "",
   keyExpressions: "",
@@ -78,7 +82,7 @@ export function GoodAnswerTab() {
     try {
       await goodAnswerApi.upload({
         topicId: form.topicId,
-        level: form.level,
+        level: "AL",
         audio: form.audio,
         summary: form.summary || undefined,
         tags: form.tags || undefined,
@@ -131,31 +135,20 @@ export function GoodAnswerTab() {
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">레벨</label>
+            <label className="text-xs font-medium text-[var(--muted)]">문제 유형</label>
             <select
-              value={form.level}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, level: e.target.value as OpicLevel }))
-              }
+              value={form.summary}
+              onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
               className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
             >
-              {OPIC_LEVELS.map((level) => (
-                <option key={level} value={level}>
-                  {level}
+              <option value="">유형 선택</option>
+              {SUMMARY_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
                 </option>
               ))}
             </select>
           </div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-[var(--muted)]">요약 (선택)</label>
-          <textarea
-            rows={2}
-            value={form.summary}
-            onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
-            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-            placeholder="샘플 답변 요약"
-          />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
