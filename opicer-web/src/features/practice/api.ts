@@ -67,13 +67,14 @@ export async function transcribeAudio(
 }
 
 export async function analyzeAnswer(
+  topicId: string,
   questionText: string,
   transcript: string
 ): Promise<string> {
   const res = await fetch("/api/practice/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ questionText, transcript }),
+    body: JSON.stringify({ topicId, questionText, transcript }),
   });
   if (!res.ok) {
     const body = await res.json().catch(() => null);
@@ -84,13 +85,14 @@ export async function analyzeAnswer(
 }
 
 export async function improveScript(
+  topicId: string,
   questionText: string,
   transcript: string
 ): Promise<string> {
   const res = await fetch("/api/practice/improve", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ questionText, transcript }),
+    body: JSON.stringify({ topicId, questionText, transcript }),
   });
   if (!res.ok) {
     const body = await res.json().catch(() => null);
