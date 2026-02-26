@@ -15,7 +15,10 @@ public enum ErrorCode {
 	VALIDATION_ERROR("VALIDATION_ERROR", HttpStatus.BAD_REQUEST, "Validation failed"),
 	BAD_REQUEST("BAD_REQUEST", HttpStatus.BAD_REQUEST, "Bad request"),
 	DATA_INTEGRITY_VIOLATION("DATA_INTEGRITY_VIOLATION", HttpStatus.CONFLICT, "Data integrity violation"),
-	INTERNAL_ERROR("INTERNAL_ERROR", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+	INTERNAL_ERROR("INTERNAL_ERROR", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
+	AI_NOT_CONFIGURED("AI_NOT_CONFIGURED", HttpStatus.SERVICE_UNAVAILABLE, "AI service is not configured"),
+	AI_TRANSCRIPTION_FAILED("AI_TRANSCRIPTION_FAILED", HttpStatus.BAD_GATEWAY, "Audio transcription failed"),
+	AI_ANALYSIS_FAILED("AI_ANALYSIS_FAILED", HttpStatus.BAD_GATEWAY, "AI analysis failed");
 
 	private final String code;
 	private final HttpStatus httpStatus;
