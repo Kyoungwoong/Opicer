@@ -4,6 +4,7 @@ import com.opicer.api.practice.application.PracticeAiService;
 import com.opicer.api.shared.presentation.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;

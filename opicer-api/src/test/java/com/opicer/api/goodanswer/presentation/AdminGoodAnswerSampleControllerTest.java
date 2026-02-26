@@ -79,6 +79,8 @@ class AdminGoodAnswerSampleControllerTest {
 			new float[] {0.1f, 0.2f}
 		);
 		ReflectionTestUtils.setField(sample, "id", UUID.randomUUID());
+		ReflectionTestUtils.setField(sample, "createdAt", java.time.Instant.now());
+		ReflectionTestUtils.setField(sample, "updatedAt", java.time.Instant.now());
 
 		when(service.create(eq(topicId), eq(OpicLevel.IM), anyString(), any(), any(), anyList(), anyList()))
 			.thenReturn(sample);
@@ -118,6 +120,8 @@ class AdminGoodAnswerSampleControllerTest {
 			new float[] {0.1f}
 		);
 		ReflectionTestUtils.setField(sample, "id", UUID.randomUUID());
+		ReflectionTestUtils.setField(sample, "createdAt", java.time.Instant.now());
+		ReflectionTestUtils.setField(sample, "updatedAt", java.time.Instant.now());
 		when(service.listByTopic(topicId)).thenReturn(List.of(sample));
 
 		mockMvc.perform(get("/api/admin/good-answers")
