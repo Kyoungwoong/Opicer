@@ -69,7 +69,7 @@ public class AdminGoodAnswerSampleController {
 			parseCsv(keyExpressions)
 		);
 		List<Map<String, Object>> result = samples.stream()
-			.map(sample -> Map.of(
+			.map(sample -> Map.<String, Object>of(
 				"id", sample.getId(),
 				"createdAt", sample.getCreatedAt(),
 				"updatedAt", sample.getUpdatedAt(),
