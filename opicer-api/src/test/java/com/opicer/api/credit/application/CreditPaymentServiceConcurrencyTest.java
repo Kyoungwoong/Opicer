@@ -57,7 +57,8 @@ class CreditPaymentServiceConcurrencyTest {
 		}
 
 		startGate.countDown();
-		doneGate.await(5, TimeUnit.SECONDS);
+		boolean completed = doneGate.await(10, TimeUnit.SECONDS);
+		assertThat(completed).isTrue();
 		executor.shutdown();
 
 		long count = creditPaymentRepository.countByOrderId(order.getId());
