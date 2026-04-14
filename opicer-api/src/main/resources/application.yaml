@@ -54,3 +54,5 @@ opicer:
   storage:
     good-answer-dir: ${OPICER_GOOD_ANSWER_DIR:./storage/good-answers}
     good-answer-url-prefix: ${OPICER_GOOD_ANSWER_URL_PREFIX:/media/good-answers}
+  credit:
+    unsafe-delay-ms: ${OPICER_CREDIT_UNSAFE_DELAY_MS:0}
