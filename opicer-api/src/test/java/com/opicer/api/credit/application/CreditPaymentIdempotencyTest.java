@@ -90,4 +90,38 @@ class CreditPaymentIdempotencyTest {
 		assertThat(creditPaymentRepository.countByOrderId(order.getId())).isEqualTo(1);
 		assertThat(creditBalanceService.getBalance(order.getUserId()).getBalance()).isEqualTo(order.getAmount());
 	}
+
+	@Test
+	void concurrentDifferentKeysStillCreateSinglePaymentAndBalanceUpdate() throws Exception {
+		UUID userId = UUID.randomUUID();
+		CreditOrder order = creditOrderService.createOrder(userId, "PACK_10", 10000);
+		int threads = 20;
+		ExecutorService executor = Executors.newFixedThreadPool(threads);
+		CountDownLatch startGate = new CountDownLatch(1);
+		CountDownLatch doneGate = new CountDownLatch(threads);
+
+		for (int i = 0; i < threads; i++) {
+			final int index = i;
+			executor.submit(() -> {
+				try {
+					startGate.await();
+					creditPaymentService.confirmPaymentWithIdempotency(
+						order.getId(),
+						"TX-DIFF-" + index,
+						"idem-diff-key-" + index
+					);
+				} catch (Exception ignored) {
+				} finally {
+					doneGate.countDown();
+				}
+			});
+		}
+
+		startGate.countDown();
+		assertThat(doneGate.await(10, TimeUnit.SECONDS)).isTrue();
+		executor.shutdown();
+
+		assertThat(creditPaymentRepository.countByOrderId(order.getId())).isEqualTo(1);
+		assertThat(creditBalanceService.getBalance(order.getUserId()).getBalance()).isEqualTo(order.getAmount());
+	}
 }
