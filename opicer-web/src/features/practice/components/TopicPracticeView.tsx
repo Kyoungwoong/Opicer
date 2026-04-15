@@ -57,7 +57,6 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
 
   const [topics, setTopics] = useState<TopicItem[]>([]);
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
-  const [surveyCheckedIds, setSurveyCheckedIds] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,18 +114,14 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
 
   const filteredTopics = useMemo(() => {
     const base = activeCategory?.topics ?? [];
-    const surveyFiltered =
-      activeCategoryId === CATEGORY_SURVEY && surveyCheckedIds.length > 0
-        ? base.filter((topic) => surveyCheckedIds.includes(topic.id))
-        : base;
     const trimmed = query.trim().toLowerCase();
-    if (!trimmed) return surveyFiltered;
-    return surveyFiltered.filter(
+    if (!trimmed) return base;
+    return base.filter(
       (topic) =>
         topic.title.toLowerCase().includes(trimmed) ||
         topic.englishTitle.toLowerCase().includes(trimmed)
     );
-  }, [activeCategory, activeCategoryId, query, surveyCheckedIds]);
+  }, [activeCategory, query]);
 
   const groupedSurveyTopics = useMemo(() => {
     if (activeCategoryId !== CATEGORY_SURVEY) return [];
@@ -149,12 +144,6 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
   const handleSelect = (topic: TopicItem) => {
     setError(null);
     setSelectedId((prev) => (prev === topic.id ? null : topic.id));
-  };
-
-  const toggleSurveyCheck = (topicId: string) => {
-    setSurveyCheckedIds((prev) =>
-      prev.includes(topicId) ? prev.filter((id) => id !== topicId) : [...prev, topicId]
-    );
   };
 
   const handleSubmit = async () => {
@@ -285,9 +274,6 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                       onClick={() => {
                         setActiveCategoryId(category.id);
                         setQuery("");
-                        if (category.id !== CATEGORY_SURVEY) {
-                          setSurveyCheckedIds([]);
-                        }
                       }}
                       className={`rounded-2xl border px-4 py-3 text-left transition ${
                         isActive
@@ -314,11 +300,6 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
                 선택된 주제
               </p>
-              {activeCategoryId === CATEGORY_SURVEY ? (
-                <p className="mt-2 text-xs text-[var(--muted)]">
-                  체크한 설문 항목: {surveyCheckedIds.length}개
-                </p>
-              ) : null}
               {selectedTopic ? (
                 <div className="mt-4 rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent)]/10 p-4">
                   <p className="text-sm font-semibold">{selectedTopic.title}</p>
@@ -383,7 +364,6 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                     <div className="grid gap-4 sm:grid-cols-2">
                       {items.map((topic) => {
                         const isSelected = selectedId === topic.id;
-                        const isChecked = surveyCheckedIds.includes(topic.id);
                         return (
                           <button
                             key={topic.id}
@@ -408,25 +388,22 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                                 {isSelected ? "선택됨" : "선택"}
                               </span>
                             </div>
-                            <label
-                              className={`mt-3 flex items-center gap-2 text-xs font-semibold ${
-                                isSelected ? "text-white" : "text-[var(--accent-strong)]"
-                              }`}
-                              onClick={(event) => {
-                                event.stopPropagation();
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={(event) => {
-                                  event.stopPropagation();
-                                  toggleSurveyCheck(topic.id);
-                                }}
-                                className="h-4 w-4 accent-[var(--accent)]"
-                              />
-                              설문 항목 체크
-                            </label>
+                            {topic.badges && topic.badges.length > 0 ? (
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {topic.badges.map((badge) => (
+                                  <span
+                                    key={`${topic.id}-${badge.label}`}
+                                    className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
+                                      isSelected
+                                        ? "border-white/30 text-white/90"
+                                        : "border-[var(--accent)]/20 text-[var(--accent-strong)]"
+                                    }`}
+                                  >
+                                    {badge.label}{badge.count != null ? ` ${badge.count}` : ""}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : null}
                           </button>
                         );
                       })}
