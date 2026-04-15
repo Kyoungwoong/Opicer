@@ -7,6 +7,7 @@ import com.opicer.api.prompt.domain.PromptUseCase;
 import com.opicer.api.prompt.domain.PromptVersion;
 import com.opicer.api.goodanswer.application.GoodAnswerSampleService;
 import com.opicer.api.goodanswer.domain.GoodAnswerSample;
+import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
 import java.io.InputStream;
@@ -85,7 +86,13 @@ public class PracticeAiService {
 		}
 	}
 
-	public String analyze(UUID topicId, String questionText, String transcript) {
+	public String analyze(
+		UUID topicId,
+		String questionText,
+		String transcript,
+		String questionType,
+		OpicLevel targetLevel
+	) {
 		String apiKey = aiProperties.getAnthropicApiKey();
 		if (apiKey == null || apiKey.isBlank()) {
 			throw new ApiException(ErrorCode.AI_NOT_CONFIGURED);
@@ -96,11 +103,17 @@ public class PracticeAiService {
 		String prompt = template
 			.replace("{questionText}", questionText)
 			.replace("{transcript}", transcript);
-		prompt = attachRagContext(prompt, topicId, transcript);
+		prompt = attachRagContext(prompt, topicId, transcript, questionType, targetLevel);
 		return callClaude(apiKey, prompt);
 	}
 
-	public String improve(UUID topicId, String questionText, String transcript) {
+	public String improve(
+		UUID topicId,
+		String questionText,
+		String transcript,
+		String questionType,
+		OpicLevel targetLevel
+	) {
 		String apiKey = aiProperties.getAnthropicApiKey();
 		if (apiKey == null || apiKey.isBlank()) {
 			throw new ApiException(ErrorCode.AI_NOT_CONFIGURED);
@@ -111,15 +124,34 @@ public class PracticeAiService {
 		String prompt = template
 			.replace("{questionText}", questionText)
 			.replace("{transcript}", transcript);
-		prompt = attachRagContext(prompt, topicId, transcript);
+		prompt = attachRagContext(prompt, topicId, transcript, questionType, targetLevel);
 		return callClaude(apiKey, prompt);
 	}
 
-	private String attachRagContext(String prompt, UUID topicId, String transcript) {
-		List<GoodAnswerSample> samples = goodAnswerSampleService.findSimilar(topicId, transcript, 3);
+	private String attachRagContext(
+		String prompt,
+		UUID topicId,
+		String transcript,
+		String questionType,
+		OpicLevel targetLevel
+	) {
+		List<GoodAnswerSample> samples = goodAnswerSampleService.findSimilar(
+			topicId,
+			transcript,
+			3,
+			questionType,
+			targetLevel
+		);
 		if (samples.isEmpty()) return prompt;
 		StringJoiner joiner = new StringJoiner("\n\n");
-		joiner.add("### Similar Good Answer Samples");
+		joiner.add("### RAG Reference Samples");
+		joiner.add("""
+			Use these references only as guidance.
+			- Do not copy sentences verbatim.
+			- Rebuild the answer in the learner's own words and context.
+			- Prioritize structure, flow, and expressions over memorization.
+			- If references conflict with learner context, prefer learner context.
+			""");
 		for (int i = 0; i < samples.size(); i++) {
 			GoodAnswerSample sample = samples.get(i);
 			joiner.add(String.format(
@@ -131,6 +163,12 @@ public class PracticeAiService {
 				sample.getSampleText()
 			));
 		}
+		joiner.add("""
+			### Output Guardrails
+			- Never output exact copied chunks from references.
+			- Keep response grounded to the given question.
+			- Keep explanation in Korean.
+			""");
 		return prompt + "\n\n" + joiner;
 	}
 

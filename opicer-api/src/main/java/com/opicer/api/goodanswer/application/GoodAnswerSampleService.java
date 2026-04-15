@@ -79,10 +79,21 @@ public class GoodAnswerSampleService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<GoodAnswerSample> findSimilar(UUID topicId, String transcript, int limit) {
+	public List<GoodAnswerSample> findSimilar(
+		UUID topicId,
+		String transcript,
+		int limit,
+		String questionType,
+		OpicLevel targetLevel
+	) {
 		try {
 			float[] embedding = embeddingService.embed(transcript);
-			return repository.findSimilar(topicId, embedding, limit);
+			List<GoodAnswerSample> filtered = repository.findSimilar(topicId, embedding, limit, questionType, targetLevel);
+			if (!filtered.isEmpty() || (questionType == null && targetLevel == null)) {
+				return filtered;
+			}
+			// Fallback: if strict metadata filtering yields no rows, return similarity-only result.
+			return repository.findSimilar(topicId, embedding, limit, null, null);
 		} catch (ApiException e) {
 			throw e;
 		} catch (Exception e) {
