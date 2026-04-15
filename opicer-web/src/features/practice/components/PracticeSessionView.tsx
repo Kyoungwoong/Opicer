@@ -344,6 +344,9 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
       isImproving: false, improvement: null, improveError: null,
     };
 
+  const findQuestionMeta = (questionId: string) =>
+    questions.find((q) => q.id === questionId);
+
   const handleAnalyze = async (answer: PracticeAnswer) => {
     if (!answer.transcript) return;
     const id = answer.questionId;
@@ -352,7 +355,14 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
       [id]: { ...getOrInitAiState(id), isAnalyzing: true, analyzeError: null },
     }));
     try {
-      const analysis = await analyzeAnswer(topicId, answer.questionText, answer.transcript);
+      const question = findQuestionMeta(answer.questionId);
+      const analysis = await analyzeAnswer(
+        topicId,
+        answer.questionText,
+        answer.transcript,
+        question?.type,
+        question?.targetLevels?.[0]
+      );
       setAiStates((prev) => ({
         ...prev,
         [id]: { ...prev[id]!, isAnalyzing: false, analysis },
@@ -374,7 +384,14 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
       [id]: { ...getOrInitAiState(id), isImproving: true, improveError: null },
     }));
     try {
-      const improvement = await improveScript(topicId, answer.questionText, answer.transcript);
+      const question = findQuestionMeta(answer.questionId);
+      const improvement = await improveScript(
+        topicId,
+        answer.questionText,
+        answer.transcript,
+        question?.type,
+        question?.targetLevels?.[0]
+      );
       setAiStates((prev) => ({
         ...prev,
         [id]: { ...prev[id]!, isImproving: false, improvement },
