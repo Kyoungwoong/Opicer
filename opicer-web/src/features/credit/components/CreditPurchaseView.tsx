@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { TopNav } from "@/components/common/TopNav";
 import { createCreditOrder, confirmCreditPayment } from "@/features/credit/api";
 import { CREDIT_PACKAGES, type CreditPackage, type CreditPaymentResponse } from "@/features/credit/types";
+import { ROUTES } from "@/lib/routes";
 import type { User } from "@/types/auth";
 
 type RetryRequest = {
@@ -19,6 +21,7 @@ export function CreditPurchaseView({
   user: User;
   onLogout: () => void;
 }) {
+  const router = useRouter();
   const [selectedPackageId, setSelectedPackageId] = useState<string>(CREDIT_PACKAGES[0].id);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +57,7 @@ export function CreditPurchaseView({
       const payment = await confirmCreditPayment(retryPayload);
       setPaymentResult(payment);
       setLastRetryRequest(null);
+      router.replace(ROUTES.home);
     } catch (e) {
       setError(e instanceof Error ? e.message : "구매 처리 중 오류가 발생했습니다.");
     } finally {
@@ -70,6 +74,7 @@ export function CreditPurchaseView({
       const payment = await confirmCreditPayment(lastRetryRequest);
       setPaymentResult(payment);
       setLastRetryRequest(null);
+      router.replace(ROUTES.home);
     } catch (e) {
       setError(e instanceof Error ? e.message : "재시도 중 오류가 발생했습니다.");
     } finally {
