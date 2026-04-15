@@ -72,17 +72,29 @@ public class PracticeTopicBootstrapRunner implements ApplicationRunner {
 
 	private void ensureSelfIntroductionTopicAndQuestions() {
 		Optional<Topic> existing = topicRepository.findByTitle(SELF_INTRO_TOPIC_TITLE);
-		Topic selfIntro = existing.orElseGet(() -> topicRepository.save(new Topic(
-			SELF_INTRO_TOPIC_TITLE,
-			"Self Introduction",
-			CATEGORY_SELF_INTRO,
-			0,
-			0,
-			List.of(new TopicBadge("필수", null)),
-			true
-		)));
-
-		if (existing.isEmpty()) {
+		Topic selfIntro;
+		if (existing.isPresent()) {
+			Topic topic = existing.get();
+			topic.update(
+				SELF_INTRO_TOPIC_TITLE,
+				"Self Introduction",
+				CATEGORY_SELF_INTRO,
+				0,
+				0,
+				List.of(new TopicBadge("필수", null)),
+				true
+			);
+			selfIntro = topicRepository.save(topic);
+		} else {
+			selfIntro = topicRepository.save(new Topic(
+				SELF_INTRO_TOPIC_TITLE,
+				"Self Introduction",
+				CATEGORY_SELF_INTRO,
+				0,
+				0,
+				List.of(new TopicBadge("필수", null)),
+				true
+			));
 			log.info("Self-introduction topic created: {}", selfIntro.getId());
 		}
 

@@ -99,6 +99,8 @@ class PracticeTopicBootstrapRunnerTest {
 		runner.run(new DefaultApplicationArguments(new String[] {}));
 
 		verify(questionRepository, never()).saveAll(any());
-		verify(topicRepository, never()).save(eq(selfIntro));
+		verify(topicRepository, times(1)).save(eq(selfIntro));
+		assertThat(selfIntro.getCategory()).isEqualTo("자기소개");
+		assertThat(selfIntro.isActive()).isTrue();
 	}
 }
