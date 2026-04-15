@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class CreditProperties {
 
 	private long unsafeDelayMs = 0;
+	private long idempotencyTtlHours = 24;
 
 	public long getUnsafeDelayMs() {
 		return unsafeDelayMs;
@@ -13,5 +14,13 @@ public class CreditProperties {
 
 	public void setUnsafeDelayMs(long unsafeDelayMs) {
 		this.unsafeDelayMs = unsafeDelayMs;
+	}
+
+	public long getIdempotencyTtlHours() {
+		return idempotencyTtlHours;
+	}
+
+	public void setIdempotencyTtlHours(long idempotencyTtlHours) {
+		this.idempotencyTtlHours = idempotencyTtlHours;
 	}
 }
