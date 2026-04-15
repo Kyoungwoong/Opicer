@@ -8,18 +8,22 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "credit_payments")
+@Table(
+	name = "credit_payments",
+	uniqueConstraints = @UniqueConstraint(name = "uk_credit_payments_order", columnNames = {"order_id"})
+)
 public class CreditPayment {
 
 	@Id
 	@GeneratedValue
 	private UUID id;
 
-	@Column(nullable = false)
+	@Column(name = "order_id", nullable = false)
 	private UUID orderId;
 
 	@Column(nullable = false)

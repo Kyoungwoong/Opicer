@@ -71,14 +71,20 @@ public class CreditPaymentService {
 			.orElseGet(() -> {
 				sleepIfNeeded();
 				CreditPayment payment = new CreditPayment(order.getId(), providerTxId, CreditPaymentStatus.APPROVED);
-				order.markPaid();
-				// NOTE: INTENTIONALLY VULNERABLE
-				// Balance update can be executed multiple times if duplicate payment is created.
-				creditBalanceService.addBalance(order.getUserId(), order.getAmount());
-				CreditPayment saved = creditPaymentRepository.save(payment);
-				log.info("Credit payment approved. paymentId={}, orderId={}, userId={}",
-					saved.getId(), saved.getOrderId(), order.getUserId());
-				return saved;
+				try {
+					CreditPayment saved = creditPaymentRepository.save(payment);
+					order.markPaid();
+					creditBalanceService.addBalance(order.getUserId(), order.getAmount());
+					log.info("Credit payment approved. paymentId={}, orderId={}, userId={}",
+						saved.getId(), saved.getOrderId(), order.getUserId());
+					return saved;
+				} catch (DataIntegrityViolationException ex) {
+					// DB unique constraint on orderId is the final guard for concurrent requests
+					log.warn("Duplicate payment prevented by DB unique constraint. orderId={}", orderId);
+					return creditPaymentRepository.findByOrderId(orderId)
+						.orElseThrow(() -> new ApiException(ErrorCode.DATA_INTEGRITY_VIOLATION,
+							"Duplicate payment conflict occurred"));
+				}
 			});
 	}
 
