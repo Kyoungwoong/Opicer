@@ -31,7 +31,7 @@ class CreditPaymentRetryTest {
 	private CreditBalanceService creditBalanceService;
 
 	@Test
-	void retryDuringInFlightCanDuplicatePaymentAndBalance() throws Exception {
+	void retryDuringInFlightIsDeduplicatedByDatabaseConstraint() throws Exception {
 		UUID userId = UUID.randomUUID();
 		CreditOrder order = creditOrderService.createOrder(userId, "PACK_10", 10000);
 
@@ -65,7 +65,7 @@ class CreditPaymentRetryTest {
 		long count = creditPaymentRepository.countByOrderId(order.getId());
 		long balance = creditBalanceService.getBalance(order.getUserId()).getBalance();
 
-		assertThat(count).isGreaterThan(1);
-		assertThat(balance).isGreaterThan(order.getAmount());
+		assertThat(count).isEqualTo(1);
+		assertThat(balance).isEqualTo(order.getAmount());
 	}
 }

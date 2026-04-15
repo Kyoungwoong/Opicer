@@ -31,7 +31,7 @@ class CreditPaymentServiceConcurrencyTest {
 	private com.opicer.api.credit.application.CreditBalanceService creditBalanceService;
 
 	@Test
-	void concurrentConfirmCreatesDuplicates() throws Exception {
+	void concurrentConfirmIsDeduplicatedByDatabaseConstraint() throws Exception {
 		UUID userId = UUID.randomUUID();
 		CreditOrder order = creditOrderService.createOrder(userId, "PACK_10", 10000);
 
@@ -62,9 +62,9 @@ class CreditPaymentServiceConcurrencyTest {
 		executor.shutdown();
 
 		long count = creditPaymentRepository.countByOrderId(order.getId());
-		assertThat(count).isGreaterThan(1);
+		assertThat(count).isEqualTo(1);
 
 		long balance = creditBalanceService.getBalance(order.getUserId()).getBalance();
-		assertThat(balance).isGreaterThan(order.getAmount());
+		assertThat(balance).isEqualTo(order.getAmount());
 	}
 }
