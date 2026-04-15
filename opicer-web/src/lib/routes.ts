@@ -3,6 +3,7 @@ export const ROUTES = {
   login: "/login",
   admin: "/admin",
   mypage: "/mypage",
+  credit: "/credit",
   practice: "/practice",
   practiceSession: (topicId: string) => `/practice/${topicId}` as const,
   auth: {

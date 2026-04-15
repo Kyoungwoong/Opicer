@@ -23,11 +23,15 @@ import java.util.HexFormat;
 import java.util.UUID;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CreditPaymentService {
+
+	private static final Logger log = LoggerFactory.getLogger(CreditPaymentService.class);
 
 	private final CreditOrderService creditOrderService;
 	private final CreditPaymentRepository creditPaymentRepository;
@@ -57,6 +61,7 @@ public class CreditPaymentService {
 
 	@Transactional
 	public CreditPayment confirmPayment(UUID orderId, String providerTxId) {
+		log.info("Confirming credit payment (vulnerable path). orderId={}, providerTxId={}", orderId, providerTxId);
 		CreditOrder order = creditOrderService.getOrder(orderId);
 		mockPaymentRecordRepository.save(new MockPaymentRecord(providerTxId, MockPaymentDecision.APPROVED));
 
@@ -70,7 +75,10 @@ public class CreditPaymentService {
 				// NOTE: INTENTIONALLY VULNERABLE
 				// Balance update can be executed multiple times if duplicate payment is created.
 				creditBalanceService.addBalance(order.getUserId(), order.getAmount());
-				return creditPaymentRepository.save(payment);
+				CreditPayment saved = creditPaymentRepository.save(payment);
+				log.info("Credit payment approved. paymentId={}, orderId={}, userId={}",
+					saved.getId(), saved.getOrderId(), order.getUserId());
+				return saved;
 			});
 	}
 
@@ -83,9 +91,12 @@ public class CreditPaymentService {
 		String requestHash = computeRequestHash(orderId, providerTxId);
 		Instant now = Instant.now();
 		Instant expiresAt = now.plus(creditProperties.getIdempotencyTtlHours(), ChronoUnit.HOURS);
+		log.info("Confirming credit payment with idempotency. orderId={}, key={}", orderId, idempotencyKey);
 		CreditPaymentIdempotency idem = acquireIdempotency(order.getUserId(), idempotencyKey, requestHash, now, expiresAt);
 
 		if (idem.isCompleted()) {
+			log.info("Reusing completed idempotent result. orderId={}, key={}, paymentId={}",
+				orderId, idempotencyKey, idem.getPaymentId());
 			return creditPaymentRepository.findById(idem.getPaymentId())
 				.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_ERROR, "Saved idempotency response is invalid"));
 		}
@@ -93,6 +104,8 @@ public class CreditPaymentService {
 		CreditPayment payment = confirmPayment(orderId, providerTxId);
 		idem.complete(payment.getId(), HttpStatus.OK.value(), toSnapshot(payment));
 		creditPaymentIdempotencyRepository.save(idem);
+		log.info("Idempotent payment confirmation completed. orderId={}, key={}, paymentId={}",
+			orderId, idempotencyKey, payment.getId());
 		return payment;
 	}
 
@@ -107,14 +120,19 @@ public class CreditPaymentService {
 			.findForUpdate(userId, idempotencyKey)
 			.orElse(null);
 		if (existing != null) {
+			log.debug("Idempotency key found. userId={}, key={}, status={}",
+				userId, idempotencyKey, existing.getStatus());
 			return validateOrReuse(existing, requestHash, now, expiresAt);
 		}
 
 		try {
 			CreditPaymentIdempotency created = creditPaymentIdempotencyRepository
 				.saveAndFlush(new CreditPaymentIdempotency(userId, idempotencyKey, requestHash, expiresAt));
+			log.debug("Idempotency key created. userId={}, key={}", userId, idempotencyKey);
 			return created;
 		} catch (DataIntegrityViolationException ex) {
+			log.debug("Idempotency unique collision occurred; retrying with lock. userId={}, key={}",
+				userId, idempotencyKey);
 			CreditPaymentIdempotency conflicted = creditPaymentIdempotencyRepository
 				.findForUpdate(userId, idempotencyKey)
 				.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_ERROR, "Failed to read idempotency key"));
@@ -129,10 +147,13 @@ public class CreditPaymentService {
 		Instant expiresAt
 	) {
 		if (existing.getExpiresAt().isBefore(now)) {
+			log.info("Idempotency key expired; refreshing. userId={}, key={}",
+				existing.getUserId(), existing.getIdempotencyKey());
 			existing.refreshForNewRequest(requestHash, expiresAt);
 			return creditPaymentIdempotencyRepository.save(existing);
 		}
 		if (!existing.getRequestHash().equals(requestHash)) {
+			log.warn("Idempotency key conflict. userId={}, key={}", existing.getUserId(), existing.getIdempotencyKey());
 			throw new ApiException(ErrorCode.IDEMPOTENCY_KEY_CONFLICT,
 				"Idempotency-Key already used with different request payload");
 		}

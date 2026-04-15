@@ -113,6 +113,14 @@ export function TopNav({
                 >
                   마이페이지
                 </Link>
+                <Link
+                  href={ROUTES.credit}
+                  role="menuitem"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block rounded-xl px-3 py-2 text-[var(--ink)] hover:bg-[var(--accent)]/10"
+                >
+                  결제/크레딧 구매
+                </Link>
               </div>
             ) : null}
           </div>
