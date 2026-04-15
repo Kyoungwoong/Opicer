@@ -108,7 +108,7 @@ class PracticeAiControllerTest {
 	// T4: POST /analyze valid JSON + auth → 200
 	@Test
 	void analyze_validRequest_returns200() throws Exception {
-		when(practiceAiService.analyze(any(), anyString(), anyString())).thenReturn("Analysis result");
+		when(practiceAiService.analyze(any(), anyString(), anyString(), any(), any())).thenReturn("Analysis result");
 
 		mockMvc.perform(post("/api/practice/analyze")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -140,7 +140,7 @@ class PracticeAiControllerTest {
 	// T7: POST /improve valid JSON + auth → 200
 	@Test
 	void improve_validRequest_returns200() throws Exception {
-		when(practiceAiService.improve(any(), anyString(), anyString())).thenReturn("Improved script");
+		when(practiceAiService.improve(any(), anyString(), anyString(), any(), any())).thenReturn("Improved script");
 
 		mockMvc.perform(post("/api/practice/improve")
 				.contentType(MediaType.APPLICATION_JSON)

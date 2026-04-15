@@ -1,6 +1,7 @@
 package com.opicer.api.practice.presentation;
 
 import com.opicer.api.practice.application.PracticeAiService;
+import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.presentation.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -39,7 +40,9 @@ public class PracticeAiController {
 		String analysis = practiceAiService.analyze(
 			request.topicId(),
 			request.questionText(),
-			request.transcript()
+			request.transcript(),
+			request.questionType(),
+			request.targetLevel()
 		);
 		return ApiResponse.ok("Analysis complete", Map.of("analysis", analysis));
 	}
@@ -49,7 +52,9 @@ public class PracticeAiController {
 		String improved = practiceAiService.improve(
 			request.topicId(),
 			request.questionText(),
-			request.transcript()
+			request.transcript(),
+			request.questionType(),
+			request.targetLevel()
 		);
 		return ApiResponse.ok("Improvement complete", Map.of("improved", improved));
 	}
@@ -57,12 +62,16 @@ public class PracticeAiController {
 	record AnalyzeRequest(
 		@NotNull java.util.UUID topicId,
 		@NotBlank String questionText,
-		@NotBlank String transcript
+		@NotBlank String transcript,
+		String questionType,
+		OpicLevel targetLevel
 	) {}
 
 	record ImproveRequest(
 		@NotNull java.util.UUID topicId,
 		@NotBlank String questionText,
-		@NotBlank String transcript
+		@NotBlank String transcript,
+		String questionType,
+		OpicLevel targetLevel
 	) {}
 }
