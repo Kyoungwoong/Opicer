@@ -16,7 +16,6 @@ async function parseError(res: Response): Promise<string> {
 }
 
 export async function createCreditOrder(input: {
-  userId: string;
   packageId: string;
   amount: number;
 }): Promise<CreditOrderResponse> {

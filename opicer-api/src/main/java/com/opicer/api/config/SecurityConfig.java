@@ -40,8 +40,6 @@ public class SecurityConfig {
 		http.authorizeHttpRequests(auth -> auth
 			.requestMatchers("/h2-console/**", "/actuator/health", "/api/health").permitAll()
 			.requestMatchers("/oauth2/**", "/login/**").permitAll()
-			// Experimental credit purchase endpoints (for duplication tests)
-			.requestMatchers("/api/credits/**").permitAll()
 			.requestMatchers("/api/auth/login/**", "/api/auth/logout").permitAll()
 			.requestMatchers("/api/admin/**").hasRole("ADMIN")
 			.requestMatchers("/api/auth/me").authenticated()

@@ -42,7 +42,6 @@ export function CreditPurchaseView({
 
     try {
       const order = await createCreditOrder({
-        userId: user.id,
         packageId: selectedPackage.id,
         amount: selectedPackage.amount,
       });

@@ -4,6 +4,7 @@ import com.opicer.api.credit.application.CreditOrderService;
 import com.opicer.api.credit.application.CreditPaymentService;
 import com.opicer.api.credit.domain.CreditOrder;
 import com.opicer.api.credit.domain.CreditPayment;
+import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.shared.presentation.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -12,6 +13,7 @@ import jakarta.validation.constraints.Positive;
 import java.time.Instant;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -35,9 +37,11 @@ public class CreditPurchaseController {
 
 	@PostMapping("/orders")
 	public ResponseEntity<ApiResponse<OrderResponse>> createOrder(
+		Authentication authentication,
 		@Valid @RequestBody OrderRequest request
 	) {
-		CreditOrder order = creditOrderService.createOrder(request.userId(), request.packageId(), request.amount());
+		UUID currentUserId = resolveCurrentUserId(authentication);
+		CreditOrder order = creditOrderService.createOrder(currentUserId, request.packageId(), request.amount());
 		return ResponseEntity.status(201).body(ApiResponse.created("CREDIT_ORDER_CREATED",
 			new OrderResponse(order.getId(), order.getUserId(), order.getPackageId(), order.getAmount(), order.getStatus().name(),
 				order.getCreatedAt())));
@@ -64,11 +68,7 @@ public class CreditPurchaseController {
 				payment.getCreatedAt())));
 	}
 
-	public record OrderRequest(
-		@NotNull UUID userId,
-		@NotBlank String packageId,
-		@Positive int amount
-	) {}
+	public record OrderRequest(@NotBlank String packageId, @Positive int amount) {}
 
 	public record OrderResponse(
 		UUID orderId,
@@ -92,4 +92,14 @@ public class CreditPurchaseController {
 		String status,
 		Instant createdAt
 	) {}
+
+	private UUID resolveCurrentUserId(Authentication authentication) {
+		if (authentication == null || !(authentication.getPrincipal() instanceof AuthUserPrincipal principal)) {
+			throw new org.springframework.web.server.ResponseStatusException(
+				org.springframework.http.HttpStatus.UNAUTHORIZED,
+				"Authentication is required"
+			);
+		}
+		return principal.id();
+	}
 }
