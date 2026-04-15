@@ -20,7 +20,8 @@ public enum ErrorCode {
 	AI_TRANSCRIPTION_FAILED("AI_TRANSCRIPTION_FAILED", HttpStatus.BAD_GATEWAY, "Audio transcription failed"),
 	AI_ANALYSIS_FAILED("AI_ANALYSIS_FAILED", HttpStatus.BAD_GATEWAY, "AI analysis failed"),
 	AI_EMBEDDING_FAILED("AI_EMBEDDING_FAILED", HttpStatus.BAD_GATEWAY, "Embedding generation failed"),
-	AI_RAG_FAILED("AI_RAG_FAILED", HttpStatus.BAD_GATEWAY, "RAG retrieval failed");
+	AI_RAG_FAILED("AI_RAG_FAILED", HttpStatus.BAD_GATEWAY, "RAG retrieval failed"),
+	IDEMPOTENCY_KEY_CONFLICT("IDEMPOTENCY_KEY_CONFLICT", HttpStatus.CONFLICT, "Idempotency key already used with different request");
 
 	private final String code;
 	private final HttpStatus httpStatus;

@@ -14,6 +14,7 @@ import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,9 +45,14 @@ public class CreditPurchaseController {
 
 	@PostMapping("/payments/confirm")
 	public ResponseEntity<ApiResponse<PaymentResponse>> confirmPayment(
+		@RequestHeader("Idempotency-Key") String idempotencyKey,
 		@Valid @RequestBody PaymentConfirmRequest request
 	) {
-		CreditPayment payment = creditPaymentService.confirmPayment(request.orderId(), request.providerTxId());
+		CreditPayment payment = creditPaymentService.confirmPaymentWithIdempotency(
+			request.orderId(),
+			request.providerTxId(),
+			idempotencyKey
+		);
 		if (request.simulateTimeout()) {
 			throw new org.springframework.web.server.ResponseStatusException(
 				org.springframework.http.HttpStatus.GATEWAY_TIMEOUT,
