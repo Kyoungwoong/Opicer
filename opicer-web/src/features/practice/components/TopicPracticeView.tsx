@@ -10,20 +10,54 @@ type Props = {
   onLogout?: () => void;
 };
 
+const CATEGORY_SELF_INTRO = "자기소개";
+const CATEGORY_SURVEY = "설문조사";
+const CATEGORY_UNEXPECTED = "돌발질문";
+
 const CATEGORY_META: Record<string, string> = {
-  "프로필/배경": "서베이 기본 정보",
-  "여가/일상": "취미와 일상 활동",
-  "취미/관심사": "개인 취미 중심",
-  "운동/건강": "운동 관련 경험",
-  "여행/출장": "이동과 휴가 경험",
-  "돌발/상황 대처": "돌발 주제 빈출",
+  [CATEGORY_SELF_INTRO]: "시험 시작 전 필수 자기소개 대비",
+  [CATEGORY_SURVEY]: "Background Survey 기반 주제",
+  [CATEGORY_UNEXPECTED]: "돌발/상황형 질문 대비",
 };
+
+const LEGACY_UNEXPECTED = new Set(["돌발/상황 대처", CATEGORY_UNEXPECTED]);
+
+const INTRO_KEYWORDS = ["자기소개", "self introduction"];
+
+const SURVEY_GROUPS: Array<{ label: string; keywords: string[] }> = [
+  { label: "거주/생활", keywords: ["집", "주거", "동네", "이웃", "기숙사", "룸메이트", "가족"] },
+  { label: "직업/학업", keywords: ["직업", "회사", "사업", "재택", "학생", "수업", "학위", "교사"] },
+  { label: "여가/취미", keywords: ["음악", "영화", "tv", "독서", "쇼핑", "요리", "공연", "콘서트", "캠핑"] },
+  { label: "운동/건강", keywords: ["운동", "헬스", "수영", "자전거", "조깅", "걷기", "요가"] },
+  { label: "여행/이동", keywords: ["여행", "출장", "휴가", "해외", "국내", "드라이브"] },
+];
+
+function resolvePrimaryCategory(topic: TopicItem): string {
+  const title = topic.title.toLowerCase();
+  if (INTRO_KEYWORDS.some((keyword) => title.includes(keyword))) return CATEGORY_SELF_INTRO;
+  if (LEGACY_UNEXPECTED.has(topic.category)) return CATEGORY_UNEXPECTED;
+  return CATEGORY_SURVEY;
+}
+
+function resolveSurveyGroup(topic: TopicItem): string {
+  const title = topic.title.toLowerCase();
+  const englishTitle = topic.englishTitle.toLowerCase();
+  const fromBadge = topic.badges?.[0]?.label?.trim();
+  if (fromBadge && fromBadge.length > 0) return fromBadge;
+  const matched = SURVEY_GROUPS.find((group) =>
+    group.keywords.some(
+      (keyword) => title.includes(keyword.toLowerCase()) || englishTitle.includes(keyword.toLowerCase())
+    )
+  );
+  return matched?.label ?? "기타";
+}
 
 export function TopicPracticeView({ userLabel, onLogout }: Props) {
   const router = useRouter();
 
   const [topics, setTopics] = useState<TopicItem[]>([]);
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+  const [surveyCheckedIds, setSurveyCheckedIds] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,10 +72,12 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
       .then((data) => {
         if (!mounted) return;
         setTopics(data);
-        const firstCategory = data
-          .sort((a, b) => a.categoryOrder - b.categoryOrder)
-          .map((topic) => topic.category)[0];
-        setActiveCategoryId(firstCategory ?? null);
+        const primarySet = new Set(data.map(resolvePrimaryCategory));
+        const firstCategory =
+          [CATEGORY_SELF_INTRO, CATEGORY_SURVEY, CATEGORY_UNEXPECTED].find((category) =>
+            primarySet.has(category)
+          ) ?? CATEGORY_SURVEY;
+        setActiveCategoryId(firstCategory);
       })
       .catch((err) => {
         if (!mounted) return;
@@ -55,23 +91,20 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
 
   const categories = useMemo<TopicCategory[]>(() => {
     const grouped = new Map<string, TopicItem[]>();
-    const categoryOrderMap = new Map<string, number>();
     topics.forEach((topic) => {
-      if (!grouped.has(topic.category)) {
-        grouped.set(topic.category, []);
-        categoryOrderMap.set(topic.category, topic.categoryOrder);
-      }
-      grouped.get(topic.category)?.push(topic);
+      const category = resolvePrimaryCategory(topic);
+      if (!grouped.has(category)) grouped.set(category, []);
+      grouped.get(category)?.push(topic);
     });
-    return Array.from(grouped.entries())
-      .map(([category, items]) => ({
+    return [CATEGORY_SELF_INTRO, CATEGORY_SURVEY, CATEGORY_UNEXPECTED]
+      .filter((category) => grouped.has(category))
+      .map((category, index) => ({
         id: category,
         label: category,
         description: CATEGORY_META[category] ?? "주제별 연습",
-        topics: items.sort((a, b) => a.topicOrder - b.topicOrder),
-        order: categoryOrderMap.get(category) ?? 0,
+        topics: (grouped.get(category) ?? []).sort((a, b) => a.topicOrder - b.topicOrder),
+        order: index,
       }))
-      .sort((a, b) => a.order - b.order)
       .map(({ order, ...rest }) => rest);
   }, [topics]);
 
@@ -82,14 +115,31 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
 
   const filteredTopics = useMemo(() => {
     const base = activeCategory?.topics ?? [];
+    const surveyFiltered =
+      activeCategoryId === CATEGORY_SURVEY && surveyCheckedIds.length > 0
+        ? base.filter((topic) => surveyCheckedIds.includes(topic.id))
+        : base;
     const trimmed = query.trim().toLowerCase();
-    if (!trimmed) return base;
-    return base.filter(
+    if (!trimmed) return surveyFiltered;
+    return surveyFiltered.filter(
       (topic) =>
         topic.title.toLowerCase().includes(trimmed) ||
         topic.englishTitle.toLowerCase().includes(trimmed)
     );
-  }, [activeCategory, query]);
+  }, [activeCategory, activeCategoryId, query, surveyCheckedIds]);
+
+  const groupedSurveyTopics = useMemo(() => {
+    if (activeCategoryId !== CATEGORY_SURVEY) return [];
+    const grouped = new Map<string, TopicItem[]>();
+    filteredTopics.forEach((topic) => {
+      const group = resolveSurveyGroup(topic);
+      if (!grouped.has(group)) grouped.set(group, []);
+      grouped.get(group)?.push(topic);
+    });
+    return Array.from(grouped.entries())
+      .map(([group, items]) => ({ group, items }))
+      .sort((a, b) => a.group.localeCompare(b.group, "ko"));
+  }, [activeCategoryId, filteredTopics]);
 
   const selectedTopic = useMemo<TopicItem | undefined>(
     () => topics.find((t) => t.id === selectedId),
@@ -99,6 +149,12 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
   const handleSelect = (topic: TopicItem) => {
     setError(null);
     setSelectedId((prev) => (prev === topic.id ? null : topic.id));
+  };
+
+  const toggleSurveyCheck = (topicId: string) => {
+    setSurveyCheckedIds((prev) =>
+      prev.includes(topicId) ? prev.filter((id) => id !== topicId) : [...prev, topicId]
+    );
   };
 
   const handleSubmit = async () => {
@@ -226,7 +282,13 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                     <button
                       key={category.id}
                       type="button"
-                      onClick={() => setActiveCategoryId(category.id)}
+                      onClick={() => {
+                        setActiveCategoryId(category.id);
+                        setQuery("");
+                        if (category.id !== CATEGORY_SURVEY) {
+                          setSurveyCheckedIds([]);
+                        }
+                      }}
                       className={`rounded-2xl border px-4 py-3 text-left transition ${
                         isActive
                           ? "border-transparent bg-[var(--accent)] text-white shadow-sm"
@@ -236,7 +298,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                       <div className="flex items-center justify-between">
                         <span className="font-semibold">{category.label}</span>
                         <span className={`text-xs ${isActive ? "text-white/80" : "text-[var(--muted)]"}`}>
-                          {category.topics.length} topics
+                          {category.topics.length} items
                         </span>
                       </div>
                       <p className={`mt-1 text-xs ${isActive ? "text-white/80" : "text-[var(--muted)]"}`}>
@@ -252,6 +314,11 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
                 선택된 주제
               </p>
+              {activeCategoryId === CATEGORY_SURVEY ? (
+                <p className="mt-2 text-xs text-[var(--muted)]">
+                  체크한 설문 항목: {surveyCheckedIds.length}개
+                </p>
+              ) : null}
               {selectedTopic ? (
                 <div className="mt-4 rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent)]/10 p-4">
                   <p className="text-sm font-semibold">{selectedTopic.title}</p>
@@ -301,6 +368,70 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={`skeleton-${i}`} className="h-24 rounded-3xl border border-black/10 bg-white/60 animate-pulse" />
+                ))}
+              </div>
+            ) : activeCategoryId === CATEGORY_SURVEY ? (
+              <div className="mt-6 space-y-5">
+                {groupedSurveyTopics.length === 0 ? (
+                  <p className="text-sm text-[var(--muted)]">조건에 맞는 설문 항목이 없습니다.</p>
+                ) : null}
+                {groupedSurveyTopics.map(({ group, items }) => (
+                  <div key={group} className="space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                      {group}
+                    </p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {items.map((topic) => {
+                        const isSelected = selectedId === topic.id;
+                        const isChecked = surveyCheckedIds.includes(topic.id);
+                        return (
+                          <button
+                            key={topic.id}
+                            type="button"
+                            onClick={() => handleSelect(topic)}
+                            className={`rounded-3xl border p-4 text-left transition ${
+                              isSelected
+                                ? "border-transparent bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/20"
+                                : "border-black/10 bg-white hover:border-[var(--accent)]/40"
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-base font-semibold">{topic.title}</p>
+                                <p className={`mt-1 text-xs ${isSelected ? "text-white/80" : "text-[var(--muted)]"}`}>
+                                  {topic.englishTitle}
+                                </p>
+                              </div>
+                              <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                                isSelected ? "bg-white/20 text-white" : "bg-[var(--accent)]/10 text-[var(--accent-strong)]"
+                              }`}>
+                                {isSelected ? "선택됨" : "선택"}
+                              </span>
+                            </div>
+                            <label
+                              className={`mt-3 flex items-center gap-2 text-xs font-semibold ${
+                                isSelected ? "text-white" : "text-[var(--accent-strong)]"
+                              }`}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={(event) => {
+                                  event.stopPropagation();
+                                  toggleSurveyCheck(topic.id);
+                                }}
+                                className="h-4 w-4 accent-[var(--accent)]"
+                              />
+                              설문 항목 체크
+                            </label>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
