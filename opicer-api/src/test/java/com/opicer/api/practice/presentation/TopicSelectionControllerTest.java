@@ -3,6 +3,8 @@ package com.opicer.api.practice.presentation;
 import com.opicer.api.auth.application.JwtService;
 import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.config.AuthProperties;
+import com.opicer.api.credit.domain.CreditBalance;
+import com.opicer.api.credit.infrastructure.CreditBalanceRepository;
 import com.opicer.api.topic.domain.Topic;
 import com.opicer.api.topic.infrastructure.TopicRepository;
 import com.opicer.api.user.domain.AuthProvider;
@@ -37,20 +39,29 @@ class TopicSelectionControllerTest {
 	@Autowired
 	private TopicRepository topicRepository;
 
+	@Autowired
+	private CreditBalanceRepository creditBalanceRepository;
+
 	private jakarta.servlet.http.Cookie userCookie;
+	private UUID userId;
 
 	@BeforeEach
 	void setUp() {
 		topicRepository.deleteAll();
+		creditBalanceRepository.deleteAll();
+		userId = UUID.randomUUID();
 		userCookie = new jakarta.servlet.http.Cookie(authProperties.getCookieName(), jwtService.issueToken(
 			new AuthUserPrincipal(
-				UUID.randomUUID(),
+				userId,
 				"user@example.com",
 				"User",
 				UserRole.USER,
 				AuthProvider.KAKAO
 			)
 		));
+		CreditBalance balance = new CreditBalance(userId);
+		balance.increase(10);
+		creditBalanceRepository.save(balance);
 	}
 
 	@Test
@@ -85,5 +96,26 @@ class TopicSelectionControllerTest {
 					""".formatted(topic.getId())))
 			.andExpect(status().isConflict())
 			.andExpect(jsonPath("$.code").value("TOPIC_INACTIVE"));
+	}
+
+	@Test
+	void createSelectionWithoutEnoughCreditReturns402() throws Exception {
+		creditBalanceRepository.deleteAll();
+		CreditBalance lowBalance = new CreditBalance(userId);
+		lowBalance.increase(1);
+		creditBalanceRepository.save(lowBalance);
+		Topic topic = new Topic("음악 감상", "Music", "설문조사", 1, 1, List.of(), true);
+		topic = topicRepository.save(topic);
+
+		mockMvc.perform(post("/api/practice/topic-selections")
+				.cookie(userCookie)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{
+					  "topicId": "%s"
+					}
+					""".formatted(topic.getId())))
+			.andExpect(status().isPaymentRequired())
+			.andExpect(jsonPath("$.code").value("CREDIT_INSUFFICIENT_BALANCE"));
 	}
 }
