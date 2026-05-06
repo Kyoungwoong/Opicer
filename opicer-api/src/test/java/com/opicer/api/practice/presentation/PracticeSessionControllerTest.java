@@ -3,7 +3,7 @@ package com.opicer.api.practice.presentation;
 import com.opicer.api.auth.application.JwtService;
 import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.config.AuthProperties;
-import com.opicer.api.practice.application.PracticeSessionService;
+import com.opicer.api.practice.application.PracticeSessionCommandService;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
 import com.opicer.api.user.domain.AuthProvider;
@@ -39,7 +39,7 @@ class PracticeSessionControllerTest {
 	private AuthProperties authProperties;
 
 	@MockBean
-	private PracticeSessionService practiceSessionService;
+	private PracticeSessionCommandService practiceSessionCommandService;
 
 	private Cookie userCookie;
 
@@ -58,12 +58,12 @@ class PracticeSessionControllerTest {
 
 	@Test
 	void submitSuccessReturns200() throws Exception {
-		PracticeSessionService.SubmitResult result = new PracticeSessionService.SubmitResult(
+		PracticeSessionCommandService.SubmitResult result = new PracticeSessionCommandService.SubmitResult(
 			UUID.randomUUID(),
 			false,
 			2
 		);
-		when(practiceSessionService.submit(any(), any())).thenReturn(result);
+		when(practiceSessionCommandService.submit(any(), any())).thenReturn(result);
 
 		mockMvc.perform(post("/api/practice/sessions/submit")
 				.cookie(userCookie)
@@ -79,7 +79,7 @@ class PracticeSessionControllerTest {
 
 	@Test
 	void submitInsufficientBalanceReturns402() throws Exception {
-		when(practiceSessionService.submit(any(), any()))
+		when(practiceSessionCommandService.submit(any(), any()))
 			.thenThrow(new ApiException(ErrorCode.CREDIT_INSUFFICIENT_BALANCE));
 
 		mockMvc.perform(post("/api/practice/sessions/submit")

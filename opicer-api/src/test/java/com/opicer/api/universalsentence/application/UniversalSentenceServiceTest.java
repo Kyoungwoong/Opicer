@@ -20,17 +20,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UniversalSentenceServiceTest {
+class UniversalSentenceQueryServiceTest {
 
 	@Mock
 	private UniversalSentenceRepository repository;
 
-	private UniversalSentenceService service;
+	private UniversalSentenceQueryService service;
 
 	@BeforeEach
 	void setUp() {
 		Clock fixedClock = Clock.fixed(Instant.parse("1970-01-02T00:00:00Z"), ZoneOffset.UTC);
-		service = new UniversalSentenceService(repository, fixedClock);
+		service = new UniversalSentenceQueryService(repository, fixedClock);
 	}
 
 	@Test

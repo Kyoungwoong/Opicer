@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CreditPaymentServiceConcurrencyTest {
 
 	@Autowired
-	private CreditOrderService creditOrderService;
+	private CreditOrderCommandService creditOrderCommandService;
 
 	@Autowired
 	private CreditPaymentService creditPaymentService;
@@ -28,12 +28,12 @@ class CreditPaymentServiceConcurrencyTest {
 	private CreditPaymentRepository creditPaymentRepository;
 
 	@Autowired
-	private com.opicer.api.credit.application.CreditBalanceService creditBalanceService;
+	private CreditBalanceQueryService creditBalanceQueryService;
 
 	@Test
 	void concurrentConfirmIsDeduplicatedByDatabaseConstraint() throws Exception {
 		UUID userId = UUID.randomUUID();
-		CreditOrder order = creditOrderService.createOrder(userId, "PACK_10", 10000);
+		CreditOrder order = creditOrderCommandService.createOrder(userId, "PACK_10", 10000);
 
 		int threads = 10;
 		int requestsPerThread = 10_000;
@@ -64,7 +64,7 @@ class CreditPaymentServiceConcurrencyTest {
 		long count = creditPaymentRepository.countByOrderId(order.getId());
 		assertThat(count).isEqualTo(1);
 
-		long balance = creditBalanceService.getBalance(order.getUserId()).getBalance();
+		long balance = creditBalanceQueryService.getBalance(order.getUserId()).getBalance();
 		assertThat(balance).isEqualTo(order.getAmount());
 	}
 }

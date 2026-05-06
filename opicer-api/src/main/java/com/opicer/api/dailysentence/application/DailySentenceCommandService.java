@@ -6,34 +6,18 @@ import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class DailySentenceService {
+public class DailySentenceCommandService {
 
 	private final DailySentenceRepository dailySentenceRepository;
 
-	public DailySentenceService(DailySentenceRepository dailySentenceRepository) {
+	public DailySentenceCommandService(DailySentenceRepository dailySentenceRepository) {
 		this.dailySentenceRepository = dailySentenceRepository;
-	}
-
-	@Transactional(readOnly = true)
-	public List<DailySentence> findAll() {
-		return dailySentenceRepository.findAll();
-	}
-
-	@Transactional(readOnly = true)
-	public Optional<DailySentence> findById(UUID id) {
-		return dailySentenceRepository.findById(id);
-	}
-
-	@Transactional(readOnly = true)
-	public Optional<DailySentence> findByDate(LocalDate date) {
-		return dailySentenceRepository.findByDate(date);
 	}
 
 	@Transactional
@@ -65,5 +49,4 @@ public class DailySentenceService {
 		dailySentenceRepository.deleteById(id);
 		return true;
 	}
-
 }

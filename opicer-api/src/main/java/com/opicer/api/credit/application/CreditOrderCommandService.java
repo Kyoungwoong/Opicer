@@ -9,32 +9,28 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CreditOrderService {
+public class CreditOrderCommandService {
 
-	private static final Logger log = LoggerFactory.getLogger(CreditOrderService.class);
+	private static final Logger log = LoggerFactory.getLogger(CreditOrderCommandService.class);
 
 	private final CreditOrderRepository creditOrderRepository;
-	private final CreditBalanceService creditBalanceService;
+	private final CreditBalanceCommandService creditBalanceCommandService;
 
-	public CreditOrderService(CreditOrderRepository creditOrderRepository, CreditBalanceService creditBalanceService) {
+	public CreditOrderCommandService(
+		CreditOrderRepository creditOrderRepository,
+		CreditBalanceCommandService creditBalanceCommandService
+	) {
 		this.creditOrderRepository = creditOrderRepository;
-		this.creditBalanceService = creditBalanceService;
+		this.creditBalanceCommandService = creditBalanceCommandService;
 	}
 
 	@Transactional
 	public CreditOrder createOrder(UUID userId, String packageId, int amount) {
 		log.info("Creating credit order. userId={}, packageId={}, amount={}", userId, packageId, amount);
-		creditBalanceService.ensureBalance(userId);
+		creditBalanceCommandService.ensureBalance(userId);
 		CreditOrder order = new CreditOrder(userId, packageId, amount);
 		CreditOrder saved = creditOrderRepository.save(order);
 		log.info("Credit order created. orderId={}, userId={}, status={}", saved.getId(), userId, saved.getStatus());
 		return saved;
-	}
-
-	@Transactional(readOnly = true)
-	public CreditOrder getOrder(UUID orderId) {
-		log.debug("Fetching credit order. orderId={}", orderId);
-		return creditOrderRepository.findById(orderId)
-			.orElseThrow(() -> new IllegalArgumentException("Order not found"));
 	}
 }

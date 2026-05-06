@@ -33,36 +33,36 @@ public class CreditPaymentService {
 
 	private static final Logger log = LoggerFactory.getLogger(CreditPaymentService.class);
 
-	private final CreditOrderService creditOrderService;
+	private final CreditOrderQueryService creditOrderQueryService;
 	private final CreditPaymentRepository creditPaymentRepository;
 	private final CreditPaymentIdempotencyRepository creditPaymentIdempotencyRepository;
 	private final MockPaymentRecordRepository mockPaymentRecordRepository;
 	private final CreditProperties creditProperties;
-	private final CreditBalanceService creditBalanceService;
+	private final CreditBalanceCommandService creditBalanceCommandService;
 	private final ObjectMapper objectMapper;
 
 	public CreditPaymentService(
-		CreditOrderService creditOrderService,
+		CreditOrderQueryService creditOrderQueryService,
 		CreditPaymentRepository creditPaymentRepository,
 		CreditPaymentIdempotencyRepository creditPaymentIdempotencyRepository,
 		MockPaymentRecordRepository mockPaymentRecordRepository,
 		CreditProperties creditProperties,
-		CreditBalanceService creditBalanceService,
+		CreditBalanceCommandService creditBalanceCommandService,
 		ObjectMapper objectMapper
 	) {
-		this.creditOrderService = creditOrderService;
+		this.creditOrderQueryService = creditOrderQueryService;
 		this.creditPaymentRepository = creditPaymentRepository;
 		this.creditPaymentIdempotencyRepository = creditPaymentIdempotencyRepository;
 		this.mockPaymentRecordRepository = mockPaymentRecordRepository;
 		this.creditProperties = creditProperties;
-		this.creditBalanceService = creditBalanceService;
+		this.creditBalanceCommandService = creditBalanceCommandService;
 		this.objectMapper = objectMapper;
 	}
 
 	@Transactional
 	public CreditPayment confirmPayment(UUID orderId, String providerTxId) {
 		log.info("Confirming credit payment (vulnerable path). orderId={}, providerTxId={}", orderId, providerTxId);
-		CreditOrder order = creditOrderService.getOrder(orderId);
+		CreditOrder order = creditOrderQueryService.getOrder(orderId);
 		mockPaymentRecordRepository.save(new MockPaymentRecord(providerTxId, MockPaymentDecision.APPROVED));
 
 		// NOTE: INTENTIONALLY VULNERABLE
@@ -74,7 +74,7 @@ public class CreditPaymentService {
 				try {
 					CreditPayment saved = creditPaymentRepository.save(payment);
 					order.markPaid();
-					creditBalanceService.addBalance(order.getUserId(), order.getAmount());
+					creditBalanceCommandService.addBalance(order.getUserId(), order.getAmount());
 					log.info("Credit payment approved. paymentId={}, orderId={}, userId={}",
 						saved.getId(), saved.getOrderId(), order.getUserId());
 					return saved;
@@ -93,7 +93,7 @@ public class CreditPaymentService {
 		if (idempotencyKey == null || idempotencyKey.isBlank()) {
 			throw new ApiException(ErrorCode.VALIDATION_ERROR, "Idempotency-Key header is required");
 		}
-		CreditOrder order = creditOrderService.getOrder(orderId);
+		CreditOrder order = creditOrderQueryService.getOrder(orderId);
 		String requestHash = computeRequestHash(orderId, providerTxId);
 		Instant now = Instant.now();
 		Instant expiresAt = now.plus(creditProperties.getIdempotencyTtlHours(), ChronoUnit.HOURS);

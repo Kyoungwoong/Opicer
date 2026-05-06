@@ -3,7 +3,8 @@ package com.opicer.api.topic.presentation;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
 import com.opicer.api.shared.presentation.ApiResponse;
-import com.opicer.api.topic.application.TopicService;
+import com.opicer.api.topic.application.TopicCommandService;
+import com.opicer.api.topic.application.TopicQueryService;
 import com.opicer.api.topic.domain.Topic;
 import com.opicer.api.topic.domain.TopicBadge;
 import jakarta.validation.Valid;
@@ -27,15 +28,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/topics")
 public class AdminTopicController {
 
-	private final TopicService topicService;
+	private final TopicQueryService topicQueryService;
+	private final TopicCommandService topicCommandService;
 
-	public AdminTopicController(TopicService topicService) {
-		this.topicService = topicService;
+	public AdminTopicController(TopicQueryService topicQueryService, TopicCommandService topicCommandService) {
+		this.topicQueryService = topicQueryService;
+		this.topicCommandService = topicCommandService;
 	}
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<List<TopicResponse>>> list() {
-		List<TopicResponse> responses = topicService.findAll().stream()
+		List<TopicResponse> responses = topicQueryService.findAll().stream()
 			.map(TopicResponse::from)
 			.toList();
 		return ResponseEntity.ok(ApiResponse.ok("TOPIC_LIST_OK", responses));
@@ -43,7 +46,7 @@ public class AdminTopicController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<TopicResponse>> create(@Valid @RequestBody TopicRequest request) {
-		Topic created = topicService.create(
+		Topic created = topicCommandService.create(
 			request.title(),
 			request.englishTitle(),
 			request.category(),
@@ -57,7 +60,7 @@ public class AdminTopicController {
 
 	@PutMapping("/{id}")
 	public ResponseEntity<Object> update(@PathVariable UUID id, @Valid @RequestBody TopicRequest request) {
-		return topicService.update(
+		return topicCommandService.update(
 				id,
 				request.title(),
 				request.englishTitle(),
@@ -74,7 +77,7 @@ public class AdminTopicController {
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Object> delete(@PathVariable UUID id) {
-		if (topicService.delete(id)) {
+		if (topicCommandService.delete(id)) {
 			return ResponseEntity.ok(ApiResponse.ok("TOPIC_DELETED", null));
 		}
 		throw new ApiException(ErrorCode.TOPIC_NOT_FOUND, "Topic not found: " + id);

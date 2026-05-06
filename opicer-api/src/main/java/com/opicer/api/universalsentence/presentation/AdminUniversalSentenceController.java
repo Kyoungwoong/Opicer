@@ -3,7 +3,8 @@ package com.opicer.api.universalsentence.presentation;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
 import com.opicer.api.shared.presentation.ApiResponse;
-import com.opicer.api.universalsentence.application.UniversalSentenceService;
+import com.opicer.api.universalsentence.application.UniversalSentenceCommandService;
+import com.opicer.api.universalsentence.application.UniversalSentenceQueryService;
 import com.opicer.api.universalsentence.domain.UniversalSentence;
 import com.opicer.api.universalsentence.domain.UniversalSentenceType;
 import jakarta.validation.Valid;
@@ -27,15 +28,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/universal-sentences")
 public class AdminUniversalSentenceController {
 
-	private final UniversalSentenceService universalSentenceService;
+	private final UniversalSentenceQueryService universalSentenceQueryService;
+	private final UniversalSentenceCommandService universalSentenceCommandService;
 
-	public AdminUniversalSentenceController(UniversalSentenceService universalSentenceService) {
-		this.universalSentenceService = universalSentenceService;
+	public AdminUniversalSentenceController(
+		UniversalSentenceQueryService universalSentenceQueryService,
+		UniversalSentenceCommandService universalSentenceCommandService
+	) {
+		this.universalSentenceQueryService = universalSentenceQueryService;
+		this.universalSentenceCommandService = universalSentenceCommandService;
 	}
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<List<UniversalSentenceResponse>>> list() {
-		List<UniversalSentenceResponse> responses = universalSentenceService.findAll().stream()
+		List<UniversalSentenceResponse> responses = universalSentenceQueryService.findAll().stream()
 			.map(UniversalSentenceResponse::from)
 			.toList();
 		return ResponseEntity.ok(ApiResponse.ok("UNIVERSAL_SENTENCE_LIST_OK", responses));
@@ -45,7 +51,7 @@ public class AdminUniversalSentenceController {
 	public ResponseEntity<ApiResponse<UniversalSentenceResponse>> create(
 		@Valid @RequestBody UniversalSentenceRequest request
 	) {
-		UniversalSentence created = universalSentenceService.create(
+		UniversalSentence created = universalSentenceCommandService.create(
 			request.type(),
 			request.title(),
 			request.sentence(),
@@ -58,7 +64,7 @@ public class AdminUniversalSentenceController {
 
 	@PutMapping("/{id}")
 	public ResponseEntity<Object> update(@PathVariable UUID id, @Valid @RequestBody UniversalSentenceRequest request) {
-		return universalSentenceService.update(
+		return universalSentenceCommandService.update(
 				id,
 				request.type(),
 				request.title(),
@@ -74,7 +80,7 @@ public class AdminUniversalSentenceController {
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Object> delete(@PathVariable UUID id) {
-		if (universalSentenceService.delete(id)) {
+		if (universalSentenceCommandService.delete(id)) {
 			return ResponseEntity.ok(ApiResponse.ok("UNIVERSAL_SENTENCE_DELETED", null));
 		}
 		throw new ApiException(ErrorCode.UNIVERSAL_SENTENCE_NOT_FOUND,

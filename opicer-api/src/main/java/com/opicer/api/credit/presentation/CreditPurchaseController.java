@@ -1,6 +1,6 @@
 package com.opicer.api.credit.presentation;
 
-import com.opicer.api.credit.application.CreditOrderService;
+import com.opicer.api.credit.application.CreditOrderCommandService;
 import com.opicer.api.credit.application.CreditPaymentService;
 import com.opicer.api.credit.domain.CreditOrder;
 import com.opicer.api.credit.domain.CreditPayment;
@@ -24,14 +24,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/credits")
 public class CreditPurchaseController {
 
-	private final CreditOrderService creditOrderService;
+	private final CreditOrderCommandService creditOrderCommandService;
 	private final CreditPaymentService creditPaymentService;
 
 	public CreditPurchaseController(
-		CreditOrderService creditOrderService,
+		CreditOrderCommandService creditOrderCommandService,
 		CreditPaymentService creditPaymentService
 	) {
-		this.creditOrderService = creditOrderService;
+		this.creditOrderCommandService = creditOrderCommandService;
 		this.creditPaymentService = creditPaymentService;
 	}
 
@@ -41,7 +41,7 @@ public class CreditPurchaseController {
 		@Valid @RequestBody OrderRequest request
 	) {
 		UUID currentUserId = resolveCurrentUserId(authentication);
-		CreditOrder order = creditOrderService.createOrder(currentUserId, request.packageId(), request.amount());
+		CreditOrder order = creditOrderCommandService.createOrder(currentUserId, request.packageId(), request.amount());
 		return ResponseEntity.status(201).body(ApiResponse.created("CREDIT_ORDER_CREATED",
 			new OrderResponse(order.getId(), order.getUserId(), order.getPackageId(), order.getAmount(), order.getStatus().name(),
 				order.getCreatedAt())));

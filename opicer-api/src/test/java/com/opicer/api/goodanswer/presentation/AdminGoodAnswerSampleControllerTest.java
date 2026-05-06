@@ -3,7 +3,8 @@ package com.opicer.api.goodanswer.presentation;
 import com.opicer.api.auth.application.JwtService;
 import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.config.AuthProperties;
-import com.opicer.api.goodanswer.application.GoodAnswerSampleService;
+import com.opicer.api.goodanswer.application.GoodAnswerSampleCommandService;
+import com.opicer.api.goodanswer.application.GoodAnswerSampleQueryService;
 import com.opicer.api.goodanswer.domain.GoodAnswerSample;
 import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.error.ApiException;
@@ -49,7 +50,10 @@ class AdminGoodAnswerSampleControllerTest {
 	private AuthProperties authProperties;
 
 	@MockBean
-	private GoodAnswerSampleService service;
+	private GoodAnswerSampleCommandService commandService;
+
+	@MockBean
+	private GoodAnswerSampleQueryService queryService;
 
 	private Cookie adminCookie;
 	private UUID topicId;
@@ -86,7 +90,7 @@ class AdminGoodAnswerSampleControllerTest {
 		ReflectionTestUtils.setField(sample, "createdAt", java.time.Instant.now());
 		ReflectionTestUtils.setField(sample, "updatedAt", java.time.Instant.now());
 
-		when(service.create(eq(topicId), eq(OpicLevel.IM), anyString(), any(), any(), anyList(), anyList()))
+		when(commandService.create(eq(topicId), eq(OpicLevel.IM), anyString(), any(), any(), anyList(), anyList()))
 			.thenReturn(sample);
 
 		String payload = """
@@ -126,7 +130,7 @@ class AdminGoodAnswerSampleControllerTest {
 		ReflectionTestUtils.setField(sample, "id", UUID.randomUUID());
 		ReflectionTestUtils.setField(sample, "createdAt", java.time.Instant.now());
 		ReflectionTestUtils.setField(sample, "updatedAt", java.time.Instant.now());
-		when(service.listByTopic(topicId)).thenReturn(List.of(sample));
+		when(queryService.listByTopic(topicId)).thenReturn(List.of(sample));
 
 		mockMvc.perform(get("/api/admin/good-answers")
 				.cookie(adminCookie)
@@ -153,7 +157,7 @@ class AdminGoodAnswerSampleControllerTest {
 		ReflectionTestUtils.setField(sample, "createdAt", java.time.Instant.now());
 		ReflectionTestUtils.setField(sample, "updatedAt", java.time.Instant.now());
 
-		when(service.createFromAudio(eq(topicId), eq(OpicLevel.IM), any(), any(), anyList(), anyList()))
+		when(commandService.createFromAudio(eq(topicId), eq(OpicLevel.IM), any(), any(), anyList(), anyList()))
 			.thenReturn(List.of(sample));
 
 		MockMultipartFile file = new MockMultipartFile(
@@ -188,7 +192,7 @@ class AdminGoodAnswerSampleControllerTest {
 
 	@Test
 	void uploadAudio_transcriptionFailed_returns502() throws Exception {
-		when(service.createFromAudio(eq(topicId), eq(OpicLevel.IM), any(), any(), anyList(), anyList()))
+		when(commandService.createFromAudio(eq(topicId), eq(OpicLevel.IM), any(), any(), anyList(), anyList()))
 			.thenThrow(new ApiException(ErrorCode.AI_TRANSCRIPTION_FAILED));
 
 		MockMultipartFile file = new MockMultipartFile(

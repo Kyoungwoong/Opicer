@@ -11,27 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class QuestionService {
+public class QuestionCommandService {
 
 	private final QuestionRepository questionRepository;
 
-	public QuestionService(QuestionRepository questionRepository) {
+	public QuestionCommandService(QuestionRepository questionRepository) {
 		this.questionRepository = questionRepository;
-	}
-
-	@Transactional(readOnly = true)
-	public List<Question> findAll() {
-		return questionRepository.findAll();
-	}
-
-	@Transactional(readOnly = true)
-	public List<Question> findActiveByTopic(String topic) {
-		return questionRepository.findByActiveTrueAndTopicOrderByCreatedAtAscIdAsc(topic);
-	}
-
-	@Transactional(readOnly = true)
-	public Optional<Question> findById(UUID id) {
-		return questionRepository.findById(id);
 	}
 
 	@Transactional

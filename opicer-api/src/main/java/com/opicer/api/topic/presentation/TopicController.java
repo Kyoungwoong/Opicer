@@ -1,7 +1,7 @@
 package com.opicer.api.topic.presentation;
 
 import com.opicer.api.shared.presentation.ApiResponse;
-import com.opicer.api.topic.application.TopicService;
+import com.opicer.api.topic.application.TopicQueryService;
 import com.opicer.api.topic.domain.Topic;
 import com.opicer.api.topic.domain.TopicBadge;
 import java.time.Instant;
@@ -16,15 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/topics")
 public class TopicController {
 
-	private final TopicService topicService;
+	private final TopicQueryService topicQueryService;
 
-	public TopicController(TopicService topicService) {
-		this.topicService = topicService;
+	public TopicController(TopicQueryService topicQueryService) {
+		this.topicQueryService = topicQueryService;
 	}
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<List<TopicResponse>>> list() {
-		List<TopicResponse> responses = topicService.findActive().stream()
+		List<TopicResponse> responses = topicQueryService.findActive().stream()
 			.map(TopicResponse::from)
 			.toList();
 		return ResponseEntity.ok(ApiResponse.ok("TOPIC_LIST_OK", responses));

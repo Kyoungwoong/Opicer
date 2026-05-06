@@ -4,11 +4,11 @@ import com.opicer.api.ai.application.AiEmbeddingService;
 import com.opicer.api.ai.application.AiTranscriptionService;
 import com.opicer.api.goodanswer.domain.GoodAnswerSample;
 import com.opicer.api.goodanswer.infrastructure.GoodAnswerSampleRepository;
+import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
-import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.infrastructure.AudioStorage;
-import com.opicer.api.topic.application.TopicService;
+import com.opicer.api.topic.application.TopicQueryService;
 import com.opicer.api.topic.domain.Topic;
 import java.util.List;
 import java.util.UUID;
@@ -17,23 +17,23 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-public class GoodAnswerSampleService {
+public class GoodAnswerSampleCommandService {
 
 	private final GoodAnswerSampleRepository repository;
-	private final TopicService topicService;
+	private final TopicQueryService topicQueryService;
 	private final AiEmbeddingService embeddingService;
 	private final AudioStorage audioStorage;
 	private final AiTranscriptionService transcriptionService;
 
-	public GoodAnswerSampleService(
+	public GoodAnswerSampleCommandService(
 		GoodAnswerSampleRepository repository,
-		TopicService topicService,
+		TopicQueryService topicQueryService,
 		AiEmbeddingService embeddingService,
 		AudioStorage audioStorage,
 		AiTranscriptionService transcriptionService
 	) {
 		this.repository = repository;
-		this.topicService = topicService;
+		this.topicQueryService = topicQueryService;
 		this.embeddingService = embeddingService;
 		this.audioStorage = audioStorage;
 		this.transcriptionService = transcriptionService;
@@ -42,7 +42,7 @@ public class GoodAnswerSampleService {
 	@Transactional
 	public GoodAnswerSample create(UUID topicId, OpicLevel level, String sampleText, String sampleAudioUrl,
 		String summary, List<String> tags, List<String> keyExpressions) {
-		Topic topic = topicService.getActiveOrThrow(topicId);
+		Topic topic = topicQueryService.getActiveOrThrow(topicId);
 		float[] embedding = embeddingService.embed(sampleText);
 		GoodAnswerSample sample = new GoodAnswerSample(
 			topic, level, sampleText, sampleAudioUrl, summary, tags, keyExpressions, embedding
@@ -68,36 +68,8 @@ public class GoodAnswerSampleService {
 			.toList();
 	}
 
-	@Transactional(readOnly = true)
-	public List<GoodAnswerSample> listByTopic(UUID topicId) {
-		return repository.findByTopicId(topicId);
-	}
-
 	@Transactional
 	public void delete(UUID id) {
 		repository.deleteById(id);
-	}
-
-	@Transactional(readOnly = true)
-	public List<GoodAnswerSample> findSimilar(
-		UUID topicId,
-		String transcript,
-		int limit,
-		String questionType,
-		OpicLevel targetLevel
-	) {
-		try {
-			float[] embedding = embeddingService.embed(transcript);
-			List<GoodAnswerSample> filtered = repository.findSimilar(topicId, embedding, limit, questionType, targetLevel);
-			if (!filtered.isEmpty() || (questionType == null && targetLevel == null)) {
-				return filtered;
-			}
-			// Fallback: if strict metadata filtering yields no rows, return similarity-only result.
-			return repository.findSimilar(topicId, embedding, limit, null, null);
-		} catch (ApiException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new ApiException(ErrorCode.AI_RAG_FAILED, e.getMessage());
-		}
 	}
 }
