@@ -5,8 +5,8 @@ export function OpicTipsSection() {
   return (
     <GuideSection
       id="tips"
-      title="오픽 보러 갈 때의 꿀팁"
-      subtitle="당일 컨디션과 답변 템포를 위한 체크리스트"
+      title="Test Day Tips"
+      subtitle="text text text text text text"
     >
       <div className="space-y-3">
         {TIP_ITEMS.map((tip, index) => (
