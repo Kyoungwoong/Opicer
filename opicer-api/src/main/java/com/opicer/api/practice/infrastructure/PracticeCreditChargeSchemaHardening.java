@@ -55,5 +55,53 @@ public class PracticeCreditChargeSchemaHardening implements ApplicationRunner {
 			END
 			$$;
 			""");
+		jdbcTemplate.execute("""
+			DO $$
+			BEGIN
+			  IF NOT EXISTS (
+			    SELECT 1
+			    FROM pg_constraint
+			    WHERE conname = 'fk_practice_credit_charge_topic_selection'
+			  ) THEN
+			    IF NOT EXISTS (
+			      SELECT 1
+			      FROM practice_credit_charge p
+			      LEFT JOIN topic_selection t ON t.id = p.topic_selection_id
+			      WHERE t.id IS NULL
+			    ) THEN
+			      ALTER TABLE practice_credit_charge
+			        ADD CONSTRAINT fk_practice_credit_charge_topic_selection
+			        FOREIGN KEY (topic_selection_id) REFERENCES topic_selection(id);
+			    ELSE
+			      RAISE NOTICE 'Skip adding fk_practice_credit_charge_topic_selection due to orphan rows';
+			    END IF;
+			  END IF;
+			END
+			$$;
+			""");
+		jdbcTemplate.execute("""
+			DO $$
+			BEGIN
+			  IF NOT EXISTS (
+			    SELECT 1
+			    FROM pg_constraint
+			    WHERE conname = 'fk_practice_credit_charge_user'
+			  ) THEN
+			    IF NOT EXISTS (
+			      SELECT 1
+			      FROM practice_credit_charge p
+			      LEFT JOIN app_user u ON u.id = p.user_id
+			      WHERE u.id IS NULL
+			    ) THEN
+			      ALTER TABLE practice_credit_charge
+			        ADD CONSTRAINT fk_practice_credit_charge_user
+			        FOREIGN KEY (user_id) REFERENCES app_user(id);
+			    ELSE
+			      RAISE NOTICE 'Skip adding fk_practice_credit_charge_user due to orphan rows';
+			    END IF;
+			  END IF;
+			END
+			$$;
+			""");
 	}
 }
