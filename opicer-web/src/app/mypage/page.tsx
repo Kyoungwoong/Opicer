@@ -26,5 +26,5 @@ export default function MyPage() {
     window.location.href = ROUTES.login;
   };
 
-  return <MyPageView userLabel={auth.user.name ?? auth.user.email ?? "사용자"} onLogout={handleLogout} />;
+  return <MyPageView userLabel={auth.user.name ?? auth.user.email ?? "User"} onLogout={handleLogout} />;
 }
