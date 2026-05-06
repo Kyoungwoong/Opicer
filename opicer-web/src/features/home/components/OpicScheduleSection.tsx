@@ -1,5 +1,6 @@
 import { OPIC_CALENDAR } from "@/features/home/data";
 import { SectionShell } from "@/features/home/components/SectionShell";
+import { frontPageText } from "@/locales/frontPage";
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -12,10 +13,10 @@ export function OpicScheduleSection() {
   return (
     <SectionShell
       title="OPIC schedule"
-      description="오픽 일정 캘린더"
+      description={frontPageText.opicSchedule.description}
       action={
         <span className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[var(--muted)]">
-          연동 준비중
+          {frontPageText.opicSchedule.actionLabel}
         </span>
       }
     >
@@ -24,7 +25,7 @@ export function OpicScheduleSection() {
           {OPIC_CALENDAR.monthLabel}
         </h4>
         <span className="text-xs text-[var(--muted)]">
-          공식 일정 연동 예정
+          {frontPageText.opicSchedule.officialNotice}
         </span>
       </div>
 
@@ -69,7 +70,9 @@ export function OpicScheduleSection() {
               }`}
             />
             <span>
-              {event.date}일 · {event.label}
+              {event.date}
+              {frontPageText.opicSchedule.dateUnit} {frontPageText.opicSchedule.eventSeparator}{" "}
+              {event.label}
             </span>
           </div>
         ))}
