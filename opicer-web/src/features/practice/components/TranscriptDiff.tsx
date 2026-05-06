@@ -13,7 +13,7 @@ export function TranscriptDiff({ original, improved }: Props) {
   return (
     <div className="rounded-2xl border border-black/10 bg-white/80 p-4 text-sm leading-relaxed">
       <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
-        개선 스크립트
+        Improved Script
       </p>
       <p className="flex flex-wrap gap-y-1">
         {changes.map((change, idx) => {
