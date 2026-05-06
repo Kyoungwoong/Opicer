@@ -7,6 +7,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @TestPropertySource(properties = "opicer.credit.unsafe-delay-ms=50")
+@Tag("stress")
 class CreditPaymentServiceConcurrencyTest {
 
 	@Autowired
@@ -35,8 +37,8 @@ class CreditPaymentServiceConcurrencyTest {
 		UUID userId = UUID.randomUUID();
 		CreditOrder order = creditOrderCommandService.createOrder(userId, "PACK_10", 10000);
 
-		int threads = 10;
-		int requestsPerThread = 10_000;
+		int threads = Integer.getInteger("opicer.test.threads", 10);
+		int requestsPerThread = Integer.getInteger("opicer.test.requestsPerThread", 10_000);
 		ExecutorService executor = Executors.newFixedThreadPool(threads);
 		CountDownLatch startGate = new CountDownLatch(1);
 		CountDownLatch doneGate = new CountDownLatch(threads);
