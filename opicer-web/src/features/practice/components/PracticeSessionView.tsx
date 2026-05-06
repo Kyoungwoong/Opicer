@@ -167,7 +167,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
       try {
         await submitPracticeSession(topicSelectionId);
       } catch (err) {
-        const message = err instanceof Error ? err.message : "연습 제출 처리에 실패했습니다.";
+        const message = err instanceof Error ? err.message : "Failed to submit practice session.";
         setError(message);
       }
       answersRef.current = updated;
@@ -447,7 +447,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
 
           {error ? (
             <section className="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-800">
-              <p className="font-semibold">크레딧 차감/제출 처리에 실패했습니다.</p>
+              <p className="font-semibold">Credit deduction/submit failed.</p>
               <p className="mt-1">{error}</p>
             </section>
           ) : null}
