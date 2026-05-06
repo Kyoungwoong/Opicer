@@ -6,12 +6,12 @@ import type { TopicItem } from "@/features/practice/types";
 import { goodAnswerApi } from "./api";
 import type { GoodAnswerSample } from "./types";
 const SUMMARY_OPTIONS = [
-  "묘사",
-  "과거/현재/비교",
-  "육하원칙",
-  "의견 제시",
-  "이유 설명",
-  "상황 대처",
+  "text",
+  "text/text/text",
+  "text",
+  "text text",
+  "text text",
+  "text text",
 ];
 
 type FormState = {
@@ -48,7 +48,7 @@ export function GoodAnswerTab() {
           setForm((prev) => ({ ...prev, topicId: data[0].id }));
         }
       })
-      .catch(() => setError("주제 목록을 불러오는 중 문제가 발생했습니다."));
+      .catch(() => setError("Topic listtext text text text text."));
     return () => { mounted = false; };
   }, []);
 
@@ -75,7 +75,7 @@ export function GoodAnswerTab() {
     e.preventDefault();
     setError(null);
     if (!form.topicId || form.audio.length === 0) {
-      setError("주제와 음성 파일을 선택해주세요.");
+      setError("Topictext text text Selecttext.");
       return;
     }
     setLoading(true);
@@ -98,7 +98,7 @@ export function GoodAnswerTab() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("삭제하시겠습니까?")) return;
+    if (!confirm("Are you sure to delete?")) return;
     try {
       await goodAnswerApi.delete(id);
       await loadSamples(form.topicId);
@@ -113,7 +113,7 @@ export function GoodAnswerTab() {
         onSubmit={handleSubmit}
         className="rounded-xl border border-black/8 bg-[var(--card)] p-5 space-y-4"
       >
-        <h3 className="font-semibold text-[var(--ink)]">샘플 답변 업로드</h3>
+        <h3 className="font-semibold text-[var(--ink)]">Sample Answers Upload</h3>
         {error && (
           <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
             {error}
@@ -121,7 +121,7 @@ export function GoodAnswerTab() {
         )}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">주제</label>
+            <label className="text-xs font-medium text-[var(--muted)]">Topic</label>
             <select
               value={form.topicId}
               onChange={(e) => setForm((f) => ({ ...f, topicId: e.target.value }))}
@@ -135,13 +135,13 @@ export function GoodAnswerTab() {
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">문제 유형</label>
+            <label className="text-xs font-medium text-[var(--muted)]">Question type</label>
             <select
               value={form.summary}
               onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
               className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
             >
-              <option value="">유형 선택</option>
+              <option value="">text Select</option>
               {SUMMARY_OPTIONS.map((option) => (
                 <option key={option} value={option}>
                   {option}
@@ -152,7 +152,7 @@ export function GoodAnswerTab() {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">태그 (쉼표 구분)</label>
+            <label className="text-xs font-medium text-[var(--muted)]">text (text textmin)</label>
             <input
               value={form.tags}
               onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
@@ -160,7 +160,7 @@ export function GoodAnswerTab() {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">핵심 표현 (쉼표 구분)</label>
+            <label className="text-xs font-medium text-[var(--muted)]">text text (text textmin)</label>
             <input
               value={form.keyExpressions}
               onChange={(e) =>
@@ -172,7 +172,7 @@ export function GoodAnswerTab() {
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-[var(--muted)]">
-            음성 파일 업로드
+            Upload audio files
           </label>
           <label
             className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-sm transition ${
@@ -204,15 +204,15 @@ export function GoodAnswerTab() {
               }}
             />
             <div className="text-[var(--ink)] font-semibold">
-              {form.audio.length > 0 ? `${form.audio.length}개 파일 선택됨` : "파일을 드래그하거나 클릭"}
+              {form.audio.length > 0 ? `${form.audio.length}items text Selected` : "Drag files or click"}
             </div>
             <div className="mt-1 text-xs text-[var(--muted)]">
               {form.audio.length > 0
                 ? form.audio
                     .slice(0, 3)
                     .map((file) => `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`)
-                    .join(" · ")
-                : "mp3, wav, m4a, webm 파일 지원"}
+                    .join(" text ")
+                : "mp3, wav, m4a, webm supported"}
             </div>
             {form.audio.length > 0 && (
               <button
@@ -223,7 +223,7 @@ export function GoodAnswerTab() {
                 }}
                 className="mt-3 rounded-full border border-black/10 px-3 py-1 text-xs text-[var(--muted)] hover:bg-black/5"
               >
-                선택 해제
+                Select text
               </button>
             )}
           </label>
@@ -235,7 +235,7 @@ export function GoodAnswerTab() {
                   className="flex items-center justify-between rounded-lg border border-black/10 bg-white/70 px-3 py-2 text-xs text-[var(--muted)]"
                 >
                   <span className="truncate">
-                    {file.name} · {(file.size / 1024 / 1024).toFixed(2)}MB
+                    {file.name} text {(file.size / 1024 / 1024).toFixed(2)}MB
                   </span>
                   <button
                     type="button"
@@ -247,7 +247,7 @@ export function GoodAnswerTab() {
                     }
                     className="text-red-600 hover:underline"
                   >
-                    제거
+                    Remove
                   </button>
                 </div>
               ))}
@@ -260,7 +260,7 @@ export function GoodAnswerTab() {
             disabled={loading}
             className="rounded-full bg-[var(--accent-strong)] px-4 py-2 text-sm text-white transition hover:opacity-90 disabled:opacity-50"
           >
-            {loading ? "업로드 중..." : "업로드"}
+            {loading ? "Uploading..." : "Upload"}
           </button>
         </div>
       </form>
@@ -268,9 +268,9 @@ export function GoodAnswerTab() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-[var(--ink)]">
-            샘플 목록 {topicLabel && `· ${topicLabel}`}
+            Sample list {topicLabel && `text ${topicLabel}`}
           </h3>
-          <span className="text-xs text-[var(--muted)]">{samples.length}개</span>
+          <span className="text-xs text-[var(--muted)]">{samples.length}items</span>
         </div>
         <div className="space-y-3">
           {samples.map((sample) => (
@@ -286,11 +286,11 @@ export function GoodAnswerTab() {
                   onClick={() => handleDelete(sample.id)}
                   className="text-xs text-red-600 hover:underline"
                 >
-                  삭제
+                  Delete
                 </button>
               </div>
               <p className="text-sm text-[var(--muted)]">
-                {sample.summary ?? "요약 없음"}
+                {sample.summary ?? "No summary"}
               </p>
               <p className="text-sm text-[var(--ink)] line-clamp-2">
                 {sample.sampleText}
@@ -312,7 +312,7 @@ export function GoodAnswerTab() {
           ))}
           {samples.length === 0 && (
             <div className="rounded-xl border border-dashed border-black/10 p-6 text-sm text-[var(--muted)]">
-              등록된 샘플이 없습니다.
+              No samples yet.
             </div>
           )}
         </div>
