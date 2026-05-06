@@ -1,20 +1,21 @@
 import { RECENT_ACTIVITIES } from "@/features/home/data";
 import { SectionShell } from "@/features/home/components/SectionShell";
+import { frontPageText } from "@/locales/frontPage";
 
 const STATUS_LABEL = {
-  complete: "완료",
-  in_progress: "진행 중",
-  recommended: "추천",
+  complete: frontPageText.recentActivity.status.complete,
+  in_progress: frontPageText.recentActivity.status.in_progress,
+  recommended: frontPageText.recentActivity.status.recommended,
 } as const;
 
 export function RecentActivitySection() {
   return (
     <SectionShell
       title="Recent activity"
-      description="최근 활동 요약"
+      description={frontPageText.recentActivity.description}
       action={
         <button className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[var(--muted)] transition hover:border-transparent hover:bg-[var(--accent)] hover:text-white">
-          전체 보기
+          {frontPageText.recentActivity.viewAll}
         </button>
       }
     >
