@@ -445,6 +445,13 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
         <div className="mx-auto flex max-w-4xl flex-col gap-8">
           <TopNav userLabel={userLabel} onLogout={onLogout} />
 
+          {error ? (
+            <section className="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-800">
+              <p className="font-semibold">크레딧 차감/제출 처리에 실패했습니다.</p>
+              <p className="mt-1">{error}</p>
+            </section>
+          ) : null}
+
           <section className="rounded-[32px] border border-black/5 bg-white/70 p-8 shadow-sm">
             <p className="text-xs uppercase tracking-[0.32em] text-[var(--muted)]">Practice Summary</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">연습 완료</h1>
