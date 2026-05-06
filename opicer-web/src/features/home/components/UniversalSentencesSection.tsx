@@ -5,6 +5,7 @@ import { fetchUniversalSentences } from "@/features/home/api";
 import { UNIVERSAL_SENTENCES } from "@/features/home/data";
 import { SectionShell } from "@/features/home/components/SectionShell";
 import type { UniversalSentence } from "@/features/home/types";
+import { frontPageText } from "@/locales/frontPage";
 
 const TYPE_LABELS: Record<UniversalSentence["type"], string> = {
   OPINION: "Opinion",
@@ -56,10 +57,10 @@ export function UniversalSentencesSection() {
   return (
     <SectionShell
       title="Universal sentences"
-      description="OPIC에서 자주 쓰는 만능 문장"
+      description={frontPageText.universalSentences.description}
       action={
         <span className="rounded-full border border-[var(--accent)]/20 px-4 py-2 text-xs font-semibold text-[var(--accent-strong)]">
-          관리자 연동 예정
+          {frontPageText.universalSentences.actionLabel}
         </span>
       }
     >
@@ -67,7 +68,7 @@ export function UniversalSentencesSection() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-[var(--accent-strong)]">
-              {current?.title ?? "오늘의 문장을 불러오는 중입니다"}
+              {current?.title ?? frontPageText.universalSentences.titleLoading}
             </p>
             <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
               {current ? TYPE_LABELS[current.type] : "Loading"}
@@ -94,7 +95,7 @@ export function UniversalSentencesSection() {
         </div>
 
         <p className="text-lg font-semibold leading-relaxed text-[var(--ink)] break-words">
-          {current?.sentence ?? "데이터를 준비 중입니다."}
+          {current?.sentence ?? frontPageText.universalSentences.sentenceLoading}
         </p>
 
         <div className="flex flex-wrap gap-2">

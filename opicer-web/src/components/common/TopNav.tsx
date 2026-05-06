@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
+import { frontPageText } from "@/locales/frontPage";
 
 type NavItem = {
   title: string;
@@ -11,9 +12,9 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { title: "OPIC 설명", href: "/guide" },
-  { title: "주제별 연습하기", href: "/practice" },
-  { title: "실전 연습하기", href: "/mock", disabled: true },
+  { title: frontPageText.topNav.items.guide, href: "/guide" },
+  { title: frontPageText.topNav.items.practice, href: "/practice" },
+  { title: frontPageText.topNav.items.mock, href: "/mock", disabled: true },
 ];
 
 type Props = {
@@ -111,7 +112,7 @@ export function TopNav({
                   onClick={() => setIsMenuOpen(false)}
                   className="block rounded-xl px-3 py-2 text-[var(--ink)] hover:bg-[var(--accent)]/10"
                 >
-                  마이페이지
+                  {frontPageText.topNav.menu.mypage}
                 </Link>
                 <Link
                   href={ROUTES.credit}
@@ -119,7 +120,7 @@ export function TopNav({
                   onClick={() => setIsMenuOpen(false)}
                   className="block rounded-xl px-3 py-2 text-[var(--ink)] hover:bg-[var(--accent)]/10"
                 >
-                  결제/크레딧 구매
+                  {frontPageText.topNav.menu.credit}
                 </Link>
               </div>
             ) : null}
@@ -129,7 +130,7 @@ export function TopNav({
             onClick={onLogout}
             className="rounded-full border border-black/10 px-4 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:border-transparent hover:bg-[var(--accent)] hover:text-white"
           >
-            로그아웃
+            {frontPageText.topNav.menu.logout}
           </button>
         </div>
       ) : (

@@ -4,21 +4,21 @@ export function OpicIntroSection() {
   return (
     <GuideSection
       id="intro"
-      title="오픽 설명"
-      subtitle="OPIC 시험 구조 한눈에 보기"
+      title="OPIC Overview"
+      subtitle="OPIC text text text text"
     >
       <div className="space-y-6">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">
-            시험 흐름
+            Exam flow
           </p>
           <div className="mt-3 grid gap-3 md:grid-cols-5">
             {[
-              { step: "1", label: "설문" },
-              { step: "2", label: "질문" },
-              { step: "3", label: "녹음" },
-              { step: "4", label: "제출" },
-              { step: "5", label: "리포트" },
+              { step: "1", label: "Survey" },
+              { step: "2", label: "Question" },
+              { step: "3", label: "Recording" },
+              { step: "4", label: "Submit" },
+              { step: "5", label: "Report" },
             ].map((item, index) => (
               <div key={item.step} className="relative">
                 <div className="rounded-2xl border border-black/5 bg-white/80 px-4 py-3 text-center">
@@ -29,7 +29,7 @@ export function OpicIntroSection() {
                 </div>
                 {index < 4 && (
                   <span className="absolute right-[-14px] top-1/2 hidden -translate-y-1/2 text-lg text-[var(--muted)] md:block">
-                    →
+                    text
                   </span>
                 )}
               </div>
@@ -39,7 +39,7 @@ export function OpicIntroSection() {
 
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">
-            레벨 기준 (Pyramid)
+            Level Pyramid
           </p>
           <div className="mt-4 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="flex justify-center">
@@ -72,10 +72,10 @@ export function OpicIntroSection() {
 
             <div className="grid h-[240px] grid-rows-4 gap-3">
               {[
-                { level: "AL", detail: "자연스러운 흐름 / 설득력 있는 전개" },
-                { level: "IH", detail: "복잡한 구조 / 높은 논리성" },
-                { level: "IM", detail: "논리적 흐름 / 예시·근거 활용" },
-                { level: "IL / NL", detail: "기본 문장 / 단순 시제" },
+                { level: "AL", detail: "Natural flow / persuasive delivery" },
+                { level: "IH", detail: "Complex structure / strong logic" },
+                { level: "IM", detail: "Logical flow / examples and evidence" },
+                { level: "IL / NL", detail: "Basic sentences / simple tense" },
               ].map((item) => (
                 <div
                   key={item.level}
@@ -103,12 +103,12 @@ export function OpicIntroSection() {
         <div className="grid gap-4 md:grid-cols-2">
           {[
             {
-              title: "질문 유형",
-              description: "Description / Past / Opinion / Role-play 등",
+              title: "Question text",
+              description: "Description / Past / Opinion / Role-play",
             },
             {
-              title: "평가 포인트",
-              description: "구조, 논리성, 표현 다양성, 일관된 흐름",
+              title: "Evaluation points",
+              description: "Structure, logic, expression variety, coherence",
             },
           ].map((item) => (
             <div

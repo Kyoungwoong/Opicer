@@ -3,33 +3,34 @@ import type {
   RecentActivity,
   UniversalSentence,
 } from "@/features/home/types";
+import { frontPageText } from "@/locales/frontPage";
 
 export const UNIVERSAL_SENTENCES: UniversalSentence[] = [
   {
     id: "u1",
     type: "OPINION",
-    title: "의견 시작 템플릿",
+    title: frontPageText.homeData.universalTitles.opinion,
     sentence: "From my perspective, this topic is quite important because...",
     tags: ["opinion", "starter"],
   },
   {
     id: "u2",
     type: "PAST_EXPERIENCE",
-    title: "경험 공유 템플릿",
+    title: frontPageText.homeData.universalTitles.experience,
     sentence: "I still remember the time when I had to deal with...",
     tags: ["experience", "past"],
   },
   {
     id: "u3",
     type: "COMPARE_CONTRAST",
-    title: "비교/대조 템플릿",
+    title: frontPageText.homeData.universalTitles.compare,
     sentence: "Compared to the past, things have become much more...",
     tags: ["compare", "contrast"],
   },
   {
     id: "u4",
     type: "UNEXPECTED_SITUATION",
-    title: "문제 해결 템플릿",
+    title: frontPageText.homeData.universalTitles.solution,
     sentence: "In that situation, the first thing I did was to...",
     tags: ["solution", "structure"],
   },
@@ -39,32 +40,42 @@ export const RECENT_ACTIVITIES: RecentActivity[] = [
   {
     id: "a1",
     title: "Mock Test #12",
-    summary: "IM 레벨 타깃 답변 구조 점검",
-    dateLabel: "오늘",
+    summary: frontPageText.homeData.recent.summary1,
+    dateLabel: frontPageText.homeData.recent.today,
     status: "complete",
   },
   {
     id: "a2",
-    title: "주제별 연습: Travel",
-    summary: "스토리텔링 흐름 개선 필요",
-    dateLabel: "어제",
+    title: frontPageText.homeData.recent.title2,
+    summary: frontPageText.homeData.recent.summary2,
+    dateLabel: frontPageText.homeData.recent.yesterday,
     status: "in_progress",
   },
   {
     id: "a3",
-    title: "추천 연습: Role-play",
-    summary: "대화형 답변 템플릿 복습",
-    dateLabel: "추천",
+    title: frontPageText.homeData.recent.title3,
+    summary: frontPageText.homeData.recent.summary3,
+    dateLabel: frontPageText.homeData.recent.recommended,
     status: "recommended",
   },
 ];
 
 export const OPIC_CALENDAR: OpicCalendar = {
-  monthLabel: "2026년 3월",
+  monthLabel: frontPageText.homeData.calendar.monthLabel,
   startWeekday: 0,
   daysInMonth: 31,
   events: [
-    { id: "e1", date: 7, label: "시험 접수 시작", type: "registration" },
-    { id: "e2", date: 21, label: "정기 시험", type: "exam" },
+    {
+      id: "e1",
+      date: 7,
+      label: frontPageText.homeData.calendar.registrationStart,
+      type: "registration",
+    },
+    {
+      id: "e2",
+      date: 21,
+      label: frontPageText.homeData.calendar.regularExam,
+      type: "exam",
+    },
   ],
 };

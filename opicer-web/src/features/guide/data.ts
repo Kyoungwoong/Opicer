@@ -9,101 +9,101 @@ import type {
 export const GUIDE_SECTIONS: GuideSection[] = [
   {
     id: "intro",
-    title: "오픽 설명",
-    summary: "OPIC 시험의 구조와 레벨 기준을 빠르게 이해하세요.",
+    title: "OPIC Overview",
+    summary: "OPIC text text text text text text.",
   },
   {
     id: "schedule",
-    title: "오픽 일정",
-    summary: "정기 시험과 접수 일정 요약 (연동 준비중).",
+    title: "OPIC Schedule",
+    summary: "text text text text text (Integration pending).",
   },
   {
     id: "reviews",
-    title: "오픽 강의실 별 지원자들 후기",
-    summary: "시험장 분위기와 좌석 경험을 미리 확인하세요.",
+    title: "Test Center Reviews",
+    summary: "text mintext text text text text.",
   },
   {
     id: "tips",
-    title: "오픽 보러 갈 때의 꿀팁",
-    summary: "준비물, 시간 관리, 멘탈 케어까지 체크리스트.",
+    title: "Test Day Tips",
+    summary: "text, text text, text text text.",
   },
 ];
 
 export const OPIC_SCHEDULE: OpicScheduleItem[] = [
   {
     id: "s1",
-    dateLabel: "3월 7일",
-    title: "접수 시작",
-    note: "오전 10시부터 접수 오픈",
+    dateLabel: "3text 7text",
+    title: "text text",
+    note: "text 10text text text",
   },
   {
     id: "s2",
-    dateLabel: "3월 21일",
-    title: "정기 시험",
-    note: "오후 2시 시험 회차",
+    dateLabel: "3text 21text",
+    title: "text text",
+    note: "text 2text text text",
   },
 ];
 
 export const OPIC_CALENDAR: OpicCalendar = {
-  monthLabel: "2026년 3월",
+  monthLabel: "2026text 3text",
   startWeekday: 0,
   daysInMonth: 31,
   events: [
-    { id: "c1", date: 7, label: "접수 시작", type: "registration" },
-    { id: "c2", date: 21, label: "정기 시험", type: "exam" },
+    { id: "c1", date: 7, label: "text text", type: "registration" },
+    { id: "c2", date: 21, label: "text text", type: "exam" },
   ],
 };
 
 export const REVIEW_GROUPS: ReviewGroup[] = [
   {
     id: "gangnam",
-    classroom: "강남센터 3층",
+    classroom: "text 3text",
     reviews: [
       {
         id: "g1",
-        quote: "조명이 밝고 마이크 음질이 깔끔했어요.",
+        quote: "text text text text text.",
         rating: 5,
       },
       {
         id: "g2",
-        quote: "대기 공간이 넓어서 긴장 완화에 도움이 됐습니다.",
+        quote: "text text text text text text text.",
         rating: 4,
       },
       {
         id: "g3",
-        quote: "시험실 공기가 약간 건조했지만 전반적으로 만족.",
+        quote: "text text text itemstext text text.",
         rating: 4,
       },
     ],
   },
   {
     id: "jongro",
-    classroom: "종로센터 5층",
+    classroom: "text 5text",
     reviews: [
       {
         id: "j1",
-        quote: "좌석 간 간격이 넉넉해서 집중하기 좋았습니다.",
+        quote: "text text text text text text.",
         rating: 4,
       },
       {
         id: "j2",
-        quote: "모니터 높이가 적당해서 질문 보기 편했어요.",
+        quote: "text text text Question text text.",
         rating: 5,
       },
     ],
   },
   {
     id: "busan",
-    classroom: "부산센터 2층",
+    classroom: "text 2text",
     reviews: [
       {
         id: "b1",
-        quote: "에어컨 소리가 조금 있었지만 전반적으로 조용했어요.",
+        quote: "text text text text text text.",
         rating: 4,
       },
       {
         id: "b2",
-        quote: "안내 직원 응대가 빠르고 친절했습니다.",
+        quote: "text text text text text.",
         rating: 5,
       },
     ],
@@ -113,22 +113,22 @@ export const REVIEW_GROUPS: ReviewGroup[] = [
 export const TIP_ITEMS: TipItem[] = [
   {
     id: "t1",
-    title: "시험 전 10분 워밍업",
-    detail: "간단한 주제에 대해 1분씩 말하며 입을 풀어보세요.",
+    title: "text text 10min text",
+    detail: "text Topictext text 1mintext text text text.",
   },
   {
     id: "t2",
-    title: "답변 구조를 미리 정리",
-    detail: "인트로–경험–결론 3단계를 의식하면 안정적입니다.",
+    title: "text text text text",
+    detail: "text 3text text text.",
   },
   {
     id: "t3",
-    title: "시간 압박에 대비",
-    detail: "질문을 듣자마자 첫 문장을 바로 말할 수 있게 준비하세요.",
+    title: "text text text",
+    detail: "Questiontext text text Sentencetext text text text text text.",
   },
   {
     id: "t4",
-    title: "컨디션 관리",
-    detail: "시험 전날 수면을 충분히 확보하고 카페인은 과하게 마시지 마세요.",
+    title: "text text",
+    detail: "text text text textmintext text text text text text.",
   },
 ];

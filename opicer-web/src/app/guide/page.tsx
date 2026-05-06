@@ -38,12 +38,12 @@ export default function GuidePage() {
       <main className="mx-auto flex max-w-6xl flex-col gap-8">
         <TopNav
           maxWidthClassName="max-w-6xl"
-          userLabel={auth.status === "authenticated" ? auth.user.name ?? auth.user.email ?? "사용자" : undefined}
+          userLabel={auth.status === "authenticated" ? auth.user.name ?? auth.user.email ?? "User" : undefined}
           onLogout={auth.status === "authenticated" ? handleLogout : undefined}
         />
         <GuideHeader
-          title="오픽 가이드"
-          description="시험 구조부터 일정, 후기, 꿀팁까지 한 번에 정리했습니다."
+          title="OPIC Guide"
+          description="Exam structure, schedule, reviews, and tips in one place."
         />
 
         <div className="grid gap-8 lg:grid-cols-[0.8fr_2.2fr]">

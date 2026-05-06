@@ -58,7 +58,7 @@ export function CreditPurchaseView({
       setLastRetryRequest(null);
       router.replace(ROUTES.home);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "구매 처리 중 오류가 발생했습니다.");
+      setError(e instanceof Error ? e.message : "Purchase request failed.");
     } finally {
       setIsSubmitting(false);
     }
@@ -75,7 +75,7 @@ export function CreditPurchaseView({
       setLastRetryRequest(null);
       router.replace(ROUTES.home);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "재시도 중 오류가 발생했습니다.");
+      setError(e instanceof Error ? e.message : "Retry failed.");
     } finally {
       setIsSubmitting(false);
     }
@@ -84,7 +84,7 @@ export function CreditPurchaseView({
   return (
     <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
       <TopNav
-        userLabel={user.name ?? user.email ?? "사용자"}
+        userLabel={user.name ?? user.email ?? "User"}
         onLogout={onLogout}
         maxWidthClassName="max-w-5xl"
       />
@@ -92,9 +92,9 @@ export function CreditPurchaseView({
       <main className="mx-auto mt-10 flex w-full max-w-5xl flex-col gap-8">
         <section className="rounded-3xl border border-black/10 bg-white p-8 shadow-sm">
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Credit Purchase</p>
-          <h2 className="mt-2 text-3xl font-semibold">결제/크레딧 구매</h2>
+          <h2 className="mt-2 text-3xl font-semibold">Credit Purchase</h2>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            패키지를 선택하면 주문 생성 후 결제 확정까지 자동으로 진행됩니다.
+            Select a package to create an order and confirm payment automatically.
           </p>
         </section>
 
@@ -124,7 +124,7 @@ export function CreditPurchaseView({
         <section className="rounded-2xl border border-black/10 bg-white p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-sm text-[var(--muted)]">선택된 패키지</p>
+              <p className="text-sm text-[var(--muted)]">Selected package</p>
               <p className="text-xl font-semibold">{selectedPackage.title}</p>
               <p className="text-sm text-[var(--muted)]">{selectedPackage.amount.toLocaleString()} P</p>
             </div>
@@ -134,13 +134,13 @@ export function CreditPurchaseView({
               disabled={isSubmitting}
               className="rounded-full bg-[var(--accent-strong)] px-6 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isSubmitting ? "처리 중..." : "구매하기"}
+              {isSubmitting ? "Processing..." : "Purchase"}
             </button>
           </div>
 
           {paymentResult ? (
             <div className="mt-4 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm">
-              <p className="font-semibold text-emerald-800">결제가 완료되었습니다.</p>
+              <p className="font-semibold text-emerald-800">Payment completed.</p>
               <p className="mt-1 text-emerald-700">paymentId: {paymentResult.paymentId}</p>
               <p className="text-emerald-700">orderId: {paymentResult.orderId}</p>
             </div>
@@ -148,7 +148,7 @@ export function CreditPurchaseView({
 
           {error ? (
             <div className="mt-4 rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm">
-              <p className="font-semibold text-rose-800">결제 처리에 실패했습니다.</p>
+              <p className="font-semibold text-rose-800">Payment failed.</p>
               <p className="mt-1 text-rose-700">{error}</p>
               {lastRetryRequest ? (
                 <button
@@ -157,7 +157,7 @@ export function CreditPurchaseView({
                   disabled={isSubmitting}
                   className="mt-3 rounded-full bg-rose-700 px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
                 >
-                  같은 요청 다시 시도
+                  Retry same request
                 </button>
               ) : null}
             </div>

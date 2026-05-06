@@ -1,0 +1,68 @@
+{
+  "common": {
+    "loading": "불러오는 중...",
+    "userFallback": "사용자"
+  },
+  "topNav": {
+    "items": {
+      "guide": "OPIC 설명",
+      "practice": "주제별 연습하기",
+      "mock": "실전 연습하기"
+    },
+    "menu": {
+      "mypage": "마이페이지",
+      "credit": "결제/크레딧 구매",
+      "logout": "로그아웃"
+    }
+  },
+  "home": {
+    "greetingFallback": "반갑습니다",
+    "headline": "안녕하세요, {name} 👋",
+    "subHeadline": "오늘도 말하기 연습을 시작해볼까요?"
+  },
+  "universalSentences": {
+    "description": "OPIC에서 자주 쓰는 만능 문장",
+    "actionLabel": "관리자 연동 예정",
+    "titleLoading": "오늘의 문장을 불러오는 중입니다",
+    "sentenceLoading": "데이터를 준비 중입니다."
+  },
+  "recentActivity": {
+    "description": "최근 활동 요약",
+    "viewAll": "전체 보기",
+    "status": {
+      "complete": "완료",
+      "in_progress": "진행 중",
+      "recommended": "추천"
+    }
+  },
+  "opicSchedule": {
+    "description": "오픽 일정 캘린더",
+    "actionLabel": "연동 준비중",
+    "officialNotice": "공식 일정 연동 예정",
+    "dateUnit": "일",
+    "eventSeparator": "·"
+  },
+  "homeData": {
+    "universalTitles": {
+      "opinion": "의견 시작 템플릿",
+      "experience": "경험 공유 템플릿",
+      "compare": "비교/대조 템플릿",
+      "solution": "문제 해결 템플릿"
+    },
+    "recent": {
+      "title2": "주제별 연습: Travel",
+      "title3": "추천 연습: Role-play",
+      "summary1": "IM 레벨 타깃 답변 구조 점검",
+      "summary2": "스토리텔링 흐름 개선 필요",
+      "summary3": "대화형 답변 템플릿 복습",
+      "today": "오늘",
+      "yesterday": "어제",
+      "recommended": "추천"
+    },
+    "calendar": {
+      "monthLabel": "2026년 3월",
+      "registrationStart": "시험 접수 시작",
+      "regularExam": "정기 시험"
+    }
+  }
+}

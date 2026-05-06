@@ -10,26 +10,26 @@ type Props = {
   onLogout?: () => void;
 };
 
-const CATEGORY_SELF_INTRO = "자기소개";
-const CATEGORY_SURVEY = "설문조사";
-const CATEGORY_UNEXPECTED = "돌발질문";
+const CATEGORY_SELF_INTRO = "Self Introduction";
+const CATEGORY_SURVEY = "Surveytext";
+const CATEGORY_UNEXPECTED = "textQuestion";
 
 const CATEGORY_META: Record<string, string> = {
-  [CATEGORY_SELF_INTRO]: "시험 시작 전 필수 자기소개 대비",
-  [CATEGORY_SURVEY]: "Background Survey 기반 주제",
-  [CATEGORY_UNEXPECTED]: "돌발/상황형 질문 대비",
+  [CATEGORY_SELF_INTRO]: "text text text text Self Introduction text",
+  [CATEGORY_SURVEY]: "Background Survey-based topics",
+  [CATEGORY_UNEXPECTED]: "text/text Question text",
 };
 
-const LEGACY_UNEXPECTED = new Set(["돌발/상황 대처", CATEGORY_UNEXPECTED]);
+const LEGACY_UNEXPECTED = new Set(["Unexpected / Situational", CATEGORY_UNEXPECTED]);
 
-const INTRO_KEYWORDS = ["자기소개", "self introduction"];
+const INTRO_KEYWORDS = ["Self Introduction", "self introduction"];
 
 const SURVEY_GROUPS: Array<{ label: string; keywords: string[] }> = [
-  { label: "거주/생활", keywords: ["집", "주거", "동네", "이웃", "기숙사", "룸메이트", "가족"] },
-  { label: "직업/학업", keywords: ["직업", "회사", "사업", "재택", "학생", "수업", "학위", "교사"] },
-  { label: "여가/취미", keywords: ["음악", "영화", "tv", "독서", "쇼핑", "요리", "공연", "콘서트", "캠핑"] },
-  { label: "운동/건강", keywords: ["운동", "헬스", "수영", "자전거", "조깅", "걷기", "요가"] },
-  { label: "여행/이동", keywords: ["여행", "출장", "휴가", "해외", "국내", "드라이브"] },
+  { label: "Living", keywords: ["text", "text", "text", "text", "text", "text", "text"] },
+  { label: "Work/Study", keywords: ["text", "text", "text", "text", "text", "text", "text", "text"] },
+  { label: "Leisure/Hobby", keywords: ["text", "text", "tv", "text", "text", "text", "text", "text", "text"] },
+  { label: "text/itemstext", keywords: ["text", "text", "text", "text", "text", "text", "text"] },
+  { label: "Travel/Mobility", keywords: ["text", "text", "text", "text", "text", "text"] },
 ];
 
 function resolvePrimaryCategory(topic: TopicItem): string {
@@ -49,7 +49,7 @@ function resolveSurveyGroup(topic: TopicItem): string {
       (keyword) => title.includes(keyword.toLowerCase()) || englishTitle.includes(keyword.toLowerCase())
     )
   );
-  return matched?.label ?? "기타";
+  return matched?.label ?? "Others";
 }
 
 export function TopicPracticeView({ userLabel, onLogout }: Props) {
@@ -81,7 +81,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
       })
       .catch((err) => {
         if (!mounted) return;
-        setError(err.message ?? "주제를 불러오는 중 문제가 발생했습니다.");
+        setError(err.message ?? "Failed to load topics.");
       })
       .finally(() => {
         if (mounted) setIsLoading(false);
@@ -101,7 +101,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
       .map((category, index) => ({
         id: category,
         label: category,
-        description: CATEGORY_META[category] ?? "주제별 연습",
+        description: CATEGORY_META[category] ?? "Topictext text",
         topics: (grouped.get(category) ?? []).sort((a, b) => a.topicOrder - b.topicOrder),
         order: index,
       }))
@@ -157,7 +157,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
       setSelectedSelectionId(selection.id);
       setMode("ready");
     } catch (err: any) {
-      setError(err?.message ?? "선택 저장 중 문제가 발생했습니다.");
+      setError(err?.message ?? "Select Saving...text text.");
     } finally {
       setIsSubmitting(false);
     }
@@ -168,7 +168,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
     router.push(`${ROUTES.practiceSession(selectedId)}?selectionId=${selectedSelectionId}`);
   };
 
-  // ── Ready screen ───────────────────────────────────────────
+  // text Ready screen text
   if (mode === "ready") {
     return (
       <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
@@ -211,14 +211,14 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                 disabled={!selectedSelectionId}
                 className="rounded-full bg-[var(--accent)] px-10 py-4 text-base font-semibold text-white shadow-lg shadow-[var(--accent)]/20 transition hover:bg-[var(--accent-strong)] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {selectedTopic?.title ?? ""}에 맞는 연습 시작하기
+                {selectedTopic?.title ?? ""} Start practice for this topic
               </button>
               <button
                 type="button"
                 onClick={() => { setMode("select"); setError(null); }}
                 className="text-sm text-[var(--muted)] hover:underline"
               >
-                ← 주제 다시 선택하기
+                text Topic text Selecttext
               </button>
             </div>
           </div>
@@ -227,7 +227,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
     );
   }
 
-  // ── Select screen ──────────────────────────────────────────
+  // text Select screen text
   return (
     <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
@@ -244,18 +244,18 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                 Topic Practice
               </p>
               <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-                주제별 연습을 시작해볼까요?
+                Start topic practice?
               </h1>
               <p className="mt-2 text-sm text-[var(--muted)]">
-                하나의 주제를 선택하면 그 주제에 맞는 연습 흐름을 준비합니다.
+                text Topictext Selecttext text Topictext text text text text.
               </p>
             </div>
             <div className="flex w-full max-w-sm items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 shadow-sm">
-              <span className="text-sm text-[var(--muted)]">🔎</span>
+              <span className="text-sm text-[var(--muted)]">�text</span>
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="주제 검색 (한국어/English)"
+                placeholder="Topic text (text/English)"
                 className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--muted)]"
               />
             </div>
@@ -266,7 +266,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
           <aside className="flex flex-col gap-4">
             <div className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
-                카테고리
+                Category
               </p>
               <div className="mt-4 flex flex-col gap-2">
                 {categories.map((category) => {
@@ -302,7 +302,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
 
             <div className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
-                선택된 주제
+                Selected topic
               </p>
               {selectedTopic ? (
                 <div className="mt-4 rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent)]/10 p-4">
@@ -320,7 +320,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                   </div>
                 </div>
               ) : (
-                <p className="mt-3 text-sm text-[var(--muted)]">아직 선택된 주제가 없습니다.</p>
+                <p className="mt-3 text-sm text-[var(--muted)]">text Selected topictext text.</p>
               )}
               {error ? <p className="mt-3 text-xs text-red-600">{error}</p> : null}
               <button
@@ -333,7 +333,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                     : "cursor-not-allowed bg-black/10 text-[var(--muted)]"
                 }`}
               >
-                {isSubmitting ? "저장 중..." : "선택 완료"}
+                {isSubmitting ? "Saving..." : "Confirm selection"}
               </button>
             </div>
           </aside>
@@ -343,7 +343,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Topics</p>
                 <h2 className="mt-1 text-2xl font-semibold">
-                  {activeCategory?.label ?? "주제 목록"}
+                  {activeCategory?.label ?? "Topic list"}
                 </h2>
               </div>
               <span className="text-xs text-[var(--muted)]">{filteredTopics.length} topics</span>
@@ -358,7 +358,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
             ) : activeCategoryId === CATEGORY_SURVEY ? (
               <div className="mt-6 space-y-5">
                 {groupedSurveyTopics.length === 0 ? (
-                  <p className="text-sm text-[var(--muted)]">조건에 맞는 설문 항목이 없습니다.</p>
+                  <p className="text-sm text-[var(--muted)]">textitemstext text Survey text text.</p>
                 ) : null}
                 {groupedSurveyTopics.map(({ group, items }) => (
                   <div key={group} className="space-y-3">
@@ -389,7 +389,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                               <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
                                 isSelected ? "bg-white/20 text-white" : "bg-[var(--accent)]/10 text-[var(--accent-strong)]"
                               }`}>
-                                {isSelected ? "선택됨" : "선택"}
+                                {isSelected ? "Selected" : "Select"}
                               </span>
                             </div>
                             {topic.badges && topic.badges.length > 0 ? (
@@ -440,7 +440,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                         <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
                           isSelected ? "bg-white/20 text-white" : "bg-[var(--accent)]/10 text-[var(--accent-strong)]"
                         }`}>
-                          {isSelected ? "선택됨" : "선택"}
+                          {isSelected ? "Selected" : "Select"}
                         </span>
                       </div>
                       {topic.badges && topic.badges.length > 0 ? (

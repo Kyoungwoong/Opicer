@@ -78,7 +78,7 @@ export function DailySentenceTab() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("삭제하시겠습니까?")) return;
+    if (!confirm("Are you sure to delete?")) return;
     try {
       await dailySentenceApi.delete(id);
       await load();
@@ -95,7 +95,7 @@ export function DailySentenceTab() {
         className="rounded-xl border border-black/8 bg-[var(--card)] p-5 space-y-4"
       >
         <h3 className="font-semibold text-[var(--ink)]">
-          {editId ? "오늘의 문장 수정" : "오늘의 문장 추가"}
+          {editId ? "Today Sentence Edit" : "Today Sentence text"}
         </h3>
         {error && (
           <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
@@ -105,7 +105,7 @@ export function DailySentenceTab() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-xs font-medium text-[var(--muted)]">
-              날짜
+              Date
             </label>
             <input
               required
@@ -136,7 +136,7 @@ export function DailySentenceTab() {
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-[var(--muted)]">
-            문장
+            Sentence
           </label>
           <textarea
             required
@@ -144,7 +144,7 @@ export function DailySentenceTab() {
             value={form.text}
             onChange={(e) => setForm((f) => ({ ...f, text: e.target.value }))}
             className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-            placeholder="오늘의 학습 문장"
+            placeholder="text text Sentence"
           />
         </div>
         {editId && (
@@ -166,7 +166,7 @@ export function DailySentenceTab() {
             disabled={loading}
             className="rounded-full bg-[var(--accent)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)] disabled:opacity-50"
           >
-            {loading ? "저장 중..." : editId ? "수정" : "추가"}
+            {loading ? "Saving..." : editId ? "Edit" : "text"}
           </button>
           {editId && (
             <button
@@ -174,7 +174,7 @@ export function DailySentenceTab() {
               onClick={cancelEdit}
               className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-[var(--muted)] transition hover:bg-black/5"
             >
-              취소
+              Cancel
             </button>
           )}
         </div>
@@ -185,9 +185,9 @@ export function DailySentenceTab() {
         <table className="w-full text-sm">
           <thead className="bg-[var(--card)] text-[var(--muted)]">
             <tr>
-              <th className="px-4 py-3 text-left font-medium">날짜</th>
+              <th className="px-4 py-3 text-left font-medium">Date</th>
               <th className="px-4 py-3 text-left font-medium">Level</th>
-              <th className="px-4 py-3 text-left font-medium">문장</th>
+              <th className="px-4 py-3 text-left font-medium">Sentence</th>
               <th className="px-4 py-3 text-left font-medium">Active</th>
               <th className="px-4 py-3 text-left font-medium">Actions</th>
             </tr>
@@ -199,7 +199,7 @@ export function DailySentenceTab() {
                   colSpan={5}
                   className="px-4 py-6 text-center text-[var(--muted)]"
                 >
-                  등록된 문장이 없습니다.
+                  text Sentencetext text.
                 </td>
               </tr>
             )}
@@ -231,13 +231,13 @@ export function DailySentenceTab() {
                       onClick={() => startEdit(s)}
                       className="text-[var(--accent)] hover:underline"
                     >
-                      수정
+                      Edit
                     </button>
                     <button
                       onClick={() => handleDelete(s.id)}
                       className="text-red-500 hover:underline"
                     >
-                      삭제
+                      Delete
                     </button>
                   </div>
                 </td>

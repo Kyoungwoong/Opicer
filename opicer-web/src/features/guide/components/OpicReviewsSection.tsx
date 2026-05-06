@@ -25,8 +25,8 @@ export function OpicReviewsSection() {
   return (
     <GuideSection
       id="reviews"
-      title="오픽 강의실 별 지원자들 후기"
-      subtitle="시험장 후기 스냅샷"
+      title="Test Center Reviews"
+      subtitle="text text text"
     >
       <div className="flex flex-wrap gap-2">
         {REVIEW_GROUPS.map((room) => (
@@ -59,7 +59,7 @@ export function OpicReviewsSection() {
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-semibold">{activeRoom?.classroom}</p>
                 <span className="text-xs text-[var(--muted)]">
-                  {"★".repeat(safeRating)}
+                  {"text".repeat(safeRating)}
                 </span>
               </div>
               <p className="mt-3 text-sm text-[var(--muted)]">
@@ -81,7 +81,7 @@ export function OpicReviewsSection() {
             className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold text-[var(--muted)] disabled:opacity-40"
             disabled={page === 1}
           >
-            이전
+            Prev
           </button>
           <button
             type="button"
@@ -89,7 +89,7 @@ export function OpicReviewsSection() {
             className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold text-[var(--muted)] disabled:opacity-40"
             disabled={page === totalPages}
           >
-            다음
+            Next
           </button>
         </div>
       </div>

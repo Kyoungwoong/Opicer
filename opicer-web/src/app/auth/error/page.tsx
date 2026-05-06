@@ -12,17 +12,17 @@ export default function AuthError({
     <div className="flex min-h-screen flex-col items-center justify-center px-6 text-[var(--ink)]">
       <div className="w-full max-w-sm text-center">
         <p className="text-xs uppercase tracking-[0.25em] text-[var(--muted)]">
-          로그인 실패
+          Login Failed
         </p>
         <h1 className="mt-3 text-2xl font-semibold">
-          카카오 로그인에 실패했습니다
+          Kakao login failed
         </h1>
-        <p className="mt-2 text-sm text-[var(--muted)]">오류 코드: {reason}</p>
+        <p className="mt-2 text-sm text-[var(--muted)]">Error code: {reason}</p>
         <Link
           href={ROUTES.login}
           className="mt-8 inline-block rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)]"
         >
-          다시 시도하기
+          Try again
         </Link>
       </div>
     </div>

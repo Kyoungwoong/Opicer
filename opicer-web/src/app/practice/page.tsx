@@ -28,7 +28,7 @@ export default function PracticePage() {
 
   return (
     <TopicPracticeView
-      userLabel={auth.user.name ?? auth.user.email ?? "사용자"}
+      userLabel={auth.user.name ?? auth.user.email ?? "User"}
       onLogout={handleLogout}
     />
   );
