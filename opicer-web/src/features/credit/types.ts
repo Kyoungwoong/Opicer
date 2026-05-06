@@ -23,7 +23,7 @@ export type CreditPackage = {
 };
 
 export const CREDIT_PACKAGES: CreditPackage[] = [
-  { id: "PACK_10", title: "Starter 10", amount: 10000, description: "빠른 연습 시작용 크레딧 패키지" },
-  { id: "PACK_30", title: "Plus 30", amount: 30000, description: "중간 강도의 반복 학습용 패키지" },
-  { id: "PACK_50", title: "Pro 50", amount: 50000, description: "장기 학습 루틴용 대용량 패키지" },
+  { id: "PACK_10", title: "Starter 10", amount: 10000, description: "Credit pack for quick start" },
+  { id: "PACK_30", title: "Plus 30", amount: 30000, description: "Credit pack for steady repetition" },
+  { id: "PACK_50", title: "Pro 50", amount: 50000, description: "Large credit pack for long-term routine" },
 ];
