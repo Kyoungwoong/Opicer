@@ -21,7 +21,9 @@ public enum ErrorCode {
 	AI_ANALYSIS_FAILED("AI_ANALYSIS_FAILED", HttpStatus.BAD_GATEWAY, "AI analysis failed"),
 	AI_EMBEDDING_FAILED("AI_EMBEDDING_FAILED", HttpStatus.BAD_GATEWAY, "Embedding generation failed"),
 	AI_RAG_FAILED("AI_RAG_FAILED", HttpStatus.BAD_GATEWAY, "RAG retrieval failed"),
-	IDEMPOTENCY_KEY_CONFLICT("IDEMPOTENCY_KEY_CONFLICT", HttpStatus.CONFLICT, "Idempotency key already used with different request");
+	IDEMPOTENCY_KEY_CONFLICT("IDEMPOTENCY_KEY_CONFLICT", HttpStatus.CONFLICT, "Idempotency key already used with different request"),
+	TOPIC_SELECTION_NOT_FOUND("TOPIC_SELECTION_NOT_FOUND", HttpStatus.NOT_FOUND, "Topic selection not found"),
+	CREDIT_INSUFFICIENT_BALANCE("CREDIT_INSUFFICIENT_BALANCE", HttpStatus.PAYMENT_REQUIRED, "Insufficient credits");
 
 	private final String code;
 	private final HttpStatus httpStatus;

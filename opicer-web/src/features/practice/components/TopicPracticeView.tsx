@@ -59,6 +59,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedSelectionId, setSelectedSelectionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -143,6 +144,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
 
   const handleSelect = (topic: TopicItem) => {
     setError(null);
+    setSelectedSelectionId(null);
     setSelectedId((prev) => (prev === topic.id ? null : topic.id));
   };
 
@@ -151,7 +153,8 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
     setIsSubmitting(true);
     setError(null);
     try {
-      await submitTopicSelection(selectedId);
+      const selection = await submitTopicSelection(selectedId);
+      setSelectedSelectionId(selection.id);
       setMode("ready");
     } catch (err: any) {
       setError(err?.message ?? "Select Saving...text text.");
@@ -161,8 +164,8 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
   };
 
   const handleStartPractice = () => {
-    if (!selectedId) return;
-    router.push(ROUTES.practiceSession(selectedId));
+    if (!selectedId || !selectedSelectionId) return;
+    router.push(`${ROUTES.practiceSession(selectedId)}?selectionId=${selectedSelectionId}`);
   };
 
   // text Ready screen text
@@ -205,7 +208,8 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
               <button
                 type="button"
                 onClick={handleStartPractice}
-                className="rounded-full bg-[var(--accent)] px-10 py-4 text-base font-semibold text-white shadow-lg shadow-[var(--accent)]/20 transition hover:bg-[var(--accent-strong)]"
+                disabled={!selectedSelectionId}
+                className="rounded-full bg-[var(--accent)] px-10 py-4 text-base font-semibold text-white shadow-lg shadow-[var(--accent)]/20 transition hover:bg-[var(--accent-strong)] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {selectedTopic?.title ?? ""} Start practice for this topic
               </button>

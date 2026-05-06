@@ -1,5 +1,6 @@
 import type {
   PracticeQuestion,
+  PracticeSubmitResult,
   TopicItem,
   TopicSelection,
 } from "@/features/practice/types";
@@ -104,4 +105,19 @@ export async function improveScript(
   }
   const body = (await res.json()) as { improved: string };
   return body.improved;
+}
+
+export async function submitPracticeSession(
+  topicSelectionId: string
+): Promise<PracticeSubmitResult> {
+  const res = await fetch("/api/practice/sessions/submit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ topicSelectionId }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.message ?? "Practice submit failed");
+  }
+  return (await res.json()) as PracticeSubmitResult;
 }
