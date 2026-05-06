@@ -3,6 +3,7 @@ import { TopNav } from "@/components/common/TopNav";
 import { UniversalSentencesSection } from "@/features/home/components/UniversalSentencesSection";
 import { RecentActivitySection } from "@/features/home/components/RecentActivitySection";
 import { OpicScheduleSection } from "@/features/home/components/OpicScheduleSection";
+import { frontPageText } from "@/locales/frontPage";
 
 export function HomeView({
   user,
@@ -14,7 +15,7 @@ export function HomeView({
   return (
     <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
       <TopNav
-        userLabel={user.name ?? user.email ?? "사용자"}
+        userLabel={user.name ?? user.email ?? frontPageText.common.userFallback}
         onLogout={onLogout}
         maxWidthClassName="max-w-5xl"
       />
@@ -25,10 +26,13 @@ export function HomeView({
             Welcome back
           </p>
           <h2 className="text-3xl font-semibold leading-tight">
-            안녕하세요, {user.name?.split(" ")[0] ?? "반갑습니다"} 👋
+            {frontPageText.home.headline.replace(
+              "{name}",
+              user.name?.split(" ")[0] ?? frontPageText.home.greetingFallback
+            )}
           </h2>
           <p className="text-sm text-[var(--muted)]">
-            오늘도 말하기 연습을 시작해볼까요?
+            {frontPageText.home.subHeadline}
           </p>
         </div>
 
