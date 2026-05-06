@@ -10,10 +10,10 @@ export function OpicScheduleSection() {
   );
 
   return (
-    <GuideSection id="schedule" title="오픽 일정" subtitle="연동 준비중 일정">
+    <GuideSection id="schedule" title="OPIC Schedule" subtitle="Integration pending text">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-black/5 bg-white/70 px-4 py-3">
         <div>
-          <p className="text-xs text-[var(--muted)]">공식 일정 연동 준비중</p>
+          <p className="text-xs text-[var(--muted)]">text text Integration pending</p>
           <p className="text-sm font-semibold text-[var(--accent-strong)]">
             {OPIC_CALENDAR.monthLabel}
           </p>
@@ -24,7 +24,7 @@ export function OpicScheduleSection() {
           target="_blank"
           rel="noreferrer"
         >
-          접수 바로가기
+          Register now
         </a>
       </div>
 
