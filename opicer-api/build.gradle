@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.0'
@@ -43,4 +45,45 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	useJUnitPlatform {
+		excludeTags 'stress'
+	}
+	testLogging {
+		events 'passed', 'failed', 'skipped'
+		exceptionFormat = TestExceptionFormat.SHORT
+	}
+	systemProperty 'opicer.test.threads', System.getProperty('opicer.test.threads', '10')
+	systemProperty 'opicer.test.requestsPerThread', System.getProperty('opicer.test.requestsPerThread', '200')
+	systemProperty 'opicer.credit.unsafe-delay-ms', System.getProperty('opicer.credit.unsafe-delay-ms', '0')
+}
+
+tasks.register('concurrencyTest', Test) {
+	group = 'verification'
+	description = 'Runs concurrency tests backed by ExecutorService.'
+	useJUnitPlatform {
+		includeTags 'concurrency'
+		excludeTags 'stress'
+	}
+	testLogging {
+		events 'passed', 'failed', 'skipped'
+		exceptionFormat = TestExceptionFormat.SHORT
+	}
+	systemProperty 'opicer.test.threads', System.getProperty('opicer.test.threads', '10')
+	systemProperty 'opicer.test.requestsPerThread', System.getProperty('opicer.test.requestsPerThread', '500')
+	systemProperty 'opicer.credit.unsafe-delay-ms', System.getProperty('opicer.credit.unsafe-delay-ms', '0')
+}
+
+tasks.register('stressTest', Test) {
+	group = 'verification'
+	description = 'Runs heavy stress tests for race-condition reproduction.'
+	useJUnitPlatform {
+		includeTags 'stress'
+	}
+	testLogging {
+		events 'passed', 'failed', 'skipped'
+		exceptionFormat = TestExceptionFormat.SHORT
+	}
+	systemProperty 'opicer.test.threads', System.getProperty('opicer.test.threads', '10')
+	systemProperty 'opicer.test.requestsPerThread', System.getProperty('opicer.test.requestsPerThread', '10000')
+	systemProperty 'opicer.credit.unsafe-delay-ms', System.getProperty('opicer.credit.unsafe-delay-ms', '50')
 }
