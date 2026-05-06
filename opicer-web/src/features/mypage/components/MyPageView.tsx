@@ -12,12 +12,12 @@ type Props = {
 
 const SECTION_META: Record<PracticeHistoryType, { label: string; helper: string }> = {
   topic: {
-    label: "주제별 연습하기",
-    helper: "선택한 주제 기반으로 연습한 기록을 확인할 수 있어요.",
+    label: "Topictext text",
+    helper: "Selecttext Topic text text text text text text.",
   },
   mock: {
-    label: "실전 연습하기",
-    helper: "시간 제한을 고려한 실전 연습 기록을 모아 보여줘요.",
+    label: "text text",
+    helper: "text text text text text text text text.",
   },
 };
 
@@ -50,7 +50,7 @@ function CategoryList({
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold">{SECTION_META[type].label}</span>
                 <span className="rounded-full border border-black/10 px-2.5 py-1 text-[10px] font-semibold text-[var(--muted)]">
-                  {counts[type]}건
+                  {counts[type]}items
                 </span>
               </div>
               <p className="mt-2 text-xs text-[var(--muted)]">{SECTION_META[type].helper}</p>
@@ -74,7 +74,7 @@ function HistoryList({
   if (items.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-black/10 bg-white/60 px-4 py-6 text-sm text-[var(--muted)]">
-        기록이 아직 없습니다.
+        No history yet.
       </div>
     );
   }
@@ -100,12 +100,12 @@ function HistoryList({
                 <p className="mt-1 text-xs text-[var(--muted)]">{item.topicLabel}</p>
               </div>
               <span className="rounded-full border border-black/10 px-2.5 py-1 text-[10px] font-semibold text-[var(--muted)]">
-                {item.durationMinutes}분
+                {item.durationMinutes}min
               </span>
             </div>
             <div className="mt-3 flex items-center justify-between text-xs text-[var(--muted)]">
               <span>{item.date}</span>
-              <span>히스토리 보기 →</span>
+              <span>View history text</span>
             </div>
           </button>
         );
@@ -125,9 +125,9 @@ function HistoryDetail({
     return (
       <div className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Detail</p>
-        <h3 className="mt-2 text-xl font-semibold">선택된 기록 없음</h3>
+        <h3 className="mt-2 text-xl font-semibold">No history selected</h3>
         <p className="mt-2 text-sm text-[var(--muted)]">
-          가운데 목록에서 히스토리를 선택하면 연습 상세 화면이 나타납니다.
+          text text text Selecttext text text text text.
         </p>
       </div>
     );
@@ -143,7 +143,7 @@ function HistoryDetail({
             </p>
             <h3 className="mt-2 text-2xl font-semibold">{item.title}</h3>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              {item.topicLabel} · {item.date} · {item.durationMinutes}분
+              {item.topicLabel} text {item.date} text {item.durationMinutes}min
             </p>
           </div>
           <button
@@ -151,7 +151,7 @@ function HistoryDetail({
             onClick={onBack}
             className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold text-[var(--muted)] hover:border-transparent hover:bg-[var(--accent)] hover:text-white"
           >
-            목록으로 돌아가기
+            Back to list
           </button>
         </div>
         <p className="mt-4 text-sm text-[var(--muted)]">{item.summary}</p>
@@ -161,30 +161,30 @@ function HistoryDetail({
         <div className="flex items-center justify-between">
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Analysis</p>
           <span className="rounded-full border border-black/10 px-3 py-1 text-[10px] font-semibold text-[var(--muted)]">
-            준비 중
+            Coming soon
           </span>
         </div>
-        <h4 className="mt-2 text-xl font-semibold">연습 완료 화면</h4>
+        <h4 className="mt-2 text-xl font-semibold">Practice summary view</h4>
         <p className="mt-2 text-sm text-[var(--muted)]">
-          오디오 재생, 스크립트, 수정 기능은 추후 제공됩니다.
+          Audio playback, script view, and editing are coming soon.
         </p>
 
         <div className="mt-4 grid gap-3">
           <div className="rounded-2xl border border-dashed border-black/10 bg-white/60 px-4 py-4 text-sm text-[var(--muted)]">
-            녹음 재생 기능 준비 중
+            Recording text text Coming soon
           </div>
           <div className="rounded-2xl border border-dashed border-black/10 bg-white/60 px-4 py-4 text-sm text-[var(--muted)]">
-            스크립트 보기 기능 준비 중
+            text text text Coming soon
           </div>
           <div className="rounded-2xl border border-dashed border-black/10 bg-white/60 px-4 py-4 text-sm text-[var(--muted)]">
-            스크립트 수정 기능 준비 중
+            text Edit text Coming soon
           </div>
         </div>
       </section>
 
       <section className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Answers</p>
-        <h4 className="mt-2 text-xl font-semibold">질문/답변 리스트</h4>
+        <h4 className="mt-2 text-xl font-semibold">Question/text text</h4>
         <div className="mt-4 space-y-3">
           {item.answers.map((answer, index) => (
             <div
@@ -196,7 +196,7 @@ function HistoryDetail({
               </p>
               <p className="mt-2 text-sm font-semibold">{answer.question}</p>
               <div className="mt-3 rounded-xl border border-dashed border-black/10 bg-white/60 px-3 py-2 text-xs text-[var(--muted)]">
-                녹음 미리듣기 준비 중
+                Recording text Coming soon
               </div>
             </div>
           ))}
@@ -233,9 +233,9 @@ export function MyPageView({ userLabel, onLogout }: Props) {
 
         <section className="rounded-[32px] border border-black/5 bg-white/70 p-8 shadow-sm">
           <p className="text-xs uppercase tracking-[0.32em] text-[var(--muted)]">My Page</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">연습 히스토리</h1>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Practice History</h1>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            주제별/실전 연습 기록을 확인하고 연습 상세 화면으로 이동할 수 있어요.
+            View topic/mock practice history and open detail view.
           </p>
         </section>
 
@@ -264,7 +264,7 @@ export function MyPageView({ userLabel, onLogout }: Props) {
                     {SECTION_META[activeType].helper}
                   </p>
                 </div>
-                <span className="text-xs text-[var(--muted)]">{items.length}건</span>
+                <span className="text-xs text-[var(--muted)]">{items.length}items</span>
               </div>
 
               <div className="mt-6">
