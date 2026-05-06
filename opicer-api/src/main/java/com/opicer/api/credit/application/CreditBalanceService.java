@@ -44,4 +44,17 @@ public class CreditBalanceService {
 		return creditBalanceRepository.findByUserId(userId)
 			.orElseThrow(() -> new IllegalArgumentException("Balance not found"));
 	}
+
+	@Transactional(readOnly = true)
+	public boolean hasEnough(UUID userId, long amount) {
+		return creditBalanceRepository.findByUserId(userId)
+			.map(balance -> balance.getBalance() >= amount)
+			.orElse(false);
+	}
+
+	@Transactional
+	public boolean deductIfEnough(UUID userId, long amount) {
+		log.info("Deducting credit balance. userId={}, amount={}", userId, amount);
+		return creditBalanceRepository.deductIfEnough(userId, amount) > 0;
+	}
 }
