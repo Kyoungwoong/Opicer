@@ -14,4 +14,12 @@ public interface CreditBalanceRepository extends JpaRepository<CreditBalance, UU
 	@Modifying
 	@Query("update CreditBalance b set b.balance = b.balance + :delta where b.userId = :userId")
 	int addBalance(@Param("userId") UUID userId, @Param("delta") long delta);
+
+	@Modifying
+	@Query("""
+		update CreditBalance b
+		set b.balance = b.balance - :amount
+		where b.userId = :userId and b.balance >= :amount
+		""")
+	int deductIfEnough(@Param("userId") UUID userId, @Param("amount") long amount);
 }

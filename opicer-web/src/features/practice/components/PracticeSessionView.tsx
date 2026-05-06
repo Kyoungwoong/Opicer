@@ -7,6 +7,8 @@ import {
   analyzeAnswer,
   fetchPracticeQuestions,
   improveScript,
+  submitPracticeSession,
+  submitTopicSelection,
   transcribeAudio,
 } from "@/features/practice/api";
 import { ROUTES } from "@/lib/routes";
@@ -29,11 +31,12 @@ type QuestionAiState = {
 
 type Props = {
   topicId: string;
+  topicSelectionId: string;
   userLabel?: string;
   onLogout?: () => void;
 };
 
-export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
+export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLogout }: Props) {
   const router = useRouter();
 
   // ── Core state ─────────────────────────────────────────────
@@ -160,7 +163,13 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
           return { ...a, transcribeError };
         }
       })
-    ).then((updated) => {
+    ).then(async (updated) => {
+      try {
+        await submitPracticeSession(topicSelectionId);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "연습 제출 처리에 실패했습니다.";
+        setError(message);
+      }
       answersRef.current = updated;
       setAnswers(updated);
       setMode("summary");
@@ -436,6 +445,13 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
         <div className="mx-auto flex max-w-4xl flex-col gap-8">
           <TopNav userLabel={userLabel} onLogout={onLogout} />
 
+          {error ? (
+            <section className="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-800">
+              <p className="font-semibold">크레딧 차감/제출 처리에 실패했습니다.</p>
+              <p className="mt-1">{error}</p>
+            </section>
+          ) : null}
+
           <section className="rounded-[32px] border border-black/5 bg-white/70 p-8 shadow-sm">
             <p className="text-xs uppercase tracking-[0.32em] text-[var(--muted)]">Practice Summary</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">연습 완료</h1>
@@ -538,19 +554,21 @@ export function PracticeSessionView({ topicId, userLabel, onLogout }: Props) {
             >
               다른 주제 연습하기
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                answersRef.current = [];
-                setAnswers([]);
-                setAiStates({});
-                setCurrentIndex(0);
-                setMode("playing");
-              }}
-              className="text-sm text-[var(--muted)] hover:underline"
-            >
-              같은 주제 다시 연습하기
-            </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const selection = await submitTopicSelection(topicId);
+                    router.push(`${ROUTES.practiceSession(topicId)}?selectionId=${selection.id}`);
+                  } catch (err) {
+                    const message = err instanceof Error ? err.message : "새 연습 세션 생성에 실패했습니다.";
+                    setError(message);
+                  }
+                }}
+                className="text-sm text-[var(--muted)] hover:underline"
+              >
+                같은 주제 다시 연습하기
+              </button>
           </div>
         </div>
       </div>

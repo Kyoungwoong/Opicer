@@ -27,6 +27,12 @@ export type TopicSelection = {
   selectedAt: string;
 };
 
+export type PracticeSubmitResult = {
+  chargeId: string;
+  alreadyCharged: boolean;
+  deductedCredits: number;
+};
+
 export type PracticeQuestion = {
   id: string;
   topic: string;
