@@ -107,7 +107,7 @@ export function QuestionTab() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("삭제하시겠습니까?")) return;
+    if (!confirm("Are you sure to delete?")) return;
     try {
       await questionApi.delete(id);
       await load();
@@ -124,7 +124,7 @@ export function QuestionTab() {
         className="rounded-xl border border-black/8 bg-[var(--card)] p-5 space-y-4"
       >
         <h3 className="font-semibold text-[var(--ink)]">
-          {editId ? "질문 수정" : "질문 추가"}
+          {editId ? "Question Edit" : "Question text"}
         </h3>
         {error && (
           <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
@@ -141,7 +141,7 @@ export function QuestionTab() {
               value={form.topic}
               onChange={(e) => setForm((f) => ({ ...f, topic: e.target.value }))}
               className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-              placeholder="예: 주거환경"
+              placeholder="text: text"
             />
           </div>
           <div className="space-y-1">
@@ -175,13 +175,13 @@ export function QuestionTab() {
               setForm((f) => ({ ...f, promptText: e.target.value }))
             }
             className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-            placeholder="질문 내용"
+            placeholder="Question text"
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-xs font-medium text-[var(--muted)]">
-              Structural Hint (선택)
+              Structural Hint (Select)
             </label>
             <input
               value={form.structuralHint}
@@ -193,7 +193,7 @@ export function QuestionTab() {
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-[var(--muted)]">
-              Key Expressions (쉼표 구분)
+              Key Expressions (text textmin)
             </label>
             <input
               value={form.keyExpressions}
@@ -201,7 +201,7 @@ export function QuestionTab() {
                 setForm((f) => ({ ...f, keyExpressions: e.target.value }))
               }
               className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-              placeholder="예: I usually, On weekends"
+              placeholder="text: I usually, On weekends"
             />
           </div>
         </div>
@@ -245,7 +245,7 @@ export function QuestionTab() {
             disabled={loading}
             className="rounded-full bg-[var(--accent)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)] disabled:opacity-50"
           >
-            {loading ? "저장 중..." : editId ? "수정" : "추가"}
+            {loading ? "Saving..." : editId ? "Edit" : "text"}
           </button>
           {editId && (
             <button
@@ -253,7 +253,7 @@ export function QuestionTab() {
               onClick={cancelEdit}
               className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-[var(--muted)] transition hover:bg-black/5"
             >
-              취소
+              Cancel
             </button>
           )}
         </div>
@@ -278,7 +278,7 @@ export function QuestionTab() {
                   colSpan={5}
                   className="px-4 py-6 text-center text-[var(--muted)]"
                 >
-                  질문이 없습니다.
+                  Questiontext text.
                 </td>
               </tr>
             )}
@@ -306,13 +306,13 @@ export function QuestionTab() {
                       onClick={() => startEdit(q)}
                       className="text-[var(--accent)] hover:underline"
                     >
-                      수정
+                      Edit
                     </button>
                     <button
                       onClick={() => handleDelete(q.id)}
                       className="text-red-500 hover:underline"
                     >
-                      삭제
+                      Delete
                     </button>
                   </div>
                 </td>
