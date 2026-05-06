@@ -1,11 +1,11 @@
 package com.opicer.api.practice.presentation;
 
-import com.opicer.api.question.application.QuestionService;
+import com.opicer.api.question.application.QuestionQueryService;
 import com.opicer.api.question.domain.Question;
 import com.opicer.api.question.domain.QuestionType;
 import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.presentation.ApiResponse;
-import com.opicer.api.topic.application.TopicService;
+import com.opicer.api.topic.application.TopicQueryService;
 import com.opicer.api.topic.domain.Topic;
 import java.time.Instant;
 import java.util.List;
@@ -20,18 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/practice/topics")
 public class PracticeQuestionController {
 
-	private final TopicService topicService;
-	private final QuestionService questionService;
+	private final TopicQueryService topicQueryService;
+	private final QuestionQueryService questionQueryService;
 
-	public PracticeQuestionController(TopicService topicService, QuestionService questionService) {
-		this.topicService = topicService;
-		this.questionService = questionService;
+	public PracticeQuestionController(TopicQueryService topicQueryService, QuestionQueryService questionQueryService) {
+		this.topicQueryService = topicQueryService;
+		this.questionQueryService = questionQueryService;
 	}
 
 	@GetMapping("/{topicId}/questions")
 	public ResponseEntity<ApiResponse<List<QuestionResponse>>> list(@PathVariable UUID topicId) {
-		Topic topic = topicService.getActiveOrThrow(topicId);
-		List<QuestionResponse> questions = questionService.findActiveByTopic(topic.getTitle()).stream()
+		Topic topic = topicQueryService.getActiveOrThrow(topicId);
+		List<QuestionResponse> questions = questionQueryService.findActiveByTopic(topic.getTitle()).stream()
 			.map(QuestionResponse::from)
 			.toList();
 		return ResponseEntity.ok(ApiResponse.ok("PRACTICE_QUESTION_LIST_OK", questions));

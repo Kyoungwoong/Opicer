@@ -1,7 +1,7 @@
 package com.opicer.api.practice.presentation;
 
 import com.opicer.api.auth.domain.AuthUserPrincipal;
-import com.opicer.api.practice.application.PracticeSessionService;
+import com.opicer.api.practice.application.PracticeSessionCommandService;
 import com.opicer.api.shared.presentation.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/practice/sessions")
 public class PracticeSessionController {
 
-	private final PracticeSessionService practiceSessionService;
+	private final PracticeSessionCommandService practiceSessionCommandService;
 
-	public PracticeSessionController(PracticeSessionService practiceSessionService) {
-		this.practiceSessionService = practiceSessionService;
+	public PracticeSessionController(PracticeSessionCommandService practiceSessionCommandService) {
+		this.practiceSessionCommandService = practiceSessionCommandService;
 	}
 
 	@PostMapping("/submit")
@@ -31,7 +31,7 @@ public class PracticeSessionController {
 		if (authentication == null || !(authentication.getPrincipal() instanceof AuthUserPrincipal principal)) {
 			return ResponseEntity.status(401).build();
 		}
-		PracticeSessionService.SubmitResult result = practiceSessionService.submit(principal.id(), request.topicSelectionId());
+		PracticeSessionCommandService.SubmitResult result = practiceSessionCommandService.submit(principal.id(), request.topicSelectionId());
 		return ResponseEntity.ok(ApiResponse.ok("PRACTICE_SUBMITTED", new SubmitResponse(
 			result.chargeId(),
 			result.alreadyCharged(),

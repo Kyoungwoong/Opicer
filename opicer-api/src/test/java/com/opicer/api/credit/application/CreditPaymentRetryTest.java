@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CreditPaymentRetryTest {
 
 	@Autowired
-	private CreditOrderService creditOrderService;
+	private CreditOrderCommandService creditOrderCommandService;
 
 	@Autowired
 	private CreditPaymentService creditPaymentService;
@@ -28,12 +28,12 @@ class CreditPaymentRetryTest {
 	private CreditPaymentRepository creditPaymentRepository;
 
 	@Autowired
-	private CreditBalanceService creditBalanceService;
+	private CreditBalanceQueryService creditBalanceQueryService;
 
 	@Test
 	void retryDuringInFlightIsDeduplicatedByDatabaseConstraint() throws Exception {
 		UUID userId = UUID.randomUUID();
-		CreditOrder order = creditOrderService.createOrder(userId, "PACK_10", 10000);
+		CreditOrder order = creditOrderCommandService.createOrder(userId, "PACK_10", 10000);
 
 		ExecutorService executor = Executors.newFixedThreadPool(2);
 		CountDownLatch startGate = new CountDownLatch(1);
@@ -63,7 +63,7 @@ class CreditPaymentRetryTest {
 		executor.shutdown();
 
 		long count = creditPaymentRepository.countByOrderId(order.getId());
-		long balance = creditBalanceService.getBalance(order.getUserId()).getBalance();
+		long balance = creditBalanceQueryService.getBalance(order.getUserId()).getBalance();
 
 		assertThat(count).isEqualTo(1);
 		assertThat(balance).isEqualTo(order.getAmount());

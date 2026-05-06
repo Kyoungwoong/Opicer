@@ -2,10 +2,10 @@ package com.opicer.api.practice.application;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.opicer.api.config.AiProperties;
-import com.opicer.api.prompt.application.PromptVersionService;
+import com.opicer.api.prompt.application.PromptVersionQueryService;
 import com.opicer.api.prompt.domain.PromptUseCase;
 import com.opicer.api.prompt.domain.PromptVersion;
-import com.opicer.api.goodanswer.application.GoodAnswerSampleService;
+import com.opicer.api.goodanswer.application.GoodAnswerSampleQueryService;
 import com.opicer.api.goodanswer.domain.GoodAnswerSample;
 import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.error.ApiException;
@@ -44,18 +44,18 @@ public class PracticeAiService {
 		"Return ONLY the improved script. Target IL~IM level.";
 
 	private final AiProperties aiProperties;
-	private final PromptVersionService promptVersionService;
-	private final GoodAnswerSampleService goodAnswerSampleService;
+	private final PromptVersionQueryService promptVersionQueryService;
+	private final GoodAnswerSampleQueryService goodAnswerSampleQueryService;
 	private final RestClient restClient;
 
 	public PracticeAiService(
 		AiProperties aiProperties,
-		PromptVersionService promptVersionService,
-		GoodAnswerSampleService goodAnswerSampleService
+		PromptVersionQueryService promptVersionQueryService,
+		GoodAnswerSampleQueryService goodAnswerSampleQueryService
 	) {
 		this.aiProperties = aiProperties;
-		this.promptVersionService = promptVersionService;
-		this.goodAnswerSampleService = goodAnswerSampleService;
+		this.promptVersionQueryService = promptVersionQueryService;
+		this.goodAnswerSampleQueryService = goodAnswerSampleQueryService;
 		this.restClient = RestClient.create();
 	}
 
@@ -97,7 +97,7 @@ public class PracticeAiService {
 		if (apiKey == null || apiKey.isBlank()) {
 			throw new ApiException(ErrorCode.AI_NOT_CONFIGURED);
 		}
-		String template = promptVersionService.findActiveByUseCase(PromptUseCase.FEEDBACK)
+		String template = promptVersionQueryService.findActiveByUseCase(PromptUseCase.FEEDBACK)
 			.map(PromptVersion::getTemplate)
 			.orElse(DEFAULT_FEEDBACK_TEMPLATE);
 		String prompt = template
@@ -118,7 +118,7 @@ public class PracticeAiService {
 		if (apiKey == null || apiKey.isBlank()) {
 			throw new ApiException(ErrorCode.AI_NOT_CONFIGURED);
 		}
-		String template = promptVersionService.findActiveByUseCase(PromptUseCase.SCRIPT_IMPROVEMENT)
+		String template = promptVersionQueryService.findActiveByUseCase(PromptUseCase.SCRIPT_IMPROVEMENT)
 			.map(PromptVersion::getTemplate)
 			.orElse(DEFAULT_SCRIPT_IMPROVEMENT_TEMPLATE);
 		String prompt = template
@@ -135,7 +135,7 @@ public class PracticeAiService {
 		String questionType,
 		OpicLevel targetLevel
 	) {
-		List<GoodAnswerSample> samples = goodAnswerSampleService.findSimilar(
+		List<GoodAnswerSample> samples = goodAnswerSampleQueryService.findSimilar(
 			topicId,
 			transcript,
 			3,

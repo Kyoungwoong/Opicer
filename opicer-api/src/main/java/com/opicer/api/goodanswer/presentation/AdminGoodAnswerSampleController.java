@@ -1,6 +1,7 @@
 package com.opicer.api.goodanswer.presentation;
 
-import com.opicer.api.goodanswer.application.GoodAnswerSampleService;
+import com.opicer.api.goodanswer.application.GoodAnswerSampleCommandService;
+import com.opicer.api.goodanswer.application.GoodAnswerSampleQueryService;
 import com.opicer.api.goodanswer.domain.GoodAnswerSample;
 import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.presentation.ApiResponse;
@@ -27,15 +28,20 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/admin/good-answers")
 public class AdminGoodAnswerSampleController {
 
-	private final GoodAnswerSampleService service;
+	private final GoodAnswerSampleCommandService goodAnswerSampleCommandService;
+	private final GoodAnswerSampleQueryService goodAnswerSampleQueryService;
 
-	public AdminGoodAnswerSampleController(GoodAnswerSampleService service) {
-		this.service = service;
+	public AdminGoodAnswerSampleController(
+		GoodAnswerSampleCommandService goodAnswerSampleCommandService,
+		GoodAnswerSampleQueryService goodAnswerSampleQueryService
+	) {
+		this.goodAnswerSampleCommandService = goodAnswerSampleCommandService;
+		this.goodAnswerSampleQueryService = goodAnswerSampleQueryService;
 	}
 
 	@PostMapping
 	public ApiResponse<Map<String, Object>> create(@Valid @RequestBody CreateRequest request) {
-		GoodAnswerSample sample = service.create(
+		GoodAnswerSample sample = goodAnswerSampleCommandService.create(
 			request.topicId(),
 			request.level(),
 			request.sampleText(),
@@ -60,7 +66,7 @@ public class AdminGoodAnswerSampleController {
 		@RequestParam(required = false) String tags,
 		@RequestParam(required = false) String keyExpressions
 	) {
-		List<GoodAnswerSample> samples = service.createFromAudio(
+		List<GoodAnswerSample> samples = goodAnswerSampleCommandService.createFromAudio(
 			topicId,
 			level,
 			audio,
@@ -82,7 +88,7 @@ public class AdminGoodAnswerSampleController {
 
 	@GetMapping
 	public ApiResponse<List<GoodAnswerSampleResponse>> list(@RequestParam UUID topicId) {
-		List<GoodAnswerSampleResponse> result = service.listByTopic(topicId).stream()
+		List<GoodAnswerSampleResponse> result = goodAnswerSampleQueryService.listByTopic(topicId).stream()
 			.map(GoodAnswerSampleResponse::from)
 			.toList();
 		return ApiResponse.ok("Good answer samples", result);
@@ -90,7 +96,7 @@ public class AdminGoodAnswerSampleController {
 
 	@DeleteMapping("/{id}")
 	public ApiResponse<Void> delete(@PathVariable UUID id) {
-		service.delete(id);
+		goodAnswerSampleCommandService.delete(id);
 		return ApiResponse.ok("Good answer sample deleted", null);
 	}
 

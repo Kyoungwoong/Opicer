@@ -7,25 +7,24 @@ import com.opicer.api.universalsentence.domain.UniversalSentenceType;
 import com.opicer.api.universalsentence.infrastructure.UniversalSentenceRepository;
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class UniversalSentenceService {
+public class UniversalSentenceQueryService {
 
 	private static final int MAX_RANDOM_SIZE = 4;
 
 	private final UniversalSentenceRepository universalSentenceRepository;
 	private final Clock clock;
 
-	public UniversalSentenceService(UniversalSentenceRepository universalSentenceRepository, Clock clock) {
+	public UniversalSentenceQueryService(UniversalSentenceRepository universalSentenceRepository, Clock clock) {
 		this.universalSentenceRepository = universalSentenceRepository;
 		this.clock = clock;
 	}
@@ -33,32 +32,6 @@ public class UniversalSentenceService {
 	@Transactional(readOnly = true)
 	public List<UniversalSentence> findAll() {
 		return universalSentenceRepository.findAll();
-	}
-
-	@Transactional
-	public UniversalSentence create(UniversalSentenceType type, String title, String sentence, List<String> tags,
-		boolean active) {
-		UniversalSentence universalSentence = new UniversalSentence(type, title, sentence, tags, active);
-		return universalSentenceRepository.save(universalSentence);
-	}
-
-	@Transactional
-	public Optional<UniversalSentence> update(UUID id, UniversalSentenceType type, String title, String sentence,
-		List<String> tags, boolean active) {
-		return universalSentenceRepository.findById(id)
-			.map(existing -> {
-				existing.update(type, title, sentence, tags, active);
-				return universalSentenceRepository.save(existing);
-			});
-	}
-
-	@Transactional
-	public boolean delete(UUID id) {
-		if (!universalSentenceRepository.existsById(id)) {
-			return false;
-		}
-		universalSentenceRepository.deleteById(id);
-		return true;
 	}
 
 	@Transactional(readOnly = true)
@@ -103,6 +76,7 @@ public class UniversalSentenceService {
 		return dailySet;
 	}
 
+	@Transactional(readOnly = true)
 	public UniversalSentence getOrThrow(UUID id) {
 		return universalSentenceRepository.findById(id)
 			.orElseThrow(() -> new ApiException(ErrorCode.UNIVERSAL_SENTENCE_NOT_FOUND,

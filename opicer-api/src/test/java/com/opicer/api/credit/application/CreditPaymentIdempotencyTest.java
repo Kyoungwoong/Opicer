@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class CreditPaymentIdempotencyTest {
 
 	@Autowired
-	private CreditOrderService creditOrderService;
+	private CreditOrderCommandService creditOrderCommandService;
 
 	@Autowired
 	private CreditPaymentService creditPaymentService;
@@ -32,12 +32,12 @@ class CreditPaymentIdempotencyTest {
 	private CreditPaymentRepository creditPaymentRepository;
 
 	@Autowired
-	private CreditBalanceService creditBalanceService;
+	private CreditBalanceQueryService creditBalanceQueryService;
 
 	@Test
 	void sameKeySamePayloadReturnsExistingPayment() {
 		UUID userId = UUID.randomUUID();
-		CreditOrder order = creditOrderService.createOrder(userId, "PACK_10", 10000);
+		CreditOrder order = creditOrderCommandService.createOrder(userId, "PACK_10", 10000);
 
 		CreditPayment first = creditPaymentService
 			.confirmPaymentWithIdempotency(order.getId(), "TX-IDEMPOTENT-1", "idem-key-1");
@@ -46,13 +46,13 @@ class CreditPaymentIdempotencyTest {
 
 		assertThat(second.getId()).isEqualTo(first.getId());
 		assertThat(creditPaymentRepository.countByOrderId(order.getId())).isEqualTo(1);
-		assertThat(creditBalanceService.getBalance(order.getUserId()).getBalance()).isEqualTo(order.getAmount());
+		assertThat(creditBalanceQueryService.getBalance(order.getUserId()).getBalance()).isEqualTo(order.getAmount());
 	}
 
 	@Test
 	void sameKeyDifferentPayloadThrowsConflict() {
 		UUID userId = UUID.randomUUID();
-		CreditOrder order = creditOrderService.createOrder(userId, "PACK_10", 10000);
+		CreditOrder order = creditOrderCommandService.createOrder(userId, "PACK_10", 10000);
 
 		creditPaymentService.confirmPaymentWithIdempotency(order.getId(), "TX-FIRST", "idem-key-2");
 
@@ -65,7 +65,7 @@ class CreditPaymentIdempotencyTest {
 	@Test
 	void concurrentSameKeyCreatesSinglePaymentAndBalanceUpdate() throws Exception {
 		UUID userId = UUID.randomUUID();
-		CreditOrder order = creditOrderService.createOrder(userId, "PACK_10", 10000);
+		CreditOrder order = creditOrderCommandService.createOrder(userId, "PACK_10", 10000);
 		int threads = 20;
 		ExecutorService executor = Executors.newFixedThreadPool(threads);
 		CountDownLatch startGate = new CountDownLatch(1);
@@ -88,13 +88,13 @@ class CreditPaymentIdempotencyTest {
 		executor.shutdown();
 
 		assertThat(creditPaymentRepository.countByOrderId(order.getId())).isEqualTo(1);
-		assertThat(creditBalanceService.getBalance(order.getUserId()).getBalance()).isEqualTo(order.getAmount());
+		assertThat(creditBalanceQueryService.getBalance(order.getUserId()).getBalance()).isEqualTo(order.getAmount());
 	}
 
 	@Test
 	void concurrentDifferentKeysStillCreateSinglePaymentAndBalanceUpdate() throws Exception {
 		UUID userId = UUID.randomUUID();
-		CreditOrder order = creditOrderService.createOrder(userId, "PACK_10", 10000);
+		CreditOrder order = creditOrderCommandService.createOrder(userId, "PACK_10", 10000);
 		int threads = 20;
 		ExecutorService executor = Executors.newFixedThreadPool(threads);
 		CountDownLatch startGate = new CountDownLatch(1);
@@ -122,6 +122,6 @@ class CreditPaymentIdempotencyTest {
 		executor.shutdown();
 
 		assertThat(creditPaymentRepository.countByOrderId(order.getId())).isEqualTo(1);
-		assertThat(creditBalanceService.getBalance(order.getUserId()).getBalance()).isEqualTo(order.getAmount());
+		assertThat(creditBalanceQueryService.getBalance(order.getUserId()).getBalance()).isEqualTo(order.getAmount());
 	}
 }

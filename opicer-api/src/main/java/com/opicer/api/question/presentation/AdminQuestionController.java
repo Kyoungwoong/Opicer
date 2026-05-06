@@ -1,6 +1,7 @@
 package com.opicer.api.question.presentation;
 
-import com.opicer.api.question.application.QuestionService;
+import com.opicer.api.question.application.QuestionCommandService;
+import com.opicer.api.question.application.QuestionQueryService;
 import com.opicer.api.question.domain.Question;
 import com.opicer.api.question.domain.QuestionType;
 import com.opicer.api.shared.domain.OpicLevel;
@@ -27,15 +28,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/questions")
 public class AdminQuestionController {
 
-	private final QuestionService questionService;
+	private final QuestionQueryService questionQueryService;
+	private final QuestionCommandService questionCommandService;
 
-	public AdminQuestionController(QuestionService questionService) {
-		this.questionService = questionService;
+	public AdminQuestionController(QuestionQueryService questionQueryService, QuestionCommandService questionCommandService) {
+		this.questionQueryService = questionQueryService;
+		this.questionCommandService = questionCommandService;
 	}
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<List<QuestionResponse>>> list() {
-		List<QuestionResponse> questions = questionService.findAll().stream()
+		List<QuestionResponse> questions = questionQueryService.findAll().stream()
 			.map(QuestionResponse::from)
 			.toList();
 		return ResponseEntity.ok(ApiResponse.ok("QUESTION_LIST_OK", questions));
@@ -43,7 +46,7 @@ public class AdminQuestionController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<QuestionResponse>> create(@Valid @RequestBody QuestionRequest request) {
-		Question question = questionService.create(
+		Question question = questionCommandService.create(
 			request.topic(), request.type(), request.promptText(), request.promptAudioUrl(),
 			request.structuralHint(), request.targetLevels(), request.keyExpressions());
 		return ResponseEntity.status(201)
@@ -52,7 +55,7 @@ public class AdminQuestionController {
 
 	@PutMapping("/{id}")
 	public ResponseEntity<Object> update(@PathVariable UUID id, @Valid @RequestBody QuestionRequest request) {
-		return questionService.update(id, request.topic(), request.type(), request.promptText(),
+		return questionCommandService.update(id, request.topic(), request.type(), request.promptText(),
 				request.promptAudioUrl(), request.structuralHint(), request.targetLevels(),
 				request.keyExpressions(), request.active() != null ? request.active() : true)
 			.<ResponseEntity<Object>>map(q -> ResponseEntity.ok(
@@ -63,7 +66,7 @@ public class AdminQuestionController {
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Object> delete(@PathVariable UUID id) {
-		if (questionService.delete(id)) {
+		if (questionCommandService.delete(id)) {
 			return ResponseEntity.ok(ApiResponse.ok("QUESTION_DELETED", null));
 		}
 		throw new ApiException(ErrorCode.QUESTION_NOT_FOUND, "Question not found: " + id);

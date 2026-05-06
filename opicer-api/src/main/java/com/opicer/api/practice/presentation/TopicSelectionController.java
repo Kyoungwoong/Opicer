@@ -1,7 +1,7 @@
 package com.opicer.api.practice.presentation;
 
 import com.opicer.api.auth.domain.AuthUserPrincipal;
-import com.opicer.api.practice.application.TopicSelectionService;
+import com.opicer.api.practice.application.TopicSelectionCommandService;
 import com.opicer.api.practice.domain.TopicSelection;
 import com.opicer.api.shared.presentation.ApiResponse;
 import jakarta.validation.Valid;
@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/practice/topic-selections")
 public class TopicSelectionController {
 
-	private final TopicSelectionService topicSelectionService;
+	private final TopicSelectionCommandService topicSelectionCommandService;
 
-	public TopicSelectionController(TopicSelectionService topicSelectionService) {
-		this.topicSelectionService = topicSelectionService;
+	public TopicSelectionController(TopicSelectionCommandService topicSelectionCommandService) {
+		this.topicSelectionCommandService = topicSelectionCommandService;
 	}
 
 	@PostMapping
@@ -33,7 +33,7 @@ public class TopicSelectionController {
 		if (authentication == null || !(authentication.getPrincipal() instanceof AuthUserPrincipal principal)) {
 			return ResponseEntity.status(401).build();
 		}
-		TopicSelection selection = topicSelectionService.createSelection(principal.id(), request.topicId());
+		TopicSelection selection = topicSelectionCommandService.createSelection(principal.id(), request.topicId());
 		return ResponseEntity.status(201).body(ApiResponse.created("TOPIC_SELECTION_CREATED",
 			TopicSelectionResponse.from(selection)));
 	}

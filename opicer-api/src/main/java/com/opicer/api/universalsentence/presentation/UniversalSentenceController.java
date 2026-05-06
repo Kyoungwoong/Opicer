@@ -1,7 +1,7 @@
 package com.opicer.api.universalsentence.presentation;
 
 import com.opicer.api.shared.presentation.ApiResponse;
-import com.opicer.api.universalsentence.application.UniversalSentenceService;
+import com.opicer.api.universalsentence.application.UniversalSentenceQueryService;
 import com.opicer.api.universalsentence.domain.UniversalSentence;
 import com.opicer.api.universalsentence.domain.UniversalSentenceType;
 import java.time.Instant;
@@ -17,17 +17,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/universal-sentences")
 public class UniversalSentenceController {
 
-	private final UniversalSentenceService universalSentenceService;
+	private final UniversalSentenceQueryService universalSentenceQueryService;
 
-	public UniversalSentenceController(UniversalSentenceService universalSentenceService) {
-		this.universalSentenceService = universalSentenceService;
+	public UniversalSentenceController(UniversalSentenceQueryService universalSentenceQueryService) {
+		this.universalSentenceQueryService = universalSentenceQueryService;
 	}
 
 	@GetMapping("/random")
 	public ResponseEntity<ApiResponse<List<UniversalSentenceResponse>>> random(
 		@RequestParam(defaultValue = "4") int size
 	) {
-		List<UniversalSentenceResponse> responses = universalSentenceService.findRandom(size).stream()
+		List<UniversalSentenceResponse> responses = universalSentenceQueryService.findRandom(size).stream()
 			.map(UniversalSentenceResponse::from)
 			.toList();
 		return ResponseEntity.ok(ApiResponse.ok("UNIVERSAL_SENTENCE_RANDOM_OK", responses));
@@ -35,7 +35,7 @@ public class UniversalSentenceController {
 
 	@GetMapping("/daily")
 	public ResponseEntity<ApiResponse<List<UniversalSentenceResponse>>> daily() {
-		List<UniversalSentenceResponse> responses = universalSentenceService.findDailySet().stream()
+		List<UniversalSentenceResponse> responses = universalSentenceQueryService.findDailySet().stream()
 			.map(UniversalSentenceResponse::from)
 			.toList();
 		return ResponseEntity.ok(ApiResponse.ok("UNIVERSAL_SENTENCE_DAILY_OK", responses));

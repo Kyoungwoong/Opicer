@@ -1,6 +1,7 @@
 package com.opicer.api.practice.application;
 
-import com.opicer.api.credit.application.CreditBalanceService;
+import com.opicer.api.credit.application.CreditBalanceCommandService;
+import com.opicer.api.credit.application.CreditBalanceQueryService;
 import com.opicer.api.practice.domain.TopicSelection;
 import com.opicer.api.practice.infrastructure.PracticeCreditChargeRepository;
 import com.opicer.api.practice.infrastructure.TopicSelectionRepository;
@@ -23,10 +24,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
-class PracticeSessionServiceTest {
+class PracticeSessionCommandServiceTest {
 
 	@Autowired
-	private PracticeSessionService practiceSessionService;
+	private PracticeSessionCommandService practiceSessionCommandService;
 
 	@Autowired
 	private TopicSelectionRepository topicSelectionRepository;
@@ -35,7 +36,10 @@ class PracticeSessionServiceTest {
 	private PracticeCreditChargeRepository practiceCreditChargeRepository;
 
 	@Autowired
-	private CreditBalanceService creditBalanceService;
+	private CreditBalanceCommandService creditBalanceService;
+
+	@Autowired
+	private CreditBalanceQueryService creditBalanceQueryService;
 
 	@BeforeEach
 	void setUp() {
@@ -50,13 +54,13 @@ class PracticeSessionServiceTest {
 		creditBalanceService.addBalance(userId, 10);
 		TopicSelection selection = topicSelectionRepository.save(new TopicSelection(userId, UUID.randomUUID()));
 
-		PracticeSessionService.SubmitResult first = practiceSessionService.submit(userId, selection.getId());
-		PracticeSessionService.SubmitResult second = practiceSessionService.submit(userId, selection.getId());
+		PracticeSessionCommandService.SubmitResult first = practiceSessionCommandService.submit(userId, selection.getId());
+		PracticeSessionCommandService.SubmitResult second = practiceSessionCommandService.submit(userId, selection.getId());
 
 		assertThat(first.alreadyCharged()).isFalse();
 		assertThat(second.alreadyCharged()).isTrue();
 		assertThat(practiceCreditChargeRepository.countByTopicSelectionId(selection.getId())).isEqualTo(1);
-		assertThat(creditBalanceService.getBalance(userId).getBalance()).isEqualTo(8);
+		assertThat(creditBalanceQueryService.getBalance(userId).getBalance()).isEqualTo(8);
 	}
 
 	@Test
@@ -75,7 +79,7 @@ class PracticeSessionServiceTest {
 			futures.add(pool.submit(() -> {
 				ready.countDown();
 				start.await();
-				practiceSessionService.submit(userId, selection.getId());
+				practiceSessionCommandService.submit(userId, selection.getId());
 				return true;
 			}));
 		}
@@ -88,7 +92,7 @@ class PracticeSessionServiceTest {
 		pool.shutdown();
 
 		assertThat(practiceCreditChargeRepository.countByTopicSelectionId(selection.getId())).isEqualTo(1);
-		assertThat(creditBalanceService.getBalance(userId).getBalance()).isEqualTo(8);
+		assertThat(creditBalanceQueryService.getBalance(userId).getBalance()).isEqualTo(8);
 	}
 
 	@Test
@@ -110,7 +114,7 @@ class PracticeSessionServiceTest {
 			futures.add(pool.submit(() -> {
 				ready.countDown();
 				start.await();
-				practiceSessionService.submit(userId, selection.getId());
+				practiceSessionCommandService.submit(userId, selection.getId());
 				successCount.incrementAndGet();
 				return true;
 			}));
@@ -125,7 +129,7 @@ class PracticeSessionServiceTest {
 
 		assertThat(successCount.get()).isEqualTo(totalRequests);
 		assertThat(practiceCreditChargeRepository.countByTopicSelectionId(selection.getId())).isEqualTo(1);
-		assertThat(creditBalanceService.getBalance(userId).getBalance()).isEqualTo(98);
+		assertThat(creditBalanceQueryService.getBalance(userId).getBalance()).isEqualTo(98);
 	}
 
 	@Test
@@ -157,7 +161,7 @@ class PracticeSessionServiceTest {
 
 		assertThat(success).isEqualTo(1);
 		assertThat(failed).isEqualTo(1);
-		assertThat(creditBalanceService.getBalance(userId).getBalance()).isZero();
+		assertThat(creditBalanceQueryService.getBalance(userId).getBalance()).isZero();
 		assertThat(practiceCreditChargeRepository.count()).isEqualTo(1);
 	}
 
@@ -171,7 +175,7 @@ class PracticeSessionServiceTest {
 		creditBalanceService.addBalance(attacker, 10);
 		TopicSelection selection = topicSelectionRepository.save(new TopicSelection(owner, UUID.randomUUID()));
 
-		assertThatThrownBy(() -> practiceSessionService.submit(attacker, selection.getId()))
+		assertThatThrownBy(() -> practiceSessionCommandService.submit(attacker, selection.getId()))
 			.isInstanceOf(ApiException.class)
 			.hasMessageContaining("Topic selection not found");
 	}
@@ -183,11 +187,11 @@ class PracticeSessionServiceTest {
 		creditBalanceService.addBalance(userId, 1);
 		TopicSelection selection = topicSelectionRepository.save(new TopicSelection(userId, UUID.randomUUID()));
 
-		assertThatThrownBy(() -> practiceSessionService.submit(userId, selection.getId()))
+		assertThatThrownBy(() -> practiceSessionCommandService.submit(userId, selection.getId()))
 			.isInstanceOf(ApiException.class)
 			.hasMessageContaining("At least 2 credits");
 		assertThat(practiceCreditChargeRepository.countByTopicSelectionId(selection.getId())).isZero();
-		assertThat(creditBalanceService.getBalance(userId).getBalance()).isEqualTo(1);
+		assertThat(creditBalanceQueryService.getBalance(userId).getBalance()).isEqualTo(1);
 	}
 
 	private Callable<Boolean> callSubmit(
@@ -200,7 +204,7 @@ class PracticeSessionServiceTest {
 			ready.countDown();
 			start.await();
 			try {
-				practiceSessionService.submit(userId, selectionId);
+				practiceSessionCommandService.submit(userId, selectionId);
 				return true;
 			} catch (ApiException ex) {
 				return false;

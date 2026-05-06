@@ -1,6 +1,6 @@
 package com.opicer.api.practice.application;
 
-import com.opicer.api.credit.application.CreditBalanceService;
+import com.opicer.api.credit.application.CreditBalanceCommandService;
 import com.opicer.api.practice.domain.PracticeCreditCharge;
 import com.opicer.api.practice.domain.TopicSelection;
 import com.opicer.api.practice.infrastructure.PracticeCreditChargeRepository;
@@ -12,22 +12,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class PracticeSessionService {
+public class PracticeSessionCommandService {
 
 	private static final int PRACTICE_COST = 2;
 
 	private final TopicSelectionRepository topicSelectionRepository;
 	private final PracticeCreditChargeRepository practiceCreditChargeRepository;
-	private final CreditBalanceService creditBalanceService;
+	private final CreditBalanceCommandService creditBalanceCommandService;
 
-	public PracticeSessionService(
+	public PracticeSessionCommandService(
 		TopicSelectionRepository topicSelectionRepository,
 		PracticeCreditChargeRepository practiceCreditChargeRepository,
-		CreditBalanceService creditBalanceService
+		CreditBalanceCommandService creditBalanceCommandService
 	) {
 		this.topicSelectionRepository = topicSelectionRepository;
 		this.practiceCreditChargeRepository = practiceCreditChargeRepository;
-		this.creditBalanceService = creditBalanceService;
+		this.creditBalanceCommandService = creditBalanceCommandService;
 	}
 
 	@Transactional
@@ -41,7 +41,7 @@ public class PracticeSessionService {
 			return new SubmitResult(existing.getId(), true, existing.getAmount());
 		}
 
-		boolean deducted = creditBalanceService.deductIfEnough(userId, PRACTICE_COST);
+		boolean deducted = creditBalanceCommandService.deductIfEnough(userId, PRACTICE_COST);
 		if (!deducted) {
 			throw new ApiException(ErrorCode.CREDIT_INSUFFICIENT_BALANCE, "At least 2 credits are required to submit practice");
 		}

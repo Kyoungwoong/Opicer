@@ -1,6 +1,7 @@
 package com.opicer.api.dailysentence.presentation;
 
-import com.opicer.api.dailysentence.application.DailySentenceService;
+import com.opicer.api.dailysentence.application.DailySentenceCommandService;
+import com.opicer.api.dailysentence.application.DailySentenceQueryService;
 import com.opicer.api.dailysentence.domain.DailySentence;
 import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.error.ApiException;
@@ -27,15 +28,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/daily-sentences")
 public class AdminDailySentenceController {
 
-	private final DailySentenceService dailySentenceService;
+	private final DailySentenceQueryService dailySentenceQueryService;
+	private final DailySentenceCommandService dailySentenceCommandService;
 
-	public AdminDailySentenceController(DailySentenceService dailySentenceService) {
-		this.dailySentenceService = dailySentenceService;
+	public AdminDailySentenceController(
+		DailySentenceQueryService dailySentenceQueryService,
+		DailySentenceCommandService dailySentenceCommandService
+	) {
+		this.dailySentenceQueryService = dailySentenceQueryService;
+		this.dailySentenceCommandService = dailySentenceCommandService;
 	}
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<List<DailySentenceResponse>>> list() {
-		List<DailySentenceResponse> sentences = dailySentenceService.findAll().stream()
+		List<DailySentenceResponse> sentences = dailySentenceQueryService.findAll().stream()
 			.map(DailySentenceResponse::from)
 			.toList();
 		return ResponseEntity.ok(ApiResponse.ok("DAILY_SENTENCE_LIST_OK", sentences));
@@ -43,7 +49,7 @@ public class AdminDailySentenceController {
 
 	@PostMapping
 	public ResponseEntity<Object> create(@Valid @RequestBody DailySentenceRequest request) {
-		DailySentence sentence = dailySentenceService.create(
+		DailySentence sentence = dailySentenceCommandService.create(
 			request.date(), request.text(), request.level(), request.audioUrl());
 		return ResponseEntity.status(201)
 			.body(ApiResponse.created("DAILY_SENTENCE_CREATED", DailySentenceResponse.from(sentence)));
@@ -52,7 +58,7 @@ public class AdminDailySentenceController {
 	@PutMapping("/{id}")
 	public ResponseEntity<Object> update(@PathVariable UUID id,
 		@Valid @RequestBody DailySentenceRequest request) {
-		return dailySentenceService.update(id, request.date(), request.text(), request.level(),
+		return dailySentenceCommandService.update(id, request.date(), request.text(), request.level(),
 				request.audioUrl(), request.active() != null ? request.active() : true)
 			.<ResponseEntity<Object>>map(s -> ResponseEntity.ok(
 				ApiResponse.ok("DAILY_SENTENCE_UPDATED", DailySentenceResponse.from(s))))
@@ -63,7 +69,7 @@ public class AdminDailySentenceController {
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Object> delete(@PathVariable UUID id) {
-		if (dailySentenceService.delete(id)) {
+		if (dailySentenceCommandService.delete(id)) {
 			return ResponseEntity.ok(ApiResponse.ok("DAILY_SENTENCE_DELETED", null));
 		}
 		throw new ApiException(

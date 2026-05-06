@@ -1,6 +1,7 @@
 package com.opicer.api.prompt.presentation;
 
-import com.opicer.api.prompt.application.PromptVersionService;
+import com.opicer.api.prompt.application.PromptVersionCommandService;
+import com.opicer.api.prompt.application.PromptVersionQueryService;
 import com.opicer.api.prompt.domain.PromptUseCase;
 import com.opicer.api.prompt.domain.PromptVersion;
 import com.opicer.api.shared.error.ApiException;
@@ -27,15 +28,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/prompts")
 public class AdminPromptVersionController {
 
-	private final PromptVersionService promptVersionService;
+	private final PromptVersionQueryService promptVersionQueryService;
+	private final PromptVersionCommandService promptVersionCommandService;
 
-	public AdminPromptVersionController(PromptVersionService promptVersionService) {
-		this.promptVersionService = promptVersionService;
+	public AdminPromptVersionController(
+		PromptVersionQueryService promptVersionQueryService,
+		PromptVersionCommandService promptVersionCommandService
+	) {
+		this.promptVersionQueryService = promptVersionQueryService;
+		this.promptVersionCommandService = promptVersionCommandService;
 	}
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<List<PromptVersionResponse>>> list() {
-		List<PromptVersionResponse> versions = promptVersionService.findAll().stream()
+		List<PromptVersionResponse> versions = promptVersionQueryService.findAll().stream()
 			.map(PromptVersionResponse::from)
 			.toList();
 		return ResponseEntity.ok(ApiResponse.ok("PROMPT_LIST_OK", versions));
@@ -43,7 +49,7 @@ public class AdminPromptVersionController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<PromptVersionResponse>> create(@Valid @RequestBody PromptVersionRequest request) {
-		PromptVersion version = promptVersionService.create(
+		PromptVersion version = promptVersionCommandService.create(
 			request.useCase(), request.version(), request.name(), request.template());
 		return ResponseEntity.status(201)
 			.body(ApiResponse.created("PROMPT_CREATED", PromptVersionResponse.from(version)));
@@ -52,7 +58,7 @@ public class AdminPromptVersionController {
 	@PutMapping("/{id}")
 	public ResponseEntity<Object> update(@PathVariable UUID id,
 		@Valid @RequestBody PromptVersionRequest request) {
-		return promptVersionService.update(id, request.useCase(), request.version(),
+		return promptVersionCommandService.update(id, request.useCase(), request.version(),
 				request.name(), request.template())
 			.<ResponseEntity<Object>>map(v -> ResponseEntity.ok(
 				ApiResponse.ok("PROMPT_UPDATED", PromptVersionResponse.from(v))))
@@ -62,7 +68,7 @@ public class AdminPromptVersionController {
 
 	@PostMapping("/{id}/activate")
 	public ResponseEntity<Object> activate(@PathVariable UUID id) {
-		return promptVersionService.activate(id)
+		return promptVersionCommandService.activate(id)
 			.<ResponseEntity<Object>>map(v -> ResponseEntity.ok(
 				ApiResponse.ok("PROMPT_ACTIVATED", PromptVersionResponse.from(v))))
 			.orElseThrow(() -> new ApiException(
@@ -71,7 +77,7 @@ public class AdminPromptVersionController {
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Object> delete(@PathVariable UUID id) {
-		if (promptVersionService.delete(id)) {
+		if (promptVersionCommandService.delete(id)) {
 			return ResponseEntity.ok(ApiResponse.ok("PROMPT_DELETED", null));
 		}
 		throw new ApiException(ErrorCode.PROMPT_NOT_FOUND, "PromptVersion not found: " + id);
