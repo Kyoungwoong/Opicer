@@ -1,25 +1,4 @@
 {
-  "common": {
-    "loading": "불러오는 중...",
-    "userFallback": "사용자"
-  },
-  "topNav": {
-    "items": {
-      "guide": "OPIC 설명",
-      "practice": "주제별 연습하기",
-      "mock": "실전 연습하기"
-    },
-    "menu": {
-      "mypage": "마이페이지",
-      "credit": "결제/크레딧 구매",
-      "logout": "로그아웃"
-    }
-  },
-  "home": {
-    "greetingFallback": "반갑습니다",
-    "headline": "안녕하세요, {name} 👋",
-    "subHeadline": "오늘도 말하기 연습을 시작해볼까요?"
-  },
   "universalSentences": {
     "description": "OPIC에서 자주 쓰는 만능 문장",
     "actionLabel": "관리자 연동 예정",

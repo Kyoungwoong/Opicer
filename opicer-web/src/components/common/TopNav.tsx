@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
-import { frontPageText } from "@/locales/frontPage";
+import { ko } from "@/locales/ko";
 
 type NavItem = {
   title: string;
@@ -12,9 +12,9 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { title: frontPageText.topNav.items.guide, href: "/guide" },
-  { title: frontPageText.topNav.items.practice, href: "/practice" },
-  { title: frontPageText.topNav.items.mock, href: "/mock", disabled: true },
+  { title: ko.common.topNav.items.guide, href: "/guide" },
+  { title: ko.common.topNav.items.practice, href: "/practice" },
+  { title: ko.common.topNav.items.mock, href: "/mock", disabled: true },
 ];
 
 type Props = {
@@ -112,7 +112,7 @@ export function TopNav({
                   onClick={() => setIsMenuOpen(false)}
                   className="block rounded-xl px-3 py-2 text-[var(--ink)] hover:bg-[var(--accent)]/10"
                 >
-                  {frontPageText.topNav.menu.mypage}
+                  {ko.common.topNav.menu.mypage}
                 </Link>
                 <Link
                   href={ROUTES.credit}
@@ -120,7 +120,7 @@ export function TopNav({
                   onClick={() => setIsMenuOpen(false)}
                   className="block rounded-xl px-3 py-2 text-[var(--ink)] hover:bg-[var(--accent)]/10"
                 >
-                  {frontPageText.topNav.menu.credit}
+                  {ko.common.topNav.menu.credit}
                 </Link>
               </div>
             ) : null}
@@ -130,7 +130,7 @@ export function TopNav({
             onClick={onLogout}
             className="rounded-full border border-black/10 px-4 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:border-transparent hover:bg-[var(--accent)] hover:text-white"
           >
-            {frontPageText.topNav.menu.logout}
+            {ko.common.topNav.menu.logout}
           </button>
         </div>
       ) : (

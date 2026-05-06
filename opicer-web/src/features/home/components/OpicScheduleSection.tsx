@@ -1,6 +1,6 @@
 import { OPIC_CALENDAR } from "@/features/home/data";
 import { SectionShell } from "@/features/home/components/SectionShell";
-import { frontPageText } from "@/locales/frontPage";
+import { ko } from "@/locales/ko";
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -13,10 +13,10 @@ export function OpicScheduleSection() {
   return (
     <SectionShell
       title="OPIC schedule"
-      description={frontPageText.opicSchedule.description}
+      description={ko.home.opicSchedule.description}
       action={
         <span className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[var(--muted)]">
-          {frontPageText.opicSchedule.actionLabel}
+          {ko.home.opicSchedule.actionLabel}
         </span>
       }
     >
@@ -25,7 +25,7 @@ export function OpicScheduleSection() {
           {OPIC_CALENDAR.monthLabel}
         </h4>
         <span className="text-xs text-[var(--muted)]">
-          {frontPageText.opicSchedule.officialNotice}
+          {ko.home.opicSchedule.officialNotice}
         </span>
       </div>
 
@@ -71,7 +71,7 @@ export function OpicScheduleSection() {
             />
             <span>
               {event.date}
-              {frontPageText.opicSchedule.dateUnit} {frontPageText.opicSchedule.eventSeparator}{" "}
+              {ko.home.opicSchedule.dateUnit} {ko.home.opicSchedule.eventSeparator}{" "}
               {event.label}
             </span>
           </div>

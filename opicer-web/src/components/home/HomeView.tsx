@@ -3,7 +3,7 @@ import { TopNav } from "@/components/common/TopNav";
 import { UniversalSentencesSection } from "@/features/home/components/UniversalSentencesSection";
 import { RecentActivitySection } from "@/features/home/components/RecentActivitySection";
 import { OpicScheduleSection } from "@/features/home/components/OpicScheduleSection";
-import { frontPageText } from "@/locales/frontPage";
+import { ko } from "@/locales/ko";
 
 export function HomeView({
   user,
@@ -15,7 +15,7 @@ export function HomeView({
   return (
     <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
       <TopNav
-        userLabel={user.name ?? user.email ?? frontPageText.common.userFallback}
+        userLabel={user.name ?? user.email ?? ko.common.userFallback}
         onLogout={onLogout}
         maxWidthClassName="max-w-5xl"
       />
@@ -26,13 +26,13 @@ export function HomeView({
             Welcome back
           </p>
           <h2 className="text-3xl font-semibold leading-tight">
-            {frontPageText.home.headline.replace(
+            {ko.common.homeGreeting.headline.replace(
               "{name}",
-              user.name?.split(" ")[0] ?? frontPageText.home.greetingFallback
+              user.name?.split(" ")[0] ?? ko.common.homeGreeting.fallback
             )}
           </h2>
           <p className="text-sm text-[var(--muted)]">
-            {frontPageText.home.subHeadline}
+            {ko.common.homeGreeting.subHeadline}
           </p>
         </div>
 

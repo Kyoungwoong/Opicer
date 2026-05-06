@@ -5,7 +5,7 @@ import { fetchUniversalSentences } from "@/features/home/api";
 import { UNIVERSAL_SENTENCES } from "@/features/home/data";
 import { SectionShell } from "@/features/home/components/SectionShell";
 import type { UniversalSentence } from "@/features/home/types";
-import { frontPageText } from "@/locales/frontPage";
+import { ko } from "@/locales/ko";
 
 const TYPE_LABELS: Record<UniversalSentence["type"], string> = {
   OPINION: "Opinion",
@@ -57,10 +57,10 @@ export function UniversalSentencesSection() {
   return (
     <SectionShell
       title="Universal sentences"
-      description={frontPageText.universalSentences.description}
+      description={ko.home.universalSentences.description}
       action={
         <span className="rounded-full border border-[var(--accent)]/20 px-4 py-2 text-xs font-semibold text-[var(--accent-strong)]">
-          {frontPageText.universalSentences.actionLabel}
+          {ko.home.universalSentences.actionLabel}
         </span>
       }
     >
@@ -68,7 +68,7 @@ export function UniversalSentencesSection() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-[var(--accent-strong)]">
-              {current?.title ?? frontPageText.universalSentences.titleLoading}
+              {current?.title ?? ko.home.universalSentences.titleLoading}
             </p>
             <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
               {current ? TYPE_LABELS[current.type] : "Loading"}
@@ -95,7 +95,7 @@ export function UniversalSentencesSection() {
         </div>
 
         <p className="text-lg font-semibold leading-relaxed text-[var(--ink)] break-words">
-          {current?.sentence ?? frontPageText.universalSentences.sentenceLoading}
+          {current?.sentence ?? ko.home.universalSentences.sentenceLoading}
         </p>
 
         <div className="flex flex-wrap gap-2">

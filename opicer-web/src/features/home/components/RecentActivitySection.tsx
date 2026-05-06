@@ -1,21 +1,21 @@
 import { RECENT_ACTIVITIES } from "@/features/home/data";
 import { SectionShell } from "@/features/home/components/SectionShell";
-import { frontPageText } from "@/locales/frontPage";
+import { ko } from "@/locales/ko";
 
 const STATUS_LABEL = {
-  complete: frontPageText.recentActivity.status.complete,
-  in_progress: frontPageText.recentActivity.status.in_progress,
-  recommended: frontPageText.recentActivity.status.recommended,
+  complete: ko.home.recentActivity.status.complete,
+  in_progress: ko.home.recentActivity.status.in_progress,
+  recommended: ko.home.recentActivity.status.recommended,
 } as const;
 
 export function RecentActivitySection() {
   return (
     <SectionShell
       title="Recent activity"
-      description={frontPageText.recentActivity.description}
+      description={ko.home.recentActivity.description}
       action={
         <button className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[var(--muted)] transition hover:border-transparent hover:bg-[var(--accent)] hover:text-white">
-          {frontPageText.recentActivity.viewAll}
+          {ko.home.recentActivity.viewAll}
         </button>
       }
     >
