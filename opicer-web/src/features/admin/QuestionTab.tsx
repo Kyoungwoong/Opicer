@@ -121,9 +121,9 @@ export function QuestionTab() {
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-black/8 bg-[var(--card)] p-5 space-y-4"
+        className="rounded-xl border border-black/8 bg-card p-5 space-y-4"
       >
-        <h3 className="font-semibold text-[var(--ink)]">
+        <h3 className="font-semibold text-foreground">
           {editId ? "질문 수정" : "질문 추가"}
         </h3>
         {error && (
@@ -133,19 +133,19 @@ export function QuestionTab() {
         )}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">
+            <label className="text-xs font-medium text-muted-foreground">
               Topic
             </label>
             <input
               required
               value={form.topic}
               onChange={(e) => setForm((f) => ({ ...f, topic: e.target.value }))}
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
               placeholder="예: 주거환경"
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">
+            <label className="text-xs font-medium text-muted-foreground">
               Type
             </label>
             <select
@@ -153,7 +153,7 @@ export function QuestionTab() {
               onChange={(e) =>
                 setForm((f) => ({ ...f, type: e.target.value as QuestionType }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             >
               {QUESTION_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -164,7 +164,7 @@ export function QuestionTab() {
           </div>
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-[var(--muted)]">
+          <label className="text-xs font-medium text-muted-foreground">
             Prompt Text
           </label>
           <textarea
@@ -174,13 +174,13 @@ export function QuestionTab() {
             onChange={(e) =>
               setForm((f) => ({ ...f, promptText: e.target.value }))
             }
-            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             placeholder="질문 내용"
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">
+            <label className="text-xs font-medium text-muted-foreground">
               Structural Hint (선택)
             </label>
             <input
@@ -188,11 +188,11 @@ export function QuestionTab() {
               onChange={(e) =>
                 setForm((f) => ({ ...f, structuralHint: e.target.value }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">
+            <label className="text-xs font-medium text-muted-foreground">
               Key Expressions (쉼표 구분)
             </label>
             <input
@@ -200,13 +200,13 @@ export function QuestionTab() {
               onChange={(e) =>
                 setForm((f) => ({ ...f, keyExpressions: e.target.value }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
               placeholder="예: I usually, On weekends"
             />
           </div>
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-medium text-[var(--muted)]">
+          <label className="text-xs font-medium text-muted-foreground">
             Target Levels
           </label>
           <div className="flex gap-2">
@@ -219,7 +219,7 @@ export function QuestionTab() {
                   type="checkbox"
                   checked={form.targetLevels.includes(level)}
                   onChange={() => toggleLevel(level)}
-                  className="accent-[var(--accent)]"
+                  className="accent-primary"
                 />
                 {level}
               </label>
@@ -234,16 +234,16 @@ export function QuestionTab() {
               onChange={(e) =>
                 setForm((f) => ({ ...f, active: e.target.checked }))
               }
-              className="accent-[var(--accent)]"
+              className="accent-primary"
             />
-            <span className="text-[var(--muted)]">Active</span>
+            <span className="text-muted-foreground">Active</span>
           </label>
         )}
         <div className="flex gap-2">
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-[var(--accent)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)] disabled:opacity-50"
+            className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary-strong disabled:opacity-50"
           >
             {loading ? "저장 중..." : editId ? "수정" : "추가"}
           </button>
@@ -251,7 +251,7 @@ export function QuestionTab() {
             <button
               type="button"
               onClick={cancelEdit}
-              className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-[var(--muted)] transition hover:bg-black/5"
+              className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-black/5"
             >
               취소
             </button>
@@ -262,7 +262,7 @@ export function QuestionTab() {
       {/* Table */}
       <div className="overflow-x-auto rounded-xl border border-black/8">
         <table className="w-full text-sm">
-          <thead className="bg-[var(--card)] text-[var(--muted)]">
+          <thead className="bg-card text-muted-foreground">
             <tr>
               <th className="px-4 py-3 text-left font-medium">Topic</th>
               <th className="px-4 py-3 text-left font-medium">Type</th>
@@ -276,17 +276,17 @@ export function QuestionTab() {
               <tr>
                 <td
                   colSpan={5}
-                  className="px-4 py-6 text-center text-[var(--muted)]"
+                  className="px-4 py-6 text-center text-muted-foreground"
                 >
                   질문이 없습니다.
                 </td>
               </tr>
             )}
             {questions.map((q) => (
-              <tr key={q.id} className="hover:bg-[var(--background)]">
+              <tr key={q.id} className="hover:bg-background">
                 <td className="px-4 py-3 font-medium">{q.topic}</td>
-                <td className="px-4 py-3 text-[var(--muted)]">{q.type}</td>
-                <td className="px-4 py-3 text-[var(--muted)]">
+                <td className="px-4 py-3 text-muted-foreground">{q.type}</td>
+                <td className="px-4 py-3 text-muted-foreground">
                   {q.targetLevels.join(", ")}
                 </td>
                 <td className="px-4 py-3">
@@ -304,7 +304,7 @@ export function QuestionTab() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => startEdit(q)}
-                      className="text-[var(--accent)] hover:underline"
+                      className="text-primary hover:underline"
                     >
                       수정
                     </button>

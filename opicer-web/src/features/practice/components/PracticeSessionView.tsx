@@ -425,12 +425,12 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
   // ── Submitting screen ────────────────────────────────────────
   if (mode === "submitting") {
     return (
-      <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
+      <div className="min-h-screen px-6 py-10 text-foreground">
         <div className="mx-auto flex max-w-4xl flex-col gap-8">
           <TopNav userLabel={userLabel} onLogout={onLogout} />
           <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
-            <p className="text-sm text-[var(--muted)]">답변 분석 중…</p>
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <p className="text-sm text-muted-foreground">답변 분석 중…</p>
           </div>
         </div>
       </div>
@@ -440,7 +440,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
   // ── Summary screen ───────────────────────────────────────────
   if (mode === "summary") {
     return (
-      <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
+      <div className="min-h-screen px-6 py-10 text-foreground">
         <div className="mx-auto flex max-w-4xl flex-col gap-8">
           <TopNav userLabel={userLabel} onLogout={onLogout} />
 
@@ -452,9 +452,9 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
           ) : null}
 
           <section className="rounded-[32px] border border-black/5 bg-white/70 p-8 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.32em] text-[var(--muted)]">Practice Summary</p>
+            <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">Practice Summary</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">연습 완료</h1>
-            <p className="mt-1 text-sm text-[var(--muted)]">{topicTitle} · {answers.length}문항 답변 완료</p>
+            <p className="mt-1 text-sm text-muted-foreground">{topicTitle} · {answers.length}문항 답변 완료</p>
           </section>
 
           <div className="space-y-6">
@@ -465,25 +465,25 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
                   key={answer.questionId}
                   className="rounded-[24px] border border-black/10 bg-white/70 p-5 shadow-sm"
                 >
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     Question {idx + 1}
                   </p>
                   <p className="mt-2 text-base font-semibold">{answer.questionText}</p>
 
                   {/* Transcript + audio */}
-                  <div className="mt-4 rounded-2xl border border-[var(--accent)]/20 bg-[var(--accent)]/10 p-4">
-                    <p className="text-xs font-semibold text-[var(--accent-strong)]">Your Answer</p>
+                  <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/10 p-4">
+                    <p className="text-xs font-semibold text-primary-strong">Your Answer</p>
                     {answer.transcript ? (
                       <p className="mt-2 text-sm leading-relaxed">{answer.transcript}</p>
                     ) : answer.transcribeError ? (
                       <p className="mt-2 text-sm text-red-500">전사 실패: {answer.transcribeError}</p>
                     ) : (
-                      <p className="mt-2 text-sm text-[var(--muted)]">전사 텍스트 없음</p>
+                      <p className="mt-2 text-sm text-muted-foreground">전사 텍스트 없음</p>
                     )}
                     {answer.audioUrl ? (
                       <audio controls src={answer.audioUrl} className="mt-3 w-full" />
                     ) : (
-                      <p className="mt-2 text-sm text-[var(--muted)]">녹음된 답변이 없습니다.</p>
+                      <p className="mt-2 text-sm text-muted-foreground">녹음된 답변이 없습니다.</p>
                     )}
                   </div>
 
@@ -496,8 +496,8 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
                         disabled={ai.isAnalyzing || ai.analysis !== null}
                         className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
                           ai.isAnalyzing || ai.analysis !== null
-                            ? "cursor-not-allowed bg-black/5 text-[var(--muted)]"
-                            : "bg-[var(--accent)] text-white hover:bg-[var(--accent-strong)]"
+                            ? "cursor-not-allowed bg-black/5 text-muted-foreground"
+                            : "bg-primary text-white hover:bg-primary-strong"
                         }`}
                       >
                         {ai.isAnalyzing ? "분석 중…" : ai.analysis ? "분석 완료" : "분석하기"}
@@ -508,7 +508,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
                         disabled={ai.isImproving || ai.improvement !== null}
                         className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
                           ai.isImproving || ai.improvement !== null
-                            ? "cursor-not-allowed bg-black/5 text-[var(--muted)]"
+                            ? "cursor-not-allowed bg-black/5 text-muted-foreground"
                             : "bg-black text-white hover:bg-black/80"
                         }`}
                       >
@@ -523,7 +523,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
                   )}
                   {ai.analysis && (
                     <div className="mt-4 rounded-2xl border border-black/10 bg-white/80 p-4 text-sm leading-relaxed whitespace-pre-wrap">
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">AI 분석</p>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">AI 분석</p>
                       {ai.analysis}
                     </div>
                   )}
@@ -549,7 +549,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
             <button
               type="button"
               onClick={() => router.push(ROUTES.practice)}
-              className="rounded-full bg-[var(--accent)] px-8 py-3 text-sm font-semibold text-white hover:bg-[var(--accent-strong)]"
+              className="rounded-full bg-primary px-8 py-3 text-sm font-semibold text-white hover:bg-primary-strong"
             >
               다른 주제 연습하기
             </button>
@@ -564,7 +564,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
                     setError(message);
                   }
                 }}
-                className="text-sm text-[var(--muted)] hover:underline"
+                className="text-sm text-muted-foreground hover:underline"
               >
                 같은 주제 다시 연습하기
               </button>
@@ -577,7 +577,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
   // ── Loading / error screen ───────────────────────────────────
   if (mode === "loading") {
     return (
-      <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
+      <div className="min-h-screen px-6 py-10 text-foreground">
         <div className="mx-auto flex max-w-4xl flex-col gap-8">
           <TopNav userLabel={userLabel} onLogout={onLogout} />
           <div className="flex flex-col items-center justify-center py-24 gap-4">
@@ -587,13 +587,13 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
                 <button
                   type="button"
                   onClick={() => router.push(ROUTES.practice)}
-                  className="text-sm text-[var(--muted)] hover:underline"
+                  className="text-sm text-muted-foreground hover:underline"
                 >
                   ← 주제 선택으로 돌아가기
                 </button>
               </>
             ) : (
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             )}
           </div>
         </div>
@@ -603,7 +603,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
 
   // ── Practice screen ──────────────────────────────────────────
   return (
-    <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
+    <div className="min-h-screen px-6 py-10 text-foreground">
       <div className="mx-auto flex max-w-4xl flex-col gap-8">
         <TopNav userLabel={userLabel} onLogout={onLogout} />
 
@@ -611,9 +611,9 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
         <section className="rounded-[32px] border border-black/5 bg-white/70 p-8 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.32em] text-[var(--muted)]">Topic Practice</p>
+              <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">Topic Practice</p>
               <h1 className="mt-2 text-3xl font-semibold tracking-tight">{topicTitle}</h1>
-              <p className="mt-2 text-sm text-[var(--muted)]">
+              <p className="mt-2 text-sm text-muted-foreground">
                 질문 {currentIndex + 1} / {questions.length}
               </p>
             </div>
@@ -621,7 +621,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
               className={`rounded-2xl border px-4 py-3 text-center ${
                 warning
                   ? "border-red-400 bg-red-50 text-red-700 animate-pulse"
-                  : "border-black/10 bg-white text-[var(--muted)]"
+                  : "border-black/10 bg-white text-muted-foreground"
               }`}
             >
               <p className="text-xs uppercase tracking-[0.2em]">Time</p>
@@ -636,26 +636,26 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
 
         {/* Question card */}
         <section className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Question</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Question</p>
           <h2 className="mt-3 text-2xl font-semibold leading-relaxed">
             {currentQuestion?.promptText ?? "질문을 불러오는 중입니다."}
           </h2>
           {currentQuestion?.structuralHint ? (
-            <p className="mt-3 text-sm text-[var(--muted)]">{currentQuestion.structuralHint}</p>
+            <p className="mt-3 text-sm text-muted-foreground">{currentQuestion.structuralHint}</p>
           ) : null}
 
           {/* Status + replay */}
           <div className="mt-6 flex flex-wrap items-center gap-3">
             {mode === "playing" ? (
-              <span className="flex items-center gap-2 rounded-full bg-[var(--accent)]/10 px-4 py-2 text-sm font-semibold text-[var(--accent-strong)]">
-                <span className="h-2 w-2 rounded-full bg-[var(--accent)] animate-pulse" />
+              <span className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary-strong">
+                <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                 질문 재생 중…
               </span>
             ) : (
               <span className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
                 isRecording
                   ? "bg-red-50 text-red-700"
-                  : "bg-black/5 text-[var(--muted)]"
+                  : "bg-black/5 text-muted-foreground"
               }`}>
                 <span className={`h-2 w-2 rounded-full ${isRecording ? "bg-red-500 animate-pulse" : "bg-black/20"}`} />
                 {isRecording ? "녹음 중…" : "대기 중"}
@@ -667,7 +667,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
               <button
                 type="button"
                 onClick={handleReplay}
-                className="rounded-full border border-[var(--accent)]/40 px-4 py-2 text-sm font-semibold text-[var(--accent-strong)] hover:bg-[var(--accent)]/10"
+                className="rounded-full border border-primary/40 px-4 py-2 text-sm font-semibold text-primary-strong hover:bg-primary/10"
               >
                 다시 듣기 ({replayWindow}s)
               </button>
@@ -685,7 +685,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
                 disabled={mode === "playing"}
                 className={`rounded-full px-6 py-2 text-sm font-semibold ${
                   mode === "playing"
-                    ? "cursor-not-allowed bg-black/10 text-[var(--muted)]"
+                    ? "cursor-not-allowed bg-black/10 text-muted-foreground"
                     : "bg-black text-white hover:bg-black/80"
                 }`}
               >
@@ -698,8 +698,8 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
                 disabled={mode === "playing"}
                 className={`rounded-full px-6 py-2 text-sm font-semibold ${
                   mode === "playing"
-                    ? "cursor-not-allowed bg-black/10 text-[var(--muted)]"
-                    : "bg-[var(--accent)] text-white hover:bg-[var(--accent-strong)]"
+                    ? "cursor-not-allowed bg-black/10 text-muted-foreground"
+                    : "bg-primary text-white hover:bg-primary-strong"
                 }`}
               >
                 제출하기
@@ -713,7 +713,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
           <button
             type="button"
             onClick={() => { stopAll(); router.push(ROUTES.practice); }}
-            className="text-sm text-[var(--muted)] hover:underline"
+            className="text-sm text-muted-foreground hover:underline"
           >
             ← 주제 선택으로 돌아가기
           </button>

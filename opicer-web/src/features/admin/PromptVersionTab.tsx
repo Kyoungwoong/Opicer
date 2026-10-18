@@ -96,9 +96,9 @@ export function PromptVersionTab() {
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-black/8 bg-[var(--card)] p-5 space-y-4"
+        className="rounded-xl border border-black/8 bg-card p-5 space-y-4"
       >
-        <h3 className="font-semibold text-[var(--ink)]">
+        <h3 className="font-semibold text-foreground">
           {editId ? "프롬프트 수정" : "프롬프트 추가"}
         </h3>
         {error && (
@@ -108,7 +108,7 @@ export function PromptVersionTab() {
         )}
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">
+            <label className="text-xs font-medium text-muted-foreground">
               Use Case
             </label>
             <select
@@ -119,7 +119,7 @@ export function PromptVersionTab() {
                   useCase: e.target.value as PromptUseCase,
                 }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             >
               {USE_CASES.map((uc) => (
                 <option key={uc} value={uc}>
@@ -129,7 +129,7 @@ export function PromptVersionTab() {
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">
+            <label className="text-xs font-medium text-muted-foreground">
               Version
             </label>
             <input
@@ -140,24 +140,24 @@ export function PromptVersionTab() {
               onChange={(e) =>
                 setForm((f) => ({ ...f, version: Number(e.target.value) }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">
+            <label className="text-xs font-medium text-muted-foreground">
               Name
             </label>
             <input
               required
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
               placeholder="v1-strict"
             />
           </div>
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-[var(--muted)]">
+          <label className="text-xs font-medium text-muted-foreground">
             Template
           </label>
           <textarea
@@ -167,7 +167,7 @@ export function PromptVersionTab() {
             onChange={(e) =>
               setForm((f) => ({ ...f, template: e.target.value }))
             }
-            className="w-full rounded-lg border border-black/10 px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+            className="w-full rounded-lg border border-black/10 px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-ring/30"
             placeholder="프롬프트 템플릿 내용..."
           />
         </div>
@@ -175,7 +175,7 @@ export function PromptVersionTab() {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-[var(--accent)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)] disabled:opacity-50"
+            className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary-strong disabled:opacity-50"
           >
             {loading ? "저장 중..." : editId ? "수정" : "추가"}
           </button>
@@ -183,7 +183,7 @@ export function PromptVersionTab() {
             <button
               type="button"
               onClick={cancelEdit}
-              className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-[var(--muted)] transition hover:bg-black/5"
+              className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-black/5"
             >
               취소
             </button>
@@ -194,7 +194,7 @@ export function PromptVersionTab() {
       {/* Table */}
       <div className="overflow-x-auto rounded-xl border border-black/8">
         <table className="w-full text-sm">
-          <thead className="bg-[var(--card)] text-[var(--muted)]">
+          <thead className="bg-card text-muted-foreground">
             <tr>
               <th className="px-4 py-3 text-left font-medium">Use Case</th>
               <th className="px-4 py-3 text-left font-medium">v</th>
@@ -208,17 +208,17 @@ export function PromptVersionTab() {
               <tr>
                 <td
                   colSpan={5}
-                  className="px-4 py-6 text-center text-[var(--muted)]"
+                  className="px-4 py-6 text-center text-muted-foreground"
                 >
                   등록된 프롬프트가 없습니다.
                 </td>
               </tr>
             )}
             {versions.map((v) => (
-              <tr key={v.id} className="hover:bg-[var(--background)]">
+              <tr key={v.id} className="hover:bg-background">
                 <td className="px-4 py-3 font-medium">{v.useCase}</td>
-                <td className="px-4 py-3 text-[var(--muted)]">{v.version}</td>
-                <td className="px-4 py-3 text-[var(--muted)]">{v.name}</td>
+                <td className="px-4 py-3 text-muted-foreground">{v.version}</td>
+                <td className="px-4 py-3 text-muted-foreground">{v.name}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -242,7 +242,7 @@ export function PromptVersionTab() {
                     )}
                     <button
                       onClick={() => startEdit(v)}
-                      className="text-[var(--accent)] hover:underline"
+                      className="text-primary hover:underline"
                     >
                       수정
                     </button>

@@ -14,7 +14,7 @@ export function RecentActivitySection() {
       title="Recent activity"
       description={ko.home.recentActivity.description}
       action={
-        <button className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[var(--muted)] transition hover:border-transparent hover:bg-[var(--accent)] hover:text-white">
+        <button className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-muted-foreground transition hover:border-transparent hover:bg-primary hover:text-white">
           {ko.home.recentActivity.viewAll}
         </button>
       }
@@ -27,11 +27,11 @@ export function RecentActivitySection() {
           >
             <div>
               <p className="text-sm font-semibold">{item.title}</p>
-              <p className="mt-1 text-xs text-[var(--muted)]">{item.summary}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{item.summary}</p>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs text-[var(--muted)]">{item.dateLabel}</span>
-              <span className="rounded-full bg-[var(--accent)]/10 px-3 py-1 text-[10px] font-semibold text-[var(--accent-strong)]">
+              <span className="text-xs text-muted-foreground">{item.dateLabel}</span>
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-semibold text-primary-strong">
                 {STATUS_LABEL[item.status]}
               </span>
             </div>

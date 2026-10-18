@@ -44,11 +44,11 @@ export default function AdminPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center space-y-2">
-          <p className="text-2xl font-bold text-[var(--ink)]">403</p>
-          <p className="text-[var(--muted)]">접근 권한이 없습니다.</p>
+          <p className="text-2xl font-bold text-foreground">403</p>
+          <p className="text-muted-foreground">접근 권한이 없습니다.</p>
           <a
             href={ROUTES.home}
-            className="mt-4 inline-block text-sm text-[var(--accent)] hover:underline"
+            className="mt-4 inline-block text-sm text-primary hover:underline"
           >
             홈으로 돌아가기
           </a>
@@ -63,12 +63,12 @@ export default function AdminPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--ink)]">관리자</h1>
-            <p className="text-sm text-[var(--muted)]">{auth.user.name} 님</p>
+            <h1 className="text-2xl font-bold text-foreground">관리자</h1>
+            <p className="text-sm text-muted-foreground">{auth.user.name} 님</p>
           </div>
           <a
             href={ROUTES.home}
-            className="rounded-full border border-black/10 px-4 py-1.5 text-sm text-[var(--muted)] transition hover:bg-black/5"
+            className="rounded-full border border-black/10 px-4 py-1.5 text-sm text-muted-foreground transition hover:bg-black/5"
           >
             ← 홈
           </a>
@@ -83,8 +83,8 @@ export default function AdminPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-5 py-3 text-sm font-medium transition border-b-2 -mb-px ${
                   activeTab === tab.id
-                    ? "border-[var(--accent)] text-[var(--accent-strong)]"
-                    : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]"
+                    ? "border-primary text-primary-strong"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {tab.label}

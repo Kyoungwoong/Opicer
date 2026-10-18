@@ -92,9 +92,9 @@ export function DailySentenceTab() {
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-black/8 bg-[var(--card)] p-5 space-y-4"
+        className="rounded-xl border border-black/8 bg-card p-5 space-y-4"
       >
-        <h3 className="font-semibold text-[var(--ink)]">
+        <h3 className="font-semibold text-foreground">
           {editId ? "오늘의 문장 수정" : "오늘의 문장 추가"}
         </h3>
         {error && (
@@ -104,7 +104,7 @@ export function DailySentenceTab() {
         )}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">
+            <label className="text-xs font-medium text-muted-foreground">
               날짜
             </label>
             <input
@@ -112,11 +112,11 @@ export function DailySentenceTab() {
               type="date"
               value={form.date}
               onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">
+            <label className="text-xs font-medium text-muted-foreground">
               Level
             </label>
             <select
@@ -124,7 +124,7 @@ export function DailySentenceTab() {
               onChange={(e) =>
                 setForm((f) => ({ ...f, level: e.target.value as OpicLevel }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             >
               {OPIC_LEVELS.map((l) => (
                 <option key={l} value={l}>
@@ -135,7 +135,7 @@ export function DailySentenceTab() {
           </div>
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-[var(--muted)]">
+          <label className="text-xs font-medium text-muted-foreground">
             문장
           </label>
           <textarea
@@ -143,7 +143,7 @@ export function DailySentenceTab() {
             rows={3}
             value={form.text}
             onChange={(e) => setForm((f) => ({ ...f, text: e.target.value }))}
-            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             placeholder="오늘의 학습 문장"
           />
         </div>
@@ -155,16 +155,16 @@ export function DailySentenceTab() {
               onChange={(e) =>
                 setForm((f) => ({ ...f, active: e.target.checked }))
               }
-              className="accent-[var(--accent)]"
+              className="accent-primary"
             />
-            <span className="text-[var(--muted)]">Active</span>
+            <span className="text-muted-foreground">Active</span>
           </label>
         )}
         <div className="flex gap-2">
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-[var(--accent)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)] disabled:opacity-50"
+            className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary-strong disabled:opacity-50"
           >
             {loading ? "저장 중..." : editId ? "수정" : "추가"}
           </button>
@@ -172,7 +172,7 @@ export function DailySentenceTab() {
             <button
               type="button"
               onClick={cancelEdit}
-              className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-[var(--muted)] transition hover:bg-black/5"
+              className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-black/5"
             >
               취소
             </button>
@@ -183,7 +183,7 @@ export function DailySentenceTab() {
       {/* Table */}
       <div className="overflow-x-auto rounded-xl border border-black/8">
         <table className="w-full text-sm">
-          <thead className="bg-[var(--card)] text-[var(--muted)]">
+          <thead className="bg-card text-muted-foreground">
             <tr>
               <th className="px-4 py-3 text-left font-medium">날짜</th>
               <th className="px-4 py-3 text-left font-medium">Level</th>
@@ -197,21 +197,21 @@ export function DailySentenceTab() {
               <tr>
                 <td
                   colSpan={5}
-                  className="px-4 py-6 text-center text-[var(--muted)]"
+                  className="px-4 py-6 text-center text-muted-foreground"
                 >
                   등록된 문장이 없습니다.
                 </td>
               </tr>
             )}
             {sentences.map((s) => (
-              <tr key={s.id} className="hover:bg-[var(--background)]">
+              <tr key={s.id} className="hover:bg-background">
                 <td className="px-4 py-3 font-medium">{s.date}</td>
                 <td className="px-4 py-3">
-                  <span className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-xs font-medium text-[var(--accent-strong)]">
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary-strong">
                     {s.level}
                   </span>
                 </td>
-                <td className="max-w-xs px-4 py-3 truncate text-[var(--muted)]">
+                <td className="max-w-xs px-4 py-3 truncate text-muted-foreground">
                   {s.text}
                 </td>
                 <td className="px-4 py-3">
@@ -229,7 +229,7 @@ export function DailySentenceTab() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => startEdit(s)}
-                      className="text-[var(--accent)] hover:underline"
+                      className="text-primary hover:underline"
                     >
                       수정
                     </button>
