@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { fetchUniversalSentences } from "@/features/home/api";
 import { UNIVERSAL_SENTENCES } from "@/features/home/data";
 import { SectionShell } from "@/features/home/components/SectionShell";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { UniversalSentence } from "@/features/home/types";
 import { ko } from "@/locales/ko";
 
@@ -58,69 +62,66 @@ export function UniversalSentencesSection() {
     <SectionShell
       title="Universal sentences"
       description={ko.home.universalSentences.description}
-      action={
-        <span className="rounded-full border border-primary/20 px-4 py-2 text-xs font-semibold text-primary-strong">
-          {ko.home.universalSentences.actionLabel}
-        </span>
-      }
+      action={<Badge variant="secondary">{ko.home.universalSentences.actionLabel}</Badge>}
     >
-      <div className="flex flex-col gap-4 rounded-3xl border border-black/5 bg-white/70 p-6 shadow-sm min-h-[220px]">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold text-primary-strong">
+      <div className="relative flex min-h-[220px] flex-col gap-4 overflow-hidden rounded-2xl bg-primary-strong p-5 text-primary-foreground sm:p-7">
+        <Quote aria-hidden className="pointer-events-none absolute -top-2 right-4 size-24 text-primary-foreground/10" />
+
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex flex-col gap-1.5">
+            <p className="text-sm font-semibold text-primary-foreground/90">
               {current?.title ?? ko.home.universalSentences.titleLoading}
             </p>
-            <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            <span className="w-fit rounded-full bg-primary-foreground/15 px-2.5 py-0.5 text-xs font-medium">
               {current ? TYPE_LABELS[current.type] : "Loading"}
-            </p>
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <button
+            <Button
               type="button"
+              size="icon-lg"
               onClick={() => goTo(index - 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10 text-sm text-muted-foreground transition hover:border-transparent hover:bg-primary hover:text-white"
+              className="rounded-full bg-primary-foreground/15 text-primary-foreground hover:bg-primary-foreground/25"
               aria-label="Previous sentence"
             >
-              ←
-            </button>
-            <button
+              <ChevronLeft />
+            </Button>
+            <Button
               type="button"
+              size="icon-lg"
               onClick={() => goTo(index + 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10 text-sm text-muted-foreground transition hover:border-transparent hover:bg-primary hover:text-white"
+              className="rounded-full bg-primary-foreground/15 text-primary-foreground hover:bg-primary-foreground/25"
               aria-label="Next sentence"
             >
-              →
-            </button>
+              <ChevronRight />
+            </Button>
           </div>
         </div>
 
-        <p className="text-lg font-semibold leading-relaxed text-foreground break-words">
+        <p className="text-lg font-semibold leading-relaxed break-words sm:text-xl">
           {current?.sentence ?? ko.home.universalSentences.sentenceLoading}
         </p>
 
         <div className="flex flex-wrap gap-2">
           {current?.tags?.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full border border-primary/20 px-2.5 py-1 text-[10px] font-semibold text-primary-strong"
-            >
+            <span key={tag} className="rounded-full border border-primary-foreground/25 px-2.5 py-0.5 text-xs font-medium">
               #{tag}
             </span>
           ))}
         </div>
 
-        <div className="flex items-center gap-2 pt-2">
+        <div className="mt-auto flex items-center gap-1.5 pt-2">
           {sentences.map((item, dotIndex) => (
             <button
               key={item.id}
               type="button"
               onClick={() => goTo(dotIndex)}
-              className={`h-2.5 w-2.5 rounded-full transition ${
-                dotIndex === index
-                  ? "bg-primary"
-                  : "bg-primary/20 hover:bg-primary/50"
-              }`}
+              className={cn(
+                "h-2 rounded-full transition-all",
+                dotIndex === index ? "w-6 bg-highlight" : "w-2 bg-primary-foreground/30 hover:bg-primary-foreground/60"
+              )}
               aria-label={`Go to sentence ${dotIndex + 1}`}
+              aria-current={dotIndex === index ? "true" : undefined}
             />
           ))}
         </div>
