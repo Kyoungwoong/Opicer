@@ -11,7 +11,7 @@ export function Wordmark({ className }: { className?: string }) {
         className
       )}
     >
-      <span aria-hidden className="size-2.5 rounded-full bg-primary shadow-[0_0_0_4px] shadow-primary/15" />
+      <span aria-hidden className="size-2.5 rounded-full bg-primary ring-4 ring-primary/15" />
       Opicer
     </Link>
   );
