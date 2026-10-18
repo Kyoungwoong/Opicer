@@ -6,6 +6,7 @@ import { ChevronDown, CreditCard, LogOut, Menu, UserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/lib/routes";
 import { ko } from "@/locales/ko";
+import { Wordmark } from "@/components/common/Wordmark";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -45,21 +46,6 @@ type Props = {
 
 function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-export function Wordmark({ className }: { className?: string }) {
-  return (
-    <Link
-      href="/"
-      className={cn(
-        "inline-flex shrink-0 items-center gap-2 rounded-md font-display text-xl font-bold tracking-tight text-primary-strong",
-        className
-      )}
-    >
-      <span aria-hidden className="size-2.5 rounded-full bg-primary shadow-[0_0_0_4px] shadow-primary/15" />
-      Opicer
-    </Link>
-  );
 }
 
 export function TopNav({ userLabel, onLogout, maxWidthClassName = "max-w-5xl" }: Props) {
@@ -145,7 +131,7 @@ export function TopNav({ userLabel, onLogout, maxWidthClassName = "max-w-5xl" }:
               <Menu />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[82%] max-w-xs gap-0 p-0">
+          <SheetContent side="right" className="gap-0 p-0">
             <SheetHeader className="border-b p-5">
               <SheetTitle asChild>
                 <div>

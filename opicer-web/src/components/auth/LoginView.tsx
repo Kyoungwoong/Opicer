@@ -1,7 +1,7 @@
 import { Brain, Sparkles, Target, TrendingUp } from "lucide-react";
 import { ROUTES } from "@/lib/routes";
 import { KakaoIcon } from "@/components/auth/KakaoIcon";
-import { Wordmark } from "@/components/common/TopNav";
+import { Wordmark } from "@/components/common/Wordmark";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
