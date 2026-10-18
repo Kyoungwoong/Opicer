@@ -103,7 +103,10 @@ Each step is listed with the FSM state from §4 that it belongs to.
         - Address each finding in new commits. Do not force-push over reviewed history.
         - Push, then reply on each thread with the fixing commit SHA and resolve it.
     4. **Re-review** the updated diff from step 1.
-    - The loop ends when a review pass yields **no new findings** and all checks pass. Post a final summary comment that says so and lists the verification evidence (commands and results).
+    - The loop ends when a review pass yields **no new findings** and the PR breaks **no check that passes on `main`**.
+        - Run any check that already fails on `main` against both branches.
+        - List those failures in the report as pre-existing, and track them in a follow-up issue. They do not block this PR.
+    - Post a final summary comment that says the loop is done and lists the verification evidence (commands and results).
     - If a finding is out of scope for this PR, do not fix it here. Open a follow-up issue and link it in the thread.
 9. **Merge** (Package Mode)
     - Merge only after the review loop has ended cleanly.
@@ -145,7 +148,8 @@ Convert the user’s idea into a **crisp, testable** problem statement.
 - Ambiguities (questions requiring user decision)
 
 ### Exit Condition
-- MUST: Ask user approval to proceed to Plan Mode.
+- MUST: Proceed to Plan Mode. The approval gate is the plan OK (§3.5 step 3).
+- MUST: Carry any ambiguity into the plan's Open Questions so the user decides it at that gate.
 
 ---
 
