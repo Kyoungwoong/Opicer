@@ -89,7 +89,7 @@ export function UniversalSentenceTab() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Are you sure to delete?")) return;
+    if (!confirm("삭제하시겠습니까?")) return;
     try {
       await universalSentenceApi.delete(id);
       await load();
@@ -105,7 +105,7 @@ export function UniversalSentenceTab() {
         className="rounded-xl border border-black/8 bg-[var(--card)] p-5 space-y-4"
       >
         <h3 className="font-semibold text-[var(--ink)]">
-          {editId ? "Universal Sentences Edit" : "Universal Sentences text"}
+          {editId ? "만능 문장 수정" : "만능 문장 추가"}
         </h3>
         {error && (
           <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
@@ -115,7 +115,7 @@ export function UniversalSentenceTab() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-xs font-medium text-[var(--muted)]">
-              Type
+              타입
             </label>
             <select
               value={form.type}
@@ -136,20 +136,20 @@ export function UniversalSentenceTab() {
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-[var(--muted)]">
-              Title
+              제목
             </label>
             <input
               required
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-              placeholder="Opinion starter"
+              placeholder="의견 시작"
             />
           </div>
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-[var(--muted)]">
-            Sentence
+            문장
           </label>
           <textarea
             required
@@ -164,7 +164,7 @@ export function UniversalSentenceTab() {
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-[var(--muted)]">
-            text (text textmin)
+            태그 (쉼표로 구분)
           </label>
           <input
             value={form.tags}
@@ -192,7 +192,7 @@ export function UniversalSentenceTab() {
             disabled={loading}
             className="rounded-full bg-[var(--accent)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)] disabled:opacity-50"
           >
-            {loading ? "Saving..." : editId ? "Edit" : "text"}
+            {loading ? "저장 중..." : editId ? "수정" : "추가"}
           </button>
           {editId && (
             <button
@@ -200,7 +200,7 @@ export function UniversalSentenceTab() {
               onClick={cancelEdit}
               className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-[var(--muted)] transition hover:bg-black/5"
             >
-              Cancel
+              취소
             </button>
           )}
         </div>
@@ -210,10 +210,10 @@ export function UniversalSentenceTab() {
         <table className="w-full text-sm">
           <thead className="bg-[var(--card)] text-[var(--muted)]">
             <tr>
-              <th className="px-4 py-3 text-left font-medium">Type</th>
-              <th className="px-4 py-3 text-left font-medium">Title</th>
-              <th className="px-4 py-3 text-left font-medium">Sentence</th>
-              <th className="px-4 py-3 text-left font-medium">text</th>
+              <th className="px-4 py-3 text-left font-medium">타입</th>
+              <th className="px-4 py-3 text-left font-medium">제목</th>
+              <th className="px-4 py-3 text-left font-medium">문장</th>
+              <th className="px-4 py-3 text-left font-medium">태그</th>
               <th className="px-4 py-3 text-left font-medium">Active</th>
               <th className="px-4 py-3 text-left font-medium">Actions</th>
             </tr>
@@ -225,7 +225,7 @@ export function UniversalSentenceTab() {
                   colSpan={6}
                   className="px-4 py-6 text-center text-[var(--muted)]"
                 >
-                  text Sentencetext text.
+                  등록된 문장이 없습니다.
                 </td>
               </tr>
             )}
@@ -250,13 +250,13 @@ export function UniversalSentenceTab() {
                       onClick={() => startEdit(sentence)}
                       className="rounded-full border border-black/10 px-3 py-1 text-xs text-[var(--muted)] transition hover:bg-black/5"
                     >
-                      Edit
+                      수정
                     </button>
                     <button
                       onClick={() => handleDelete(sentence.id)}
                       className="rounded-full border border-red-200 px-3 py-1 text-xs text-red-500 transition hover:bg-red-50"
                     >
-                      Delete
+                      삭제
                     </button>
                   </div>
                 </td>

@@ -82,7 +82,7 @@ export function PromptVersionTab() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Are you sure to delete?")) return;
+    if (!confirm("삭제하시겠습니까?")) return;
     try {
       await promptApi.delete(id);
       await load();
@@ -99,7 +99,7 @@ export function PromptVersionTab() {
         className="rounded-xl border border-black/8 bg-[var(--card)] p-5 space-y-4"
       >
         <h3 className="font-semibold text-[var(--ink)]">
-          {editId ? "Edit Prompt" : "Add Prompt"}
+          {editId ? "프롬프트 수정" : "프롬프트 추가"}
         </h3>
         {error && (
           <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
@@ -168,7 +168,7 @@ export function PromptVersionTab() {
               setForm((f) => ({ ...f, template: e.target.value }))
             }
             className="w-full rounded-lg border border-black/10 px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-            placeholder="Prompt template..."
+            placeholder="프롬프트 템플릿 내용..."
           />
         </div>
         <div className="flex gap-2">
@@ -177,7 +177,7 @@ export function PromptVersionTab() {
             disabled={loading}
             className="rounded-full bg-[var(--accent)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)] disabled:opacity-50"
           >
-            {loading ? "Saving..." : editId ? "Edit" : "text"}
+            {loading ? "저장 중..." : editId ? "수정" : "추가"}
           </button>
           {editId && (
             <button
@@ -185,7 +185,7 @@ export function PromptVersionTab() {
               onClick={cancelEdit}
               className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-[var(--muted)] transition hover:bg-black/5"
             >
-              Cancel
+              취소
             </button>
           )}
         </div>
@@ -210,7 +210,7 @@ export function PromptVersionTab() {
                   colSpan={5}
                   className="px-4 py-6 text-center text-[var(--muted)]"
                 >
-                  No prompts yet.
+                  등록된 프롬프트가 없습니다.
                 </td>
               </tr>
             )}
@@ -237,20 +237,20 @@ export function PromptVersionTab() {
                         onClick={() => handleActivate(v.id)}
                         className="text-green-600 hover:underline"
                       >
-                        Activate
+                        활성화
                       </button>
                     )}
                     <button
                       onClick={() => startEdit(v)}
                       className="text-[var(--accent)] hover:underline"
                     >
-                      Edit
+                      수정
                     </button>
                     <button
                       onClick={() => handleDelete(v.id)}
                       className="text-red-500 hover:underline"
                     >
-                      Delete
+                      삭제
                     </button>
                   </div>
                 </td>

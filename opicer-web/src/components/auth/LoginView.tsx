@@ -16,22 +16,22 @@ export function LoginView() {
 
         <div className="flex flex-col items-center gap-3 text-center">
           <p className="text-2xl font-semibold leading-snug">
-            Speaking ability,
+            말하기 실력,
             <br />
-            remembered by AI.
+            AI가 기억합니다.
           </p>
           <p className="text-sm leading-6 text-[var(--muted)]">
-            text text text mintext, text text text text text.
+            내가 어떻게 말하는지 분석하고, 매번 더 나은 피드백을 드려요.
             <br />
-            From OPIC practice to level-up, your personal coach is here.
+            OPIC 연습부터 레벨업까지, 나만의 코치가 함께합니다.
           </p>
         </div>
 
         <div className="flex flex-wrap justify-center gap-2">
           {[
-            { icon: "�text", label: "Topictext text text" },
-            { icon: "�text", label: "AI text mintext" },
-            { icon: "�text", label: "Level-based feedback" },
+            { icon: "🎯", label: "주제별 맞춤 연습" },
+            { icon: "🧠", label: "AI 습관 분석" },
+            { icon: "📈", label: "레벨별 피드백" },
           ].map(({ icon, label }) => (
             <span
               key={label}
@@ -45,7 +45,7 @@ export function LoginView() {
 
         <div className="w-full rounded-3xl border border-black/5 bg-[var(--card)] p-6 shadow-[0_40px_80px_-40px_rgba(27,124,122,0.35)]">
           <p className="mb-4 text-center text-sm font-medium text-[var(--muted)]">
-            Start instantly with social account
+            SNS 계정으로 바로 시작하세요
           </p>
           <a
             href={ROUTES.auth.loginKakao}
@@ -53,16 +53,16 @@ export function LoginView() {
             style={{ backgroundColor: "#FEE500", color: "#3C1E1E" }}
           >
             <KakaoIcon />
-            Continue with Kakao
+            카카오로 시작하기
           </a>
         </div>
 
         <p className="text-center text-[11px] leading-5 text-[var(--muted)]">
-          By logging in,{" "}
-          <a href="#" className="underline underline-offset-2">Terms of Service</a>
-          {" "}text{" "}
-          <a href="#" className="underline underline-offset-2">itemstext</a>
-          you agree to these policies.
+          로그인 시{" "}
+          <a href="#" className="underline underline-offset-2">이용약관</a>
+          {" "}및{" "}
+          <a href="#" className="underline underline-offset-2">개인정보처리방침</a>
+          에 동의하게 됩니다.
         </p>
       </div>
     </div>

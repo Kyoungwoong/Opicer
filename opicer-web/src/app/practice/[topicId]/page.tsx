@@ -43,7 +43,7 @@ export default function PracticeSessionPage() {
     <PracticeSessionView
       topicId={topicId}
       topicSelectionId={topicSelectionId}
-      userLabel={auth.user.name ?? auth.user.email ?? "User"}
+      userLabel={auth.user.name ?? auth.user.email ?? "사용자"}
       onLogout={handleLogout}
     />
   );

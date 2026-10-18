@@ -34,7 +34,7 @@ export async function fetchPracticeQuestions(
   topicId: string
 ): Promise<PracticeQuestion[]> {
   if (!topicId) {
-    throw new Error("Select a topic before starting practice.");
+    throw new Error("주제를 선택한 뒤 연습을 시작해주세요.");
   }
   const res = await fetch(`/api/practice/topics/${topicId}/questions`, {
     cache: "no-store",
