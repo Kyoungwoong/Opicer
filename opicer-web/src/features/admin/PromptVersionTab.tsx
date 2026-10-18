@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { promptApi } from "./api";
 import type { PromptUseCase, PromptVersion } from "./types";
+import { adminUi } from "@/features/admin/ui";
 
 const USE_CASES: PromptUseCase[] = [
   "TRANSCRIPT_CLEANING",
@@ -92,25 +93,25 @@ export function PromptVersionTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={adminUi.section}>
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-black/8 bg-card p-5 space-y-4"
+        className={adminUi.card}
       >
-        <h3 className="font-semibold text-foreground">
+        <h3 className={adminUi.cardTitle}>
           {editId ? "프롬프트 수정" : "프롬프트 추가"}
         </h3>
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+          <p className={adminUi.error}>
             {error}
           </p>
         )}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">
+        <div className={adminUi.grid3}>
+          <label className={adminUi.field}>
+            <span className={adminUi.labelText}>
               Use Case
-            </label>
+            </span>
             <select
               value={form.useCase}
               onChange={(e) =>
@@ -119,7 +120,7 @@ export function PromptVersionTab() {
                   useCase: e.target.value as PromptUseCase,
                 }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+              className={adminUi.control}
             >
               {USE_CASES.map((uc) => (
                 <option key={uc} value={uc}>
@@ -127,11 +128,11 @@ export function PromptVersionTab() {
                 </option>
               ))}
             </select>
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">
+          </label>
+          <label className={adminUi.field}>
+            <span className={adminUi.labelText}>
               Version
-            </label>
+            </span>
             <input
               required
               type="number"
@@ -140,26 +141,26 @@ export function PromptVersionTab() {
               onChange={(e) =>
                 setForm((f) => ({ ...f, version: Number(e.target.value) }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+              className={adminUi.control}
             />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">
+          </label>
+          <label className={adminUi.field}>
+            <span className={adminUi.labelText}>
               Name
-            </label>
+            </span>
             <input
               required
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+              className={adminUi.control}
               placeholder="v1-strict"
             />
-          </div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">
-            Template
           </label>
+        </div>
+        <label className={adminUi.field}>
+          <span className={adminUi.labelText}>
+            Template
+          </span>
           <textarea
             required
             rows={6}
@@ -167,15 +168,15 @@ export function PromptVersionTab() {
             onChange={(e) =>
               setForm((f) => ({ ...f, template: e.target.value }))
             }
-            className="w-full rounded-lg border border-black/10 px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-ring/30"
+            className={adminUi.controlMono}
             placeholder="프롬프트 템플릿 내용..."
           />
-        </div>
-        <div className="flex gap-2">
+        </label>
+        <div className={adminUi.actions}>
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary-strong disabled:opacity-50"
+            className={adminUi.primaryButton}
           >
             {loading ? "저장 중..." : editId ? "수정" : "추가"}
           </button>
@@ -183,7 +184,7 @@ export function PromptVersionTab() {
             <button
               type="button"
               onClick={cancelEdit}
-              className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-black/5"
+              className={adminUi.secondaryButton}
             >
               취소
             </button>
@@ -192,63 +193,63 @@ export function PromptVersionTab() {
       </form>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-black/8">
-        <table className="w-full text-sm">
-          <thead className="bg-card text-muted-foreground">
+      <div className={adminUi.tableWrap}>
+        <table className={adminUi.table}>
+          <thead className={adminUi.thead}>
             <tr>
-              <th className="px-4 py-3 text-left font-medium">Use Case</th>
-              <th className="px-4 py-3 text-left font-medium">v</th>
-              <th className="px-4 py-3 text-left font-medium">Name</th>
-              <th className="px-4 py-3 text-left font-medium">Active</th>
-              <th className="px-4 py-3 text-left font-medium">Actions</th>
+              <th className={adminUi.th}>Use Case</th>
+              <th className={adminUi.th}>v</th>
+              <th className={adminUi.th}>Name</th>
+              <th className={adminUi.th}>Active</th>
+              <th className={adminUi.th}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-black/5 bg-white">
+          <tbody className={adminUi.tbody}>
             {versions.length === 0 && (
               <tr>
                 <td
                   colSpan={5}
-                  className="px-4 py-6 text-center text-muted-foreground"
+                  className={adminUi.tdEmpty}
                 >
                   등록된 프롬프트가 없습니다.
                 </td>
               </tr>
             )}
             {versions.map((v) => (
-              <tr key={v.id} className="hover:bg-background">
-                <td className="px-4 py-3 font-medium">{v.useCase}</td>
-                <td className="px-4 py-3 text-muted-foreground">{v.version}</td>
-                <td className="px-4 py-3 text-muted-foreground">{v.name}</td>
-                <td className="px-4 py-3">
+              <tr key={v.id} className={adminUi.tr}>
+                <td className={adminUi.tdStrong}>{v.useCase}</td>
+                <td className={adminUi.tdMuted}>{v.version}</td>
+                <td className={adminUi.tdMuted}>{v.name}</td>
+                <td className={adminUi.td}>
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                       v.active
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-500"
+                        ? "bg-success-subtle text-success"
+                        : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {v.active ? "ACTIVE" : "INACTIVE"}
                   </span>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
+                <td className={adminUi.td}>
+                  <div className={adminUi.actions}>
                     {!v.active && (
                       <button
                         onClick={() => handleActivate(v.id)}
-                        className="text-green-600 hover:underline"
+                        className="font-medium text-success hover:underline"
                       >
                         활성화
                       </button>
                     )}
                     <button
                       onClick={() => startEdit(v)}
-                      className="text-primary hover:underline"
+                      className={adminUi.linkButton}
                     >
                       수정
                     </button>
                     <button
                       onClick={() => handleDelete(v.id)}
-                      className="text-red-500 hover:underline"
+                      className={adminUi.dangerLink}
                     >
                       삭제
                     </button>
