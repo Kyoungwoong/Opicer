@@ -156,8 +156,8 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
       const selection = await submitTopicSelection(selectedId);
       setSelectedSelectionId(selection.id);
       setMode("ready");
-    } catch (err: any) {
-      setError(err?.message ?? "선택 저장 중 문제가 발생했습니다.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "선택 저장 중 문제가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
     }

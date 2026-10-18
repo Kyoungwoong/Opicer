@@ -268,7 +268,7 @@ export function MyPageView({ userLabel, onLogout }: Props) {
               </div>
 
               <div className="mt-6">
-                <HistoryList items={items} selectedId={selected?.id} onSelect={setSelected} />
+                <HistoryList items={items} onSelect={setSelected} />
               </div>
             </section>
           )}
