@@ -3,13 +3,13 @@ import { KakaoIcon } from "@/components/auth/KakaoIcon";
 
 export function LoginView() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-16 text-[var(--ink)]">
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-16 text-foreground">
       <div className="flex w-full max-w-sm flex-col items-center gap-8">
         <div className="flex flex-col items-center gap-2">
-          <span className="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">
+          <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
             AI Speaking Coach
           </span>
-          <h1 className="text-4xl font-bold tracking-tight text-[var(--accent-strong)]">
+          <h1 className="text-4xl font-bold tracking-tight text-primary-strong">
             Opicer
           </h1>
         </div>
@@ -20,7 +20,7 @@ export function LoginView() {
             <br />
             AI가 기억합니다.
           </p>
-          <p className="text-sm leading-6 text-[var(--muted)]">
+          <p className="text-sm leading-6 text-muted-foreground">
             내가 어떻게 말하는지 분석하고, 매번 더 나은 피드백을 드려요.
             <br />
             OPIC 연습부터 레벨업까지, 나만의 코치가 함께합니다.
@@ -35,7 +35,7 @@ export function LoginView() {
           ].map(({ icon, label }) => (
             <span
               key={label}
-              className="flex items-center gap-1.5 rounded-full border border-[var(--accent)]/20 bg-[var(--card)] px-3 py-1.5 text-xs font-medium text-[var(--accent-strong)]"
+              className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-card px-3 py-1.5 text-xs font-medium text-primary-strong"
             >
               <span>{icon}</span>
               {label}
@@ -43,8 +43,8 @@ export function LoginView() {
           ))}
         </div>
 
-        <div className="w-full rounded-3xl border border-black/5 bg-[var(--card)] p-6 shadow-[0_40px_80px_-40px_rgba(27,124,122,0.35)]">
-          <p className="mb-4 text-center text-sm font-medium text-[var(--muted)]">
+        <div className="w-full rounded-3xl border border-black/5 bg-card p-6 shadow-[0_40px_80px_-40px_rgba(27,124,122,0.35)]">
+          <p className="mb-4 text-center text-sm font-medium text-muted-foreground">
             SNS 계정으로 바로 시작하세요
           </p>
           <a
@@ -57,7 +57,7 @@ export function LoginView() {
           </a>
         </div>
 
-        <p className="text-center text-[11px] leading-5 text-[var(--muted)]">
+        <p className="text-center text-[11px] leading-5 text-muted-foreground">
           로그인 시{" "}
           <a href="#" className="underline underline-offset-2">이용약관</a>
           {" "}및{" "}

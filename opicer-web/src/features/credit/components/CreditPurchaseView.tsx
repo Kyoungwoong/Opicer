@@ -82,7 +82,7 @@ export function CreditPurchaseView({
   };
 
   return (
-    <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
+    <div className="min-h-screen px-6 py-10 text-foreground">
       <TopNav
         userLabel={user.name ?? user.email ?? "사용자"}
         onLogout={onLogout}
@@ -91,9 +91,9 @@ export function CreditPurchaseView({
 
       <main className="mx-auto mt-10 flex w-full max-w-5xl flex-col gap-8">
         <section className="rounded-3xl border border-black/10 bg-white p-8 shadow-sm">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Credit Purchase</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Credit Purchase</p>
           <h2 className="mt-2 text-3xl font-semibold">결제/크레딧 구매</h2>
-          <p className="mt-2 text-sm text-[var(--muted)]">
+          <p className="mt-2 text-sm text-muted-foreground">
             패키지를 선택하면 주문 생성 후 결제 확정까지 자동으로 진행됩니다.
           </p>
         </section>
@@ -108,13 +108,13 @@ export function CreditPurchaseView({
                 onClick={() => setSelectedPackageId(pkg.id)}
                 className={`rounded-2xl border p-5 text-left transition ${
                   selected
-                    ? "border-[var(--accent-strong)] bg-[var(--accent)]/10"
-                    : "border-black/10 bg-white hover:border-[var(--accent)]/50"
+                    ? "border-primary-strong bg-primary/10"
+                    : "border-black/10 bg-white hover:border-primary/50"
                 }`}
               >
-                <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">{pkg.id}</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{pkg.id}</p>
                 <h3 className="mt-2 text-xl font-semibold">{pkg.title}</h3>
-                <p className="mt-2 text-sm text-[var(--muted)]">{pkg.description}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{pkg.description}</p>
                 <p className="mt-4 text-lg font-bold">{pkg.amount.toLocaleString()} P</p>
               </button>
             );
@@ -124,15 +124,15 @@ export function CreditPurchaseView({
         <section className="rounded-2xl border border-black/10 bg-white p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-sm text-[var(--muted)]">선택된 패키지</p>
+              <p className="text-sm text-muted-foreground">선택된 패키지</p>
               <p className="text-xl font-semibold">{selectedPackage.title}</p>
-              <p className="text-sm text-[var(--muted)]">{selectedPackage.amount.toLocaleString()} P</p>
+              <p className="text-sm text-muted-foreground">{selectedPackage.amount.toLocaleString()} P</p>
             </div>
             <button
               type="button"
               onClick={handlePurchase}
               disabled={isSubmitting}
-              className="rounded-full bg-[var(--accent-strong)] px-6 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-full bg-primary-strong px-6 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? "처리 중..." : "구매하기"}
             </button>

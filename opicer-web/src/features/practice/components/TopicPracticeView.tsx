@@ -169,20 +169,20 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
   // ── Ready screen ───────────────────────────────────────────
   if (mode === "ready") {
     return (
-      <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
+      <div className="min-h-screen px-6 py-10 text-foreground">
         <div className="mx-auto flex max-w-4xl flex-col gap-8">
           <TopNav userLabel={userLabel} onLogout={onLogout} />
 
           <div className="flex flex-col items-center justify-center gap-10 py-16">
             <div className="text-center space-y-3">
-              <p className="text-xs uppercase tracking-[0.32em] text-[var(--muted)]">
+              <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">
                 Topic Practice
               </p>
               <h1 className="text-4xl font-semibold tracking-tight">
                 {selectedTopic?.title ?? ""}
               </h1>
               {selectedTopic?.englishTitle ? (
-                <p className="text-base text-[var(--muted)]">
+                <p className="text-base text-muted-foreground">
                   {selectedTopic.englishTitle}
                 </p>
               ) : null}
@@ -191,7 +191,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                   {selectedTopic.badges.map((badge) => (
                     <span
                       key={badge.label}
-                      className="rounded-full border border-[var(--accent)]/30 px-3 py-1 text-xs font-semibold text-[var(--accent-strong)]"
+                      className="rounded-full border border-primary/30 px-3 py-1 text-xs font-semibold text-primary-strong"
                     >
                       {badge.label}
                       {badge.count != null ? ` ${badge.count}` : ""}
@@ -207,14 +207,14 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                 type="button"
                 onClick={handleStartPractice}
                 disabled={!selectedSelectionId}
-                className="rounded-full bg-[var(--accent)] px-10 py-4 text-base font-semibold text-white shadow-lg shadow-[var(--accent)]/20 transition hover:bg-[var(--accent-strong)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-full bg-primary px-10 py-4 text-base font-semibold text-white shadow-lg shadow-primary/20 transition hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {selectedTopic?.title ?? ""}에 맞는 연습 시작하기
               </button>
               <button
                 type="button"
                 onClick={() => { setMode("select"); setError(null); }}
-                className="text-sm text-[var(--muted)] hover:underline"
+                className="text-sm text-muted-foreground hover:underline"
               >
                 ← 주제 다시 선택하기
               </button>
@@ -227,7 +227,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
 
   // ── Select screen ──────────────────────────────────────────
   return (
-    <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
+    <div className="min-h-screen px-6 py-10 text-foreground">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
         <TopNav
           maxWidthClassName="max-w-6xl"
@@ -238,23 +238,23 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
         <section className="rounded-[32px] border border-black/5 bg-white/70 p-8 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.32em] text-[var(--muted)]">
+              <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">
                 Topic Practice
               </p>
               <h1 className="mt-2 text-3xl font-semibold tracking-tight">
                 주제별 연습을 시작해볼까요?
               </h1>
-              <p className="mt-2 text-sm text-[var(--muted)]">
+              <p className="mt-2 text-sm text-muted-foreground">
                 하나의 주제를 선택하면 그 주제에 맞는 연습 흐름을 준비합니다.
               </p>
             </div>
             <div className="flex w-full max-w-sm items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 shadow-sm">
-              <span className="text-sm text-[var(--muted)]">🔎</span>
+              <span className="text-sm text-muted-foreground">🔎</span>
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="주제 검색 (한국어/English)"
-                className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--muted)]"
+                className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               />
             </div>
           </div>
@@ -263,7 +263,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
         <div className="grid gap-6 lg:grid-cols-[0.65fr_1.35fr]">
           <aside className="flex flex-col gap-4">
             <div className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 카테고리
               </p>
               <div className="mt-4 flex flex-col gap-2">
@@ -279,17 +279,17 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                       }}
                       className={`rounded-2xl border px-4 py-3 text-left transition ${
                         isActive
-                          ? "border-transparent bg-[var(--accent)] text-white shadow-sm"
-                          : "border-black/10 bg-white text-[var(--ink)] hover:border-[var(--accent)]/40"
+                          ? "border-transparent bg-primary text-white shadow-sm"
+                          : "border-black/10 bg-white text-foreground hover:border-primary/40"
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-semibold">{category.label}</span>
-                        <span className={`text-xs ${isActive ? "text-white/80" : "text-[var(--muted)]"}`}>
+                        <span className={`text-xs ${isActive ? "text-white/80" : "text-muted-foreground"}`}>
                           {category.topics.length} items
                         </span>
                       </div>
-                      <p className={`mt-1 text-xs ${isActive ? "text-white/80" : "text-[var(--muted)]"}`}>
+                      <p className={`mt-1 text-xs ${isActive ? "text-white/80" : "text-muted-foreground"}`}>
                         {category.description}
                       </p>
                     </button>
@@ -299,18 +299,18 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
             </div>
 
             <div className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 선택된 주제
               </p>
               {selectedTopic ? (
-                <div className="mt-4 rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent)]/10 p-4">
+                <div className="mt-4 rounded-2xl border border-primary/30 bg-primary/10 p-4">
                   <p className="text-sm font-semibold">{selectedTopic.title}</p>
-                  <p className="text-xs text-[var(--muted)]">{selectedTopic.englishTitle}</p>
+                  <p className="text-xs text-muted-foreground">{selectedTopic.englishTitle}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {selectedTopic.badges?.map((badge) => (
                       <span
                         key={`${selectedTopic.id}-${badge.label}`}
-                        className="rounded-full border border-[var(--accent)]/30 px-2.5 py-1 text-[10px] font-semibold text-[var(--accent-strong)]"
+                        className="rounded-full border border-primary/30 px-2.5 py-1 text-[10px] font-semibold text-primary-strong"
                       >
                         {badge.label}{badge.count != null ? ` ${badge.count}` : ""}
                       </span>
@@ -318,7 +318,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                   </div>
                 </div>
               ) : (
-                <p className="mt-3 text-sm text-[var(--muted)]">아직 선택된 주제가 없습니다.</p>
+                <p className="mt-3 text-sm text-muted-foreground">아직 선택된 주제가 없습니다.</p>
               )}
               {error ? <p className="mt-3 text-xs text-red-600">{error}</p> : null}
               <button
@@ -327,8 +327,8 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                 onClick={handleSubmit}
                 className={`mt-4 w-full rounded-full px-4 py-2 text-sm font-semibold transition ${
                   selectedTopic && !isSubmitting
-                    ? "bg-[var(--accent)] text-white hover:bg-[var(--accent-strong)]"
-                    : "cursor-not-allowed bg-black/10 text-[var(--muted)]"
+                    ? "bg-primary text-white hover:bg-primary-strong"
+                    : "cursor-not-allowed bg-black/10 text-muted-foreground"
                 }`}
               >
                 {isSubmitting ? "저장 중..." : "선택 완료"}
@@ -339,12 +339,12 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
           <section className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Topics</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Topics</p>
                 <h2 className="mt-1 text-2xl font-semibold">
                   {activeCategory?.label ?? "주제 목록"}
                 </h2>
               </div>
-              <span className="text-xs text-[var(--muted)]">{filteredTopics.length} topics</span>
+              <span className="text-xs text-muted-foreground">{filteredTopics.length} topics</span>
             </div>
 
             {isLoading ? (
@@ -356,11 +356,11 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
             ) : activeCategoryId === CATEGORY_SURVEY ? (
               <div className="mt-6 space-y-5">
                 {groupedSurveyTopics.length === 0 ? (
-                  <p className="text-sm text-[var(--muted)]">조건에 맞는 설문 항목이 없습니다.</p>
+                  <p className="text-sm text-muted-foreground">조건에 맞는 설문 항목이 없습니다.</p>
                 ) : null}
                 {groupedSurveyTopics.map(({ group, items }) => (
                   <div key={group} className="space-y-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                       {group}
                     </p>
                     <div className="grid gap-4 sm:grid-cols-2">
@@ -373,19 +373,19 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                             onClick={() => handleSelect(topic)}
                             className={`rounded-3xl border p-4 text-left transition ${
                               isSelected
-                                ? "border-transparent bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/20"
-                                : "border-black/10 bg-white hover:border-[var(--accent)]/40"
+                                ? "border-transparent bg-primary text-white shadow-lg shadow-primary/20"
+                                : "border-black/10 bg-white hover:border-primary/40"
                             }`}
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div>
                                 <p className="text-base font-semibold">{topic.title}</p>
-                                <p className={`mt-1 text-xs ${isSelected ? "text-white/80" : "text-[var(--muted)]"}`}>
+                                <p className={`mt-1 text-xs ${isSelected ? "text-white/80" : "text-muted-foreground"}`}>
                                   {topic.englishTitle}
                                 </p>
                               </div>
                               <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                                isSelected ? "bg-white/20 text-white" : "bg-[var(--accent)]/10 text-[var(--accent-strong)]"
+                                isSelected ? "bg-white/20 text-white" : "bg-primary/10 text-primary-strong"
                               }`}>
                                 {isSelected ? "선택됨" : "선택"}
                               </span>
@@ -398,7 +398,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                                     className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
                                       isSelected
                                         ? "border-white/30 text-white/90"
-                                        : "border-[var(--accent)]/20 text-[var(--accent-strong)]"
+                                        : "border-primary/20 text-primary-strong"
                                     }`}
                                   >
                                     {badge.label}{badge.count != null ? ` ${badge.count}` : ""}
@@ -424,19 +424,19 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                       onClick={() => handleSelect(topic)}
                       className={`rounded-3xl border p-4 text-left transition ${
                         isSelected
-                          ? "border-transparent bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/20"
-                          : "border-black/10 bg-white hover:border-[var(--accent)]/40"
+                          ? "border-transparent bg-primary text-white shadow-lg shadow-primary/20"
+                          : "border-black/10 bg-white hover:border-primary/40"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-base font-semibold">{topic.title}</p>
-                          <p className={`mt-1 text-xs ${isSelected ? "text-white/80" : "text-[var(--muted)]"}`}>
+                          <p className={`mt-1 text-xs ${isSelected ? "text-white/80" : "text-muted-foreground"}`}>
                             {topic.englishTitle}
                           </p>
                         </div>
                         <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                          isSelected ? "bg-white/20 text-white" : "bg-[var(--accent)]/10 text-[var(--accent-strong)]"
+                          isSelected ? "bg-white/20 text-white" : "bg-primary/10 text-primary-strong"
                         }`}>
                           {isSelected ? "선택됨" : "선택"}
                         </span>
@@ -449,7 +449,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
                               className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
                                 isSelected
                                   ? "border-white/30 text-white/90"
-                                  : "border-[var(--accent)]/20 text-[var(--accent-strong)]"
+                                  : "border-primary/20 text-primary-strong"
                               }`}
                             >
                               {badge.label}{badge.count != null ? ` ${badge.count}` : ""}

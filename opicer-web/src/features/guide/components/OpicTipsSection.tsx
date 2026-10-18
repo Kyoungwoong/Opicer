@@ -14,12 +14,12 @@ export function OpicTipsSection() {
             key={tip.id}
             className="flex items-start gap-4 rounded-2xl border border-black/5 bg-white/80 px-4 py-3"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--accent)]/30 text-xs font-semibold text-[var(--accent-strong)]">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 text-xs font-semibold text-primary-strong">
               {index + 1}
             </span>
             <div>
               <p className="text-sm font-semibold">{tip.title}</p>
-              <p className="text-xs text-[var(--muted)]">{tip.detail}</p>
+              <p className="text-xs text-muted-foreground">{tip.detail}</p>
             </div>
           </div>
         ))}

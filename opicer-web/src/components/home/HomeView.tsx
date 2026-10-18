@@ -13,7 +13,7 @@ export function HomeView({
   onLogout: () => void;
 }) {
   return (
-    <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
+    <div className="min-h-screen px-6 py-10 text-foreground">
       <TopNav
         userLabel={user.name ?? user.email ?? ko.common.userFallback}
         onLogout={onLogout}
@@ -22,7 +22,7 @@ export function HomeView({
 
       <main className="mx-auto mt-10 flex max-w-5xl flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <p className="text-xs uppercase tracking-[0.25em] text-[var(--muted)]">
+          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
             Welcome back
           </p>
           <h2 className="text-3xl font-semibold leading-tight">
@@ -31,7 +31,7 @@ export function HomeView({
               user.name?.split(" ")[0] ?? ko.common.homeGreeting.fallback
             )}
           </h2>
-          <p className="text-sm text-[var(--muted)]">
+          <p className="text-sm text-muted-foreground">
             {ko.common.homeGreeting.subHeadline}
           </p>
         </div>

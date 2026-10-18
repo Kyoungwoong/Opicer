@@ -102,9 +102,9 @@ export function UniversalSentenceTab() {
     <div className="space-y-6">
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-black/8 bg-[var(--card)] p-5 space-y-4"
+        className="rounded-xl border border-black/8 bg-card p-5 space-y-4"
       >
-        <h3 className="font-semibold text-[var(--ink)]">
+        <h3 className="font-semibold text-foreground">
           {editId ? "만능 문장 수정" : "만능 문장 추가"}
         </h3>
         {error && (
@@ -114,7 +114,7 @@ export function UniversalSentenceTab() {
         )}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">
+            <label className="text-xs font-medium text-muted-foreground">
               타입
             </label>
             <select
@@ -125,7 +125,7 @@ export function UniversalSentenceTab() {
                   type: e.target.value as UniversalSentenceType,
                 }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             >
               {SENTENCE_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -135,20 +135,20 @@ export function UniversalSentenceTab() {
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-[var(--muted)]">
+            <label className="text-xs font-medium text-muted-foreground">
               제목
             </label>
             <input
               required
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
               placeholder="의견 시작"
             />
           </div>
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-[var(--muted)]">
+          <label className="text-xs font-medium text-muted-foreground">
             문장
           </label>
           <textarea
@@ -158,18 +158,18 @@ export function UniversalSentenceTab() {
             onChange={(e) =>
               setForm((f) => ({ ...f, sentence: e.target.value }))
             }
-            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             placeholder="From my perspective ..."
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-[var(--muted)]">
+          <label className="text-xs font-medium text-muted-foreground">
             태그 (쉼표로 구분)
           </label>
           <input
             value={form.tags}
             onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
-            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             placeholder="opinion, starter"
           />
         </div>
@@ -181,16 +181,16 @@ export function UniversalSentenceTab() {
               onChange={(e) =>
                 setForm((f) => ({ ...f, active: e.target.checked }))
               }
-              className="accent-[var(--accent)]"
+              className="accent-primary"
             />
-            <span className="text-[var(--muted)]">Active</span>
+            <span className="text-muted-foreground">Active</span>
           </label>
         )}
         <div className="flex gap-2">
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-[var(--accent)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)] disabled:opacity-50"
+            className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary-strong disabled:opacity-50"
           >
             {loading ? "저장 중..." : editId ? "수정" : "추가"}
           </button>
@@ -198,7 +198,7 @@ export function UniversalSentenceTab() {
             <button
               type="button"
               onClick={cancelEdit}
-              className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-[var(--muted)] transition hover:bg-black/5"
+              className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-black/5"
             >
               취소
             </button>
@@ -208,7 +208,7 @@ export function UniversalSentenceTab() {
 
       <div className="overflow-x-auto rounded-xl border border-black/8">
         <table className="w-full text-sm">
-          <thead className="bg-[var(--card)] text-[var(--muted)]">
+          <thead className="bg-card text-muted-foreground">
             <tr>
               <th className="px-4 py-3 text-left font-medium">타입</th>
               <th className="px-4 py-3 text-left font-medium">제목</th>
@@ -223,7 +223,7 @@ export function UniversalSentenceTab() {
               <tr>
                 <td
                   colSpan={6}
-                  className="px-4 py-6 text-center text-[var(--muted)]"
+                  className="px-4 py-6 text-center text-muted-foreground"
                 >
                   등록된 문장이 없습니다.
                 </td>
@@ -231,14 +231,14 @@ export function UniversalSentenceTab() {
             )}
             {sentences.map((sentence) => (
               <tr key={sentence.id}>
-                <td className="px-4 py-3 text-xs text-[var(--muted)]">
+                <td className="px-4 py-3 text-xs text-muted-foreground">
                   {sentence.type}
                 </td>
                 <td className="px-4 py-3 font-medium">{sentence.title}</td>
-                <td className="px-4 py-3 text-xs text-[var(--muted)]">
+                <td className="px-4 py-3 text-xs text-muted-foreground">
                   {sentence.sentence}
                 </td>
-                <td className="px-4 py-3 text-xs text-[var(--muted)]">
+                <td className="px-4 py-3 text-xs text-muted-foreground">
                   {sentence.tags.join(", ")}
                 </td>
                 <td className="px-4 py-3 text-xs">
@@ -248,7 +248,7 @@ export function UniversalSentenceTab() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => startEdit(sentence)}
-                      className="rounded-full border border-black/10 px-3 py-1 text-xs text-[var(--muted)] transition hover:bg-black/5"
+                      className="rounded-full border border-black/10 px-3 py-1 text-xs text-muted-foreground transition hover:bg-black/5"
                     >
                       수정
                     </button>

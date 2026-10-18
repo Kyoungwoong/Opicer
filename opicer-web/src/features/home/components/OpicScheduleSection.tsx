@@ -15,21 +15,21 @@ export function OpicScheduleSection() {
       title="OPIC schedule"
       description={ko.home.opicSchedule.description}
       action={
-        <span className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[var(--muted)]">
+        <span className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-muted-foreground">
           {ko.home.opicSchedule.actionLabel}
         </span>
       }
     >
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-[var(--accent-strong)]">
+        <h4 className="text-sm font-semibold text-primary-strong">
           {OPIC_CALENDAR.monthLabel}
         </h4>
-        <span className="text-xs text-[var(--muted)]">
+        <span className="text-xs text-muted-foreground">
           {ko.home.opicSchedule.officialNotice}
         </span>
       </div>
 
-      <div className="mt-4 grid grid-cols-7 gap-2 text-[11px] text-[var(--muted)]">
+      <div className="mt-4 grid grid-cols-7 gap-2 text-[11px] text-muted-foreground">
         {WEEKDAY_LABELS.map((label) => (
           <span key={label} className="text-center">
             {label}
@@ -52,7 +52,7 @@ export function OpicScheduleSection() {
               {event && (
                 <span
                   className={`absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full ${
-                    event.type === "exam" ? "bg-[var(--accent)]" : "bg-amber-400"
+                    event.type === "exam" ? "bg-primary" : "bg-amber-400"
                   }`}
                 />
               )}
@@ -61,12 +61,12 @@ export function OpicScheduleSection() {
         })}
       </div>
 
-      <div className="mt-4 space-y-2 text-xs text-[var(--muted)]">
+      <div className="mt-4 space-y-2 text-xs text-muted-foreground">
         {OPIC_CALENDAR.events.map((event) => (
           <div key={event.id} className="flex items-center gap-2">
             <span
               className={`h-2 w-2 rounded-full ${
-                event.type === "exam" ? "bg-[var(--accent)]" : "bg-amber-400"
+                event.type === "exam" ? "bg-primary" : "bg-amber-400"
               }`}
             />
             <span>

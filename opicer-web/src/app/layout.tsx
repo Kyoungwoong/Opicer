@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
 
+// Body text uses Pretendard (see globals.css); Space Grotesk is kept for the
+// wordmark/display only.
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
@@ -23,12 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${spaceGrotesk.variable} ${jetBrainsMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+    <html lang="ko" className={`${spaceGrotesk.variable} ${jetBrainsMono.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }

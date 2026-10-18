@@ -39,8 +39,8 @@ export function OpicReviewsSection() {
             }}
             className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
               activeRoomId === room.id
-                ? "border-[var(--accent)]/40 bg-white text-[var(--accent-strong)]"
-                : "border-black/5 bg-white/70 text-[var(--muted)] hover:border-[var(--accent)]/20 hover:text-[var(--accent-strong)]"
+                ? "border-primary/40 bg-white text-primary-strong"
+                : "border-black/5 bg-white/70 text-muted-foreground hover:border-primary/20 hover:text-primary-strong"
             }`}
           >
             {room.classroom}
@@ -58,11 +58,11 @@ export function OpicReviewsSection() {
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-semibold">{activeRoom?.classroom}</p>
-                <span className="text-xs text-[var(--muted)]">
+                <span className="text-xs text-muted-foreground">
                   {"★".repeat(safeRating)}
                 </span>
               </div>
-              <p className="mt-3 text-sm text-[var(--muted)]">
+              <p className="mt-3 text-sm text-muted-foreground">
                 {review.quote}
               </p>
             </div>
@@ -71,14 +71,14 @@ export function OpicReviewsSection() {
       </div>
 
       <div className="mt-4 flex items-center justify-between">
-        <span className="text-xs text-[var(--muted)]">
+        <span className="text-xs text-muted-foreground">
           {page} / {totalPages}
         </span>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold text-[var(--muted)] disabled:opacity-40"
+            className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold text-muted-foreground disabled:opacity-40"
             disabled={page === 1}
           >
             이전
@@ -86,7 +86,7 @@ export function OpicReviewsSection() {
           <button
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold text-[var(--muted)] disabled:opacity-40"
+            className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold text-muted-foreground disabled:opacity-40"
             disabled={page === totalPages}
           >
             다음

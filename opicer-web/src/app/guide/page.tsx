@@ -34,7 +34,7 @@ export default function GuidePage() {
   };
 
   return (
-    <div className="min-h-screen px-6 py-10 text-[var(--ink)]">
+    <div className="min-h-screen px-6 py-10 text-foreground">
       <main className="mx-auto flex max-w-6xl flex-col gap-8">
         <TopNav
           maxWidthClassName="max-w-6xl"

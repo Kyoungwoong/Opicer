@@ -9,7 +9,7 @@ export function OpicIntroSection() {
     >
       <div className="space-y-6">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
             시험 흐름
           </p>
           <div className="mt-3 grid gap-3 md:grid-cols-5">
@@ -22,13 +22,13 @@ export function OpicIntroSection() {
             ].map((item, index) => (
               <div key={item.step} className="relative">
                 <div className="rounded-2xl border border-black/5 bg-white/80 px-4 py-3 text-center">
-                  <span className="text-xs font-semibold text-[var(--accent-strong)]">
+                  <span className="text-xs font-semibold text-primary-strong">
                     STEP {item.step}
                   </span>
                   <p className="mt-2 text-sm font-semibold">{item.label}</p>
                 </div>
                 {index < 4 && (
-                  <span className="absolute right-[-14px] top-1/2 hidden -translate-y-1/2 text-lg text-[var(--muted)] md:block">
+                  <span className="absolute right-[-14px] top-1/2 hidden -translate-y-1/2 text-lg text-muted-foreground md:block">
                     →
                   </span>
                 )}
@@ -38,7 +38,7 @@ export function OpicIntroSection() {
         </div>
 
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
             레벨 기준 (Pyramid)
           </p>
           <div className="mt-4 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
@@ -82,7 +82,7 @@ export function OpicIntroSection() {
                   className="flex items-center rounded-2xl border border-black/5 bg-white/80 px-4 py-3"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-[var(--accent-strong)]">
+                    <p className="text-sm font-semibold text-primary-strong">
                       {item.level}
                     </p>
                     <p className="text-xs font-bold leading-4 text-black">
@@ -116,7 +116,7 @@ export function OpicIntroSection() {
               className="rounded-2xl border border-black/5 bg-white/80 p-4"
             >
               <p className="text-sm font-semibold">{item.title}</p>
-              <p className="mt-2 text-sm text-[var(--muted)]">{item.description}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
             </div>
           ))}
         </div>

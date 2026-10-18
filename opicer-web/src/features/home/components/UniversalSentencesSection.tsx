@@ -59,7 +59,7 @@ export function UniversalSentencesSection() {
       title="Universal sentences"
       description={ko.home.universalSentences.description}
       action={
-        <span className="rounded-full border border-[var(--accent)]/20 px-4 py-2 text-xs font-semibold text-[var(--accent-strong)]">
+        <span className="rounded-full border border-primary/20 px-4 py-2 text-xs font-semibold text-primary-strong">
           {ko.home.universalSentences.actionLabel}
         </span>
       }
@@ -67,10 +67,10 @@ export function UniversalSentencesSection() {
       <div className="flex flex-col gap-4 rounded-3xl border border-black/5 bg-white/70 p-6 shadow-sm min-h-[220px]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-[var(--accent-strong)]">
+            <p className="text-sm font-semibold text-primary-strong">
               {current?.title ?? ko.home.universalSentences.titleLoading}
             </p>
-            <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
+            <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
               {current ? TYPE_LABELS[current.type] : "Loading"}
             </p>
           </div>
@@ -78,7 +78,7 @@ export function UniversalSentencesSection() {
             <button
               type="button"
               onClick={() => goTo(index - 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10 text-sm text-[var(--muted)] transition hover:border-transparent hover:bg-[var(--accent)] hover:text-white"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10 text-sm text-muted-foreground transition hover:border-transparent hover:bg-primary hover:text-white"
               aria-label="Previous sentence"
             >
               ←
@@ -86,7 +86,7 @@ export function UniversalSentencesSection() {
             <button
               type="button"
               onClick={() => goTo(index + 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10 text-sm text-[var(--muted)] transition hover:border-transparent hover:bg-[var(--accent)] hover:text-white"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10 text-sm text-muted-foreground transition hover:border-transparent hover:bg-primary hover:text-white"
               aria-label="Next sentence"
             >
               →
@@ -94,7 +94,7 @@ export function UniversalSentencesSection() {
           </div>
         </div>
 
-        <p className="text-lg font-semibold leading-relaxed text-[var(--ink)] break-words">
+        <p className="text-lg font-semibold leading-relaxed text-foreground break-words">
           {current?.sentence ?? ko.home.universalSentences.sentenceLoading}
         </p>
 
@@ -102,7 +102,7 @@ export function UniversalSentencesSection() {
           {current?.tags?.map((tag) => (
             <span
               key={tag}
-              className="rounded-full border border-[var(--accent)]/20 px-2.5 py-1 text-[10px] font-semibold text-[var(--accent-strong)]"
+              className="rounded-full border border-primary/20 px-2.5 py-1 text-[10px] font-semibold text-primary-strong"
             >
               #{tag}
             </span>
@@ -117,8 +117,8 @@ export function UniversalSentencesSection() {
               onClick={() => goTo(dotIndex)}
               className={`h-2.5 w-2.5 rounded-full transition ${
                 dotIndex === index
-                  ? "bg-[var(--accent)]"
-                  : "bg-[var(--accent)]/20 hover:bg-[var(--accent)]/50"
+                  ? "bg-primary"
+                  : "bg-primary/20 hover:bg-primary/50"
               }`}
               aria-label={`Go to sentence ${dotIndex + 1}`}
             />

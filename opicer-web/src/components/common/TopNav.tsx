@@ -59,7 +59,7 @@ export function TopNav({
     >
       <Link
         href="/"
-        className="shrink-0 text-xl font-bold tracking-tight text-[var(--accent-strong)]"
+        className="shrink-0 text-xl font-bold tracking-tight text-primary-strong"
       >
         Opicer
       </Link>
@@ -69,7 +69,7 @@ export function TopNav({
           menu.disabled ? (
             <span
               key={menu.title}
-              className="rounded-full px-4 py-2 text-sm font-medium text-[var(--muted)]/50 cursor-not-allowed"
+              className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground/50 cursor-not-allowed"
             >
               {menu.title}
             </span>
@@ -77,7 +77,7 @@ export function TopNav({
             <Link
               key={menu.title}
               href={menu.href}
-              className="rounded-full px-4 py-2 text-sm font-medium text-[var(--muted)] transition hover:bg-[var(--accent)]/10 hover:text-[var(--accent-strong)]"
+              className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-primary/10 hover:text-primary-strong"
             >
               {menu.title}
             </Link>
@@ -93,7 +93,7 @@ export function TopNav({
               onClick={() => setIsMenuOpen((prev) => !prev)}
               aria-haspopup="menu"
               aria-expanded={isMenuOpen}
-              className="flex items-center gap-2 rounded-full border border-transparent px-3 py-1.5 text-sm text-[var(--muted)] transition hover:border-black/10 hover:bg-white"
+              className="flex items-center gap-2 rounded-full border border-transparent px-3 py-1.5 text-sm text-muted-foreground transition hover:border-black/10 hover:bg-white"
             >
               <span>{userLabel}</span>
               <span className={`text-xs transition ${isMenuOpen ? "rotate-180" : ""}`}>
@@ -110,7 +110,7 @@ export function TopNav({
                   href={ROUTES.mypage}
                   role="menuitem"
                   onClick={() => setIsMenuOpen(false)}
-                  className="block rounded-xl px-3 py-2 text-[var(--ink)] hover:bg-[var(--accent)]/10"
+                  className="block rounded-xl px-3 py-2 text-foreground hover:bg-primary/10"
                 >
                   {ko.common.topNav.menu.mypage}
                 </Link>
@@ -118,7 +118,7 @@ export function TopNav({
                   href={ROUTES.credit}
                   role="menuitem"
                   onClick={() => setIsMenuOpen(false)}
-                  className="block rounded-xl px-3 py-2 text-[var(--ink)] hover:bg-[var(--accent)]/10"
+                  className="block rounded-xl px-3 py-2 text-foreground hover:bg-primary/10"
                 >
                   {ko.common.topNav.menu.credit}
                 </Link>
@@ -128,7 +128,7 @@ export function TopNav({
 
           <button
             onClick={onLogout}
-            className="rounded-full border border-black/10 px-4 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:border-transparent hover:bg-[var(--accent)] hover:text-white"
+            className="rounded-full border border-black/10 px-4 py-1.5 text-xs font-semibold text-muted-foreground transition hover:border-transparent hover:bg-primary hover:text-white"
           >
             {ko.common.topNav.menu.logout}
           </button>

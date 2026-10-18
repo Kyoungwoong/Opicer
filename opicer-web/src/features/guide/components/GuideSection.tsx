@@ -9,10 +9,10 @@ export function GuideSection({ id, title, subtitle, children }: Props) {
   return (
     <section
       id={id}
-      className="rounded-3xl border border-black/5 bg-[var(--card)] p-6 shadow-[0_24px_60px_-48px_rgba(20,106,102,0.7)] scroll-mt-24"
+      className="rounded-3xl border border-black/5 bg-card p-6 shadow-[0_24px_60px_-48px_rgba(20,106,102,0.7)] scroll-mt-24"
     >
       <div className="flex flex-col gap-2">
-        <p className="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
           {title}
         </p>
         <h2 className="text-2xl font-semibold">{subtitle}</h2>
