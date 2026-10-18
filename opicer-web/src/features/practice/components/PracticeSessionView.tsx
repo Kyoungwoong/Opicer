@@ -298,7 +298,6 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
       stopRecording();
       goToNextRef.current();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeExpired]);
 
   // ── Auto-play when question changes ─────────────────────────

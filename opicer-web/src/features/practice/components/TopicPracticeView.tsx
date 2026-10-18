@@ -98,14 +98,12 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
     });
     return [CATEGORY_SELF_INTRO, CATEGORY_SURVEY, CATEGORY_UNEXPECTED]
       .filter((category) => grouped.has(category))
-      .map((category, index) => ({
+      .map((category) => ({
         id: category,
         label: category,
         description: CATEGORY_META[category] ?? "주제별 연습",
         topics: (grouped.get(category) ?? []).sort((a, b) => a.topicOrder - b.topicOrder),
-        order: index,
-      }))
-      .map(({ order, ...rest }) => rest);
+      }));
   }, [topics]);
 
   const activeCategory = useMemo<TopicCategory | undefined>(
