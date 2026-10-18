@@ -1,23 +1,20 @@
+import { cn } from "@/lib/utils";
+import { SectionHeader } from "@/components/common/SectionHeader";
+
 type Props = {
   title: string;
   description: string;
   children: React.ReactNode;
   action?: React.ReactNode;
+  className?: string;
 };
 
-export function SectionShell({ title, description, children, action }: Props) {
+/** Home dashboard card: English eyebrow + Korean heading + optional action. */
+export function SectionShell({ title, description, children, action, className }: Props) {
   return (
-    <section className="rounded-3xl border border-black/5 bg-card p-6 shadow-[0_24px_60px_-48px_rgba(20,106,102,0.7)]">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
-            {title}
-          </p>
-          <h3 className="mt-2 text-xl font-semibold">{description}</h3>
-        </div>
-        {action}
-      </div>
-      <div className="mt-6">{children}</div>
+    <section className={cn("flex flex-col gap-5 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-6", className)}>
+      <SectionHeader eyebrow={title} eyebrowLatin title={description} action={action} />
+      <div>{children}</div>
     </section>
   );
 }

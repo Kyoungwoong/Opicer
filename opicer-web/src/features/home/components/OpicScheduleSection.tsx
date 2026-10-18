@@ -1,82 +1,74 @@
+import { cn } from "@/lib/utils";
 import { OPIC_CALENDAR } from "@/features/home/data";
 import { SectionShell } from "@/features/home/components/SectionShell";
+import { Badge } from "@/components/ui/badge";
 import { ko } from "@/locales/ko";
 
-const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
+
+const EVENT_DOT = {
+  exam: "bg-primary",
+  registration: "bg-highlight-foreground",
+} as const;
 
 export function OpicScheduleSection() {
   const days = Array.from({ length: OPIC_CALENDAR.daysInMonth }, (_, i) => i + 1);
-  const eventsByDate = new Map(
-    OPIC_CALENDAR.events.map((event) => [event.date, event])
-  );
+  const eventsByDate = new Map(OPIC_CALENDAR.events.map((event) => [event.date, event]));
 
   return (
     <SectionShell
       title="OPIC schedule"
       description={ko.home.opicSchedule.description}
-      action={
-        <span className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-muted-foreground">
-          {ko.home.opicSchedule.actionLabel}
-        </span>
-      }
+      action={<Badge variant="secondary">{ko.home.opicSchedule.actionLabel}</Badge>}
     >
-      <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-primary-strong">
-          {OPIC_CALENDAR.monthLabel}
-        </h4>
-        <span className="text-xs text-muted-foreground">
-          {ko.home.opicSchedule.officialNotice}
-        </span>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-base font-semibold text-primary-strong">{OPIC_CALENDAR.monthLabel}</h3>
+        <span className="text-xs text-muted-foreground">{ko.home.opicSchedule.officialNotice}</span>
       </div>
 
-      <div className="mt-4 grid grid-cols-7 gap-2 text-[11px] text-muted-foreground">
+      <div className="mt-4 grid grid-cols-7 gap-1.5 text-center text-xs font-medium text-muted-foreground">
         {WEEKDAY_LABELS.map((label) => (
-          <span key={label} className="text-center">
-            {label}
-          </span>
+          <span key={label}>{label}</span>
         ))}
       </div>
 
-      <div className="mt-2 grid grid-cols-7 gap-2 text-sm">
+      <div className="mt-2 grid grid-cols-7 gap-1.5">
         {Array.from({ length: OPIC_CALENDAR.startWeekday }).map((_, index) => (
-          <div key={`empty-${index}`} className="h-10" />
+          <div key={`empty-${index}`} className="h-9" />
         ))}
         {days.map((day) => {
           const event = eventsByDate.get(day);
           return (
             <div
               key={day}
-              className="relative flex h-10 items-center justify-center rounded-xl border border-black/5 bg-white/70 text-xs"
+              className={cn(
+                "relative flex h-9 items-center justify-center rounded-lg border bg-background/60 text-sm",
+                event?.type === "exam" && "border-primary/40 font-semibold text-primary-strong"
+              )}
             >
               {day}
-              {event && (
+              {event ? (
                 <span
-                  className={`absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full ${
-                    event.type === "exam" ? "bg-primary" : "bg-amber-400"
-                  }`}
+                  aria-hidden
+                  className={cn("absolute bottom-1 left-1/2 size-1.5 -translate-x-1/2 rounded-full", EVENT_DOT[event.type])}
                 />
-              )}
+              ) : null}
             </div>
           );
         })}
       </div>
 
-      <div className="mt-4 space-y-2 text-xs text-muted-foreground">
+      <ul className="mt-4 flex flex-col gap-1.5 text-sm text-muted-foreground">
         {OPIC_CALENDAR.events.map((event) => (
-          <div key={event.id} className="flex items-center gap-2">
-            <span
-              className={`h-2 w-2 rounded-full ${
-                event.type === "exam" ? "bg-primary" : "bg-amber-400"
-              }`}
-            />
+          <li key={event.id} className="flex items-center gap-2">
+            <span aria-hidden className={cn("size-2 rounded-full", EVENT_DOT[event.type])} />
             <span>
               {event.date}
-              {ko.home.opicSchedule.dateUnit} {ko.home.opicSchedule.eventSeparator}{" "}
-              {event.label}
+              {ko.home.opicSchedule.dateUnit} {ko.home.opicSchedule.eventSeparator} {event.label}
             </span>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </SectionShell>
   );
 }
