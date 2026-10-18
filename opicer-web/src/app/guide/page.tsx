@@ -9,6 +9,7 @@ import { OpicReviewsSection } from "@/features/guide/components/OpicReviewsSecti
 import { OpicTipsSection } from "@/features/guide/components/OpicTipsSection";
 import { GUIDE_SECTIONS } from "@/features/guide/data";
 import { TopNav } from "@/components/common/TopNav";
+import { PageShell } from "@/components/common/PageShell";
 import { logout } from "@/lib/auth-client";
 import { useAuthState } from "@/lib/use-auth-state";
 
@@ -34,29 +35,30 @@ export default function GuidePage() {
   };
 
   return (
-    <div className="min-h-screen px-6 py-10 text-foreground">
-      <main className="mx-auto flex max-w-6xl flex-col gap-8">
+    <PageShell
+      nav={
         <TopNav
           maxWidthClassName="max-w-6xl"
           userLabel={auth.status === "authenticated" ? auth.user.name ?? auth.user.email ?? "사용자" : undefined}
           onLogout={auth.status === "authenticated" ? handleLogout : undefined}
         />
-        <GuideHeader
-          title="오픽 가이드"
-          description="시험 구조부터 일정, 후기, 꿀팁까지 한 번에 정리했습니다."
-        />
+      }
+    >
+      <GuideHeader
+        title="오픽 가이드"
+        description="시험 구조부터 일정, 후기, 꿀팁까지 한 번에 정리했습니다."
+      />
 
-        <div className="grid gap-8 lg:grid-cols-[0.8fr_2.2fr]">
-          <GuideNav
-            sections={GUIDE_SECTIONS}
-            activeId={activeId}
-            onSelect={setActiveId}
-          />
-          <div className="space-y-8">
-            <ActiveSection />
-          </div>
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8">
+        <GuideNav
+          sections={GUIDE_SECTIONS}
+          activeId={activeId}
+          onSelect={setActiveId}
+        />
+        <div className="min-w-0">
+          <ActiveSection />
         </div>
-      </main>
-    </div>
+      </div>
+    </PageShell>
   );
 }

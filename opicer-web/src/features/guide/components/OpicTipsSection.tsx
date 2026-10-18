@@ -8,22 +8,19 @@ export function OpicTipsSection() {
       title="오픽 보러 갈 때의 꿀팁"
       subtitle="당일 컨디션과 답변 템포를 위한 체크리스트"
     >
-      <div className="space-y-3">
+      <ol className="flex flex-col gap-2">
         {TIP_ITEMS.map((tip, index) => (
-          <div
-            key={tip.id}
-            className="flex items-start gap-4 rounded-2xl border border-black/5 bg-white/80 px-4 py-3"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 text-xs font-semibold text-primary-strong">
+          <li key={tip.id} className="flex items-start gap-4 rounded-2xl border bg-background/60 px-4 py-3.5">
+            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-accent text-sm font-bold text-accent-foreground">
               {index + 1}
             </span>
-            <div>
+            <div className="flex flex-col gap-0.5">
               <p className="text-sm font-semibold">{tip.title}</p>
-              <p className="text-xs text-muted-foreground">{tip.detail}</p>
+              <p className="text-sm text-muted-foreground">{tip.detail}</p>
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ol>
     </GuideSection>
   );
 }

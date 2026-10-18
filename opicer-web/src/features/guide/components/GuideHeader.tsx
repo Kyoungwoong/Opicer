@@ -1,3 +1,5 @@
+import { SectionHeader } from "@/components/common/SectionHeader";
+
 type Props = {
   title: string;
   description: string;
@@ -5,12 +7,8 @@ type Props = {
 
 export function GuideHeader({ title, description }: Props) {
   return (
-    <header className="rounded-3xl border border-black/5 bg-card px-6 py-8 shadow-[0_30px_70px_-50px_rgba(20,106,102,0.65)]">
-      <p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">
-        OPIC Guide
-      </p>
-      <h1 className="mt-3 text-3xl font-semibold">{title}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+    <header className="rounded-3xl border bg-card/90 px-6 py-8 shadow-card sm:px-8 sm:py-10">
+      <SectionHeader as="h1" eyebrow="OPIC Guide" eyebrowLatin title={title} description={description} />
     </header>
   );
 }
