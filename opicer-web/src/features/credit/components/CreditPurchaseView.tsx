@@ -2,7 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AlertCircle, Check, CheckCircle2, LoaderCircle, RotateCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { TopNav } from "@/components/common/TopNav";
+import { PageShell } from "@/components/common/PageShell";
+import { SectionHeader } from "@/components/common/SectionHeader";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { createCreditOrder, confirmCreditPayment } from "@/features/credit/api";
 import { CREDIT_PACKAGES, type CreditPackage, type CreditPaymentResponse } from "@/features/credit/types";
 import { ROUTES } from "@/lib/routes";
@@ -82,88 +88,110 @@ export function CreditPurchaseView({
   };
 
   return (
-    <div className="min-h-screen px-6 py-10 text-foreground">
-      <TopNav
-        userLabel={user.name ?? user.email ?? "사용자"}
-        onLogout={onLogout}
-        maxWidthClassName="max-w-5xl"
-      />
+    <PageShell
+      width="lg"
+      nav={
+        <TopNav
+          userLabel={user.name ?? user.email ?? "사용자"}
+          onLogout={onLogout}
+          maxWidthClassName="max-w-5xl"
+        />
+      }
+    >
+      <section className="rounded-3xl border bg-card/90 p-6 shadow-card sm:p-8">
+        <SectionHeader
+          as="h1"
+          eyebrow="Credit Purchase"
+          eyebrowLatin
+          title="결제/크레딧 구매"
+          description="패키지를 선택하면 주문 생성 후 결제 확정까지 자동으로 진행됩니다."
+        />
+      </section>
 
-      <main className="mx-auto mt-10 flex w-full max-w-5xl flex-col gap-8">
-        <section className="rounded-3xl border border-black/10 bg-white p-8 shadow-sm">
-          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Credit Purchase</p>
-          <h2 className="mt-2 text-3xl font-semibold">결제/크레딧 구매</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            패키지를 선택하면 주문 생성 후 결제 확정까지 자동으로 진행됩니다.
-          </p>
-        </section>
-
-        <section className="grid gap-4 md:grid-cols-3">
-          {CREDIT_PACKAGES.map((pkg) => {
-            const selected = pkg.id === selectedPackage.id;
-            return (
-              <button
-                key={pkg.id}
-                type="button"
-                onClick={() => setSelectedPackageId(pkg.id)}
-                className={`rounded-2xl border p-5 text-left transition ${
-                  selected
-                    ? "border-primary-strong bg-primary/10"
-                    : "border-black/10 bg-white hover:border-primary/50"
-                }`}
-              >
-                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{pkg.id}</p>
-                <h3 className="mt-2 text-xl font-semibold">{pkg.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{pkg.description}</p>
-                <p className="mt-4 text-lg font-bold">{pkg.amount.toLocaleString()} P</p>
-              </button>
-            );
-          })}
-        </section>
-
-        <section className="rounded-2xl border border-black/10 bg-white p-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">선택된 패키지</p>
-              <p className="text-xl font-semibold">{selectedPackage.title}</p>
-              <p className="text-sm text-muted-foreground">{selectedPackage.amount.toLocaleString()} P</p>
-            </div>
+      <section aria-label="크레딧 패키지" className="grid gap-3 md:grid-cols-3">
+        {CREDIT_PACKAGES.map((pkg) => {
+          const selected = pkg.id === selectedPackage.id;
+          return (
             <button
+              key={pkg.id}
               type="button"
-              onClick={handlePurchase}
-              disabled={isSubmitting}
-              className="rounded-full bg-primary-strong px-6 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+              aria-pressed={selected}
+              onClick={() => setSelectedPackageId(pkg.id)}
+              className={cn(
+                "relative flex flex-col gap-2 rounded-2xl border p-5 text-left transition-all",
+                selected
+                  ? "border-primary bg-accent shadow-raised ring-2 ring-primary/20"
+                  : "bg-card hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-card"
+              )}
             >
-              {isSubmitting ? "처리 중..." : "구매하기"}
+              {selected ? (
+                <span className="absolute top-4 right-4 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground">
+                  <Check aria-hidden className="size-3.5" />
+                </span>
+              ) : null}
+              <span className="text-xs font-medium text-muted-foreground">{pkg.id}</span>
+              <span className="text-xl font-bold">{pkg.title}</span>
+              <span className="text-sm text-muted-foreground">{pkg.description}</span>
+              <span className="mt-2 text-2xl font-bold text-primary-strong tabular-nums">
+                {pkg.amount.toLocaleString()} <span className="text-base font-semibold">P</span>
+              </span>
             </button>
+          );
+        })}
+      </section>
+
+      <section className="flex flex-col gap-4 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm text-muted-foreground">선택된 패키지</p>
+            <p className="text-xl font-bold">{selectedPackage.title}</p>
+            <p className="text-sm text-muted-foreground tabular-nums">{selectedPackage.amount.toLocaleString()} P</p>
           </div>
+          <Button
+            type="button"
+            onClick={handlePurchase}
+            disabled={isSubmitting}
+            className="h-11 rounded-full px-8 text-sm font-semibold md:min-w-40"
+          >
+            {isSubmitting ? <LoaderCircle className="animate-spin" /> : null}
+            {isSubmitting ? "처리 중..." : "구매하기"}
+          </Button>
+        </div>
 
-          {paymentResult ? (
-            <div className="mt-4 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm">
-              <p className="font-semibold text-emerald-800">결제가 완료되었습니다.</p>
-              <p className="mt-1 text-emerald-700">paymentId: {paymentResult.paymentId}</p>
-              <p className="text-emerald-700">orderId: {paymentResult.orderId}</p>
-            </div>
-          ) : null}
+        {paymentResult ? (
+          <Alert className="border-success/30 bg-success-subtle text-success">
+            <CheckCircle2 />
+            <AlertTitle>결제가 완료되었습니다.</AlertTitle>
+            <AlertDescription className="text-success/90">
+              <p>paymentId: {paymentResult.paymentId}</p>
+              <p>orderId: {paymentResult.orderId}</p>
+            </AlertDescription>
+          </Alert>
+        ) : null}
 
-          {error ? (
-            <div className="mt-4 rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm">
-              <p className="font-semibold text-rose-800">결제 처리에 실패했습니다.</p>
-              <p className="mt-1 text-rose-700">{error}</p>
+        {error ? (
+          <Alert variant="destructive">
+            <AlertCircle />
+            <AlertTitle>결제 처리에 실패했습니다.</AlertTitle>
+            <AlertDescription>
+              <p>{error}</p>
               {lastRetryRequest ? (
-                <button
+                <Button
                   type="button"
+                  variant="destructive"
+                  size="sm"
                   onClick={handleRetry}
                   disabled={isSubmitting}
-                  className="mt-3 rounded-full bg-rose-700 px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                  className="mt-2 rounded-full px-3"
                 >
+                  <RotateCcw />
                   같은 요청 다시 시도
-                </button>
+                </Button>
               ) : null}
-            </div>
-          ) : null}
-        </section>
-      </main>
-    </div>
+            </AlertDescription>
+          </Alert>
+        ) : null}
+      </section>
+    </PageShell>
   );
 }
