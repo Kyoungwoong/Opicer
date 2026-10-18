@@ -98,7 +98,7 @@ export function UniversalSentencesSection() {
           </div>
         </div>
 
-        <p className="text-lg font-semibold leading-relaxed break-words sm:text-xl" aria-live="polite">
+        <p className="text-lg font-semibold leading-relaxed break-words sm:text-xl">
           {current?.sentence ?? ko.home.universalSentences.sentenceLoading}
         </p>
 

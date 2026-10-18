@@ -676,27 +676,30 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
         </div>
 
         {/* Status + replay */}
-        <div className="flex flex-wrap items-center gap-3" aria-live="polite">
-          {mode === "playing" ? (
-            <span className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground">
-              <Volume2 aria-hidden className="size-4 animate-pulse" />
-              질문 재생 중…
-            </span>
-          ) : isRecording ? (
-            <span className="inline-flex items-center gap-2 rounded-full bg-destructive/10 px-4 py-2 text-sm font-semibold text-destructive">
-              <span aria-hidden className="relative flex size-2.5">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-destructive/60" />
-                <span className="relative inline-flex size-2.5 rounded-full bg-destructive" />
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Only the status pill is live; the replay countdown changes every second. */}
+          <div aria-live="polite" className="flex">
+            {mode === "playing" ? (
+              <span className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground">
+                <Volume2 aria-hidden className="size-4 animate-pulse" />
+                질문 재생 중…
               </span>
-              <Mic aria-hidden className="size-4" />
-              녹음 중…
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm font-semibold text-muted-foreground">
-              <MicOff aria-hidden className="size-4" />
-              대기 중
-            </span>
-          )}
+            ) : isRecording ? (
+              <span className="inline-flex items-center gap-2 rounded-full bg-destructive/10 px-4 py-2 text-sm font-semibold text-destructive">
+                <span aria-hidden className="relative flex size-2.5">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-destructive/60" />
+                  <span className="relative inline-flex size-2.5 rounded-full bg-destructive" />
+                </span>
+                <Mic aria-hidden className="size-4" />
+                녹음 중…
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm font-semibold text-muted-foreground">
+                <MicOff aria-hidden className="size-4" />
+                대기 중
+              </span>
+            )}
+          </div>
 
           {/* Replay button — only during replay window */}
           {replayWindow > 0 && !hasReplayed && (
