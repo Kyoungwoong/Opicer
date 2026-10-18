@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AlertCircle, ArrowLeft, LoaderCircle, Mic, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { TopNav } from "@/components/common/TopNav";
+import { PageShell } from "@/components/common/PageShell";
+import { Eyebrow, SectionHeader } from "@/components/common/SectionHeader";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TopicCard } from "@/features/practice/components/TopicCard";
 import { fetchTopics, submitTopicSelection } from "@/features/practice/api";
 import { ROUTES } from "@/lib/routes";
 import type { TopicCategory, TopicItem } from "@/features/practice/types";
@@ -166,305 +176,238 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
     router.push(`${ROUTES.practiceSession(selectedId)}?selectionId=${selectedSelectionId}`);
   };
 
+  const topicCount = (count: number) => `${count}개 주제`;
+
   // ── Ready screen ───────────────────────────────────────────
   if (mode === "ready") {
     return (
-      <div className="min-h-screen px-6 py-10 text-foreground">
-        <div className="mx-auto flex max-w-4xl flex-col gap-8">
-          <TopNav userLabel={userLabel} onLogout={onLogout} />
-
-          <div className="flex flex-col items-center justify-center gap-10 py-16">
-            <div className="text-center space-y-3">
-              <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">
-                Topic Practice
-              </p>
-              <h1 className="text-4xl font-semibold tracking-tight">
-                {selectedTopic?.title ?? ""}
-              </h1>
-              {selectedTopic?.englishTitle ? (
-                <p className="text-base text-muted-foreground">
-                  {selectedTopic.englishTitle}
-                </p>
-              ) : null}
-              {selectedTopic?.badges && selectedTopic.badges.length > 0 ? (
-                <div className="flex justify-center gap-2 pt-1">
-                  {selectedTopic.badges.map((badge) => (
-                    <span
-                      key={badge.label}
-                      className="rounded-full border border-primary/30 px-3 py-1 text-xs font-semibold text-primary-strong"
-                    >
-                      {badge.label}
-                      {badge.count != null ? ` ${badge.count}` : ""}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-
-            <div className="flex flex-col items-center gap-4">
-              {error ? <p className="text-sm text-red-600">{error}</p> : null}
-              <button
-                type="button"
-                onClick={handleStartPractice}
-                disabled={!selectedSelectionId}
-                className="rounded-full bg-primary px-10 py-4 text-base font-semibold text-white shadow-lg shadow-primary/20 transition hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {selectedTopic?.title ?? ""}에 맞는 연습 시작하기
-              </button>
-              <button
-                type="button"
-                onClick={() => { setMode("select"); setError(null); }}
-                className="text-sm text-muted-foreground hover:underline"
-              >
-                ← 주제 다시 선택하기
-              </button>
-            </div>
+      <PageShell width="md" nav={<TopNav userLabel={userLabel} onLogout={onLogout} />}>
+        <section className="mx-auto flex w-full max-w-xl flex-col items-center gap-8 rounded-3xl border bg-card/90 px-6 py-12 text-center shadow-raised sm:px-10">
+          <div className="flex flex-col items-center gap-3">
+            <Eyebrow latin>Topic Practice</Eyebrow>
+            <h1 className="text-3xl font-bold sm:text-4xl">{selectedTopic?.title ?? ""}</h1>
+            {selectedTopic?.englishTitle ? (
+              <p className="text-base text-muted-foreground">{selectedTopic.englishTitle}</p>
+            ) : null}
+            {selectedTopic?.badges && selectedTopic.badges.length > 0 ? (
+              <div className="flex flex-wrap justify-center gap-2 pt-1">
+                {selectedTopic.badges.map((badge) => (
+                  <Badge key={badge.label} variant="secondary">
+                    {badge.label}
+                    {badge.count != null ? ` ${badge.count}` : ""}
+                  </Badge>
+                ))}
+              </div>
+            ) : null}
           </div>
-        </div>
-      </div>
+
+          <div className="flex w-full flex-col items-center gap-3">
+            {error ? (
+              <Alert variant="destructive" className="text-left">
+                <AlertCircle />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : null}
+            <Button
+              type="button"
+              onClick={handleStartPractice}
+              disabled={!selectedSelectionId}
+              className="h-12 w-full max-w-sm rounded-full text-base font-semibold shadow-raised"
+            >
+              <Mic />
+              {selectedTopic?.title ?? ""}에 맞는 연습 시작하기
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => { setMode("select"); setError(null); }}
+              className="text-muted-foreground"
+            >
+              <ArrowLeft />
+              주제 다시 선택하기
+            </Button>
+          </div>
+        </section>
+      </PageShell>
     );
   }
 
+  const submitButton = (
+    <Button
+      type="button"
+      disabled={!selectedId || isSubmitting}
+      onClick={handleSubmit}
+      className="h-11 w-full rounded-full text-sm font-semibold"
+    >
+      {isSubmitting ? (
+        <>
+          <LoaderCircle className="animate-spin" />
+          저장 중...
+        </>
+      ) : (
+        "선택 완료"
+      )}
+    </Button>
+  );
+
   // ── Select screen ──────────────────────────────────────────
   return (
-    <div className="min-h-screen px-6 py-10 text-foreground">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <TopNav
-          maxWidthClassName="max-w-6xl"
-          userLabel={userLabel}
-          onLogout={onLogout}
+    <PageShell
+      className="pb-28 lg:pb-0"
+      nav={<TopNav maxWidthClassName="max-w-6xl" userLabel={userLabel} onLogout={onLogout} />}
+    >
+      <section className="flex flex-col gap-5 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-8 md:flex-row md:items-end md:justify-between">
+        <SectionHeader
+          as="h1"
+          eyebrow="Topic Practice"
+          eyebrowLatin
+          title="주제별 연습을 시작해볼까요?"
+          description="하나의 주제를 선택하면 그 주제에 맞는 연습 흐름을 준비합니다."
         />
+        <div className="relative w-full md:max-w-xs">
+          <label htmlFor="topic-search" className="sr-only">
+            주제 검색
+          </label>
+          <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            id="topic-search"
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="주제 검색 (한국어/English)"
+            className="h-11 rounded-full bg-background pl-10"
+          />
+        </div>
+      </section>
 
-        <section className="rounded-[32px] border border-black/5 bg-white/70 p-8 shadow-sm">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">
-                Topic Practice
-              </p>
-              <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-                주제별 연습을 시작해볼까요?
-              </h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                하나의 주제를 선택하면 그 주제에 맞는 연습 흐름을 준비합니다.
-              </p>
-            </div>
-            <div className="flex w-full max-w-sm items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 shadow-sm">
-              <span className="text-sm text-muted-foreground">🔎</span>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="주제 검색 (한국어/English)"
-                className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              />
-            </div>
-          </div>
-        </section>
+      {error ? (
+        <Alert variant="destructive">
+          <AlertCircle />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
 
-        <div className="grid gap-6 lg:grid-cols-[0.65fr_1.35fr]">
-          <aside className="flex flex-col gap-4">
-            <div className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                카테고리
-              </p>
-              <div className="mt-4 flex flex-col gap-2">
-                {categories.map((category) => {
-                  const isActive = category.id === activeCategoryId;
-                  return (
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <aside className="flex flex-col gap-4">
+          {/* Categories: scrollable chips on mobile, card list on desktop */}
+          <nav aria-label="카테고리" className="-mx-4 px-4 lg:mx-0 lg:rounded-3xl lg:border lg:bg-card/90 lg:p-5 lg:shadow-card">
+            <Eyebrow className="mb-3 hidden lg:block">카테고리</Eyebrow>
+            <ul className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] lg:flex-col lg:overflow-visible lg:pb-0">
+              {categories.map((category) => {
+                const isActive = category.id === activeCategoryId;
+                return (
+                  <li key={category.id} className="shrink-0 lg:shrink">
                     <button
-                      key={category.id}
                       type="button"
+                      aria-pressed={isActive}
                       onClick={() => {
                         setActiveCategoryId(category.id);
                         setQuery("");
                       }}
-                      className={`rounded-2xl border px-4 py-3 text-left transition ${
+                      className={cn(
+                        "flex w-full flex-col gap-1 rounded-full border px-4 py-2 text-left whitespace-nowrap transition-colors lg:rounded-2xl lg:px-4 lg:py-3 lg:whitespace-normal",
                         isActive
-                          ? "border-transparent bg-primary text-white shadow-sm"
-                          : "border-black/10 bg-white text-foreground hover:border-primary/40"
-                      }`}
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "bg-card text-foreground hover:border-primary/40"
+                      )}
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold">{category.label}</span>
-                        <span className={`text-xs ${isActive ? "text-white/80" : "text-muted-foreground"}`}>
-                          {category.topics.length} items
+                      <span className="flex items-center justify-between gap-3">
+                        <span className="text-sm font-semibold">{category.label}</span>
+                        <span className={cn("text-xs", isActive ? "text-primary-foreground/85" : "text-muted-foreground")}>
+                          {topicCount(category.topics.length)}
                         </span>
-                      </div>
-                      <p className={`mt-1 text-xs ${isActive ? "text-white/80" : "text-muted-foreground"}`}>
-                        {category.description}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                선택된 주제
-              </p>
-              {selectedTopic ? (
-                <div className="mt-4 rounded-2xl border border-primary/30 bg-primary/10 p-4">
-                  <p className="text-sm font-semibold">{selectedTopic.title}</p>
-                  <p className="text-xs text-muted-foreground">{selectedTopic.englishTitle}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {selectedTopic.badges?.map((badge) => (
-                      <span
-                        key={`${selectedTopic.id}-${badge.label}`}
-                        className="rounded-full border border-primary/30 px-2.5 py-1 text-[10px] font-semibold text-primary-strong"
-                      >
-                        {badge.label}{badge.count != null ? ` ${badge.count}` : ""}
                       </span>
+                      <span className={cn("hidden text-sm lg:block", isActive ? "text-primary-foreground/85" : "text-muted-foreground")}>
+                        {category.description}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          {/* Selection summary + CTA (desktop). Mobile uses the sticky bar below. */}
+          <div className="hidden flex-col gap-4 rounded-3xl border bg-card/90 p-5 shadow-card lg:sticky lg:top-6 lg:flex">
+            <Eyebrow>선택된 주제</Eyebrow>
+            {selectedTopic ? (
+              <div className="rounded-2xl border border-primary/30 bg-accent p-4">
+                <p className="text-sm font-semibold text-accent-foreground">{selectedTopic.title}</p>
+                <p className="text-sm text-muted-foreground">{selectedTopic.englishTitle}</p>
+                {selectedTopic.badges && selectedTopic.badges.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {selectedTopic.badges.map((badge) => (
+                      <Badge key={`${selectedTopic.id}-${badge.label}`} variant="outline">
+                        {badge.label}
+                        {badge.count != null ? ` ${badge.count}` : ""}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">아직 선택된 주제가 없습니다.</p>
+            )}
+            {submitButton}
+          </div>
+        </aside>
+
+        <section className="flex flex-col gap-5 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-6">
+          <SectionHeader
+            eyebrow="Topics"
+            eyebrowLatin
+            title={activeCategory?.label ?? "주제 목록"}
+            action={<span className="text-sm text-muted-foreground">{topicCount(filteredTopics.length)}</span>}
+          />
+
+          {isLoading ? (
+            <div className="grid gap-3 sm:grid-cols-2" aria-busy="true">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={`skeleton-${i}`} className="h-24 rounded-2xl" />
+              ))}
+            </div>
+          ) : activeCategoryId === CATEGORY_SURVEY ? (
+            <div className="flex flex-col gap-6">
+              {groupedSurveyTopics.length === 0 ? (
+                <p className="rounded-2xl border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+                  조건에 맞는 설문 항목이 없습니다.
+                </p>
+              ) : null}
+              {groupedSurveyTopics.map(({ group, items }) => (
+                <div key={group} className="flex flex-col gap-3">
+                  <h3 className="text-sm font-semibold text-muted-foreground">{group}</h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {items.map((topic) => (
+                      <TopicCard key={topic.id} topic={topic} selected={selectedId === topic.id} onSelect={handleSelect} />
                     ))}
                   </div>
                 </div>
-              ) : (
-                <p className="mt-3 text-sm text-muted-foreground">아직 선택된 주제가 없습니다.</p>
-              )}
-              {error ? <p className="mt-3 text-xs text-red-600">{error}</p> : null}
-              <button
-                type="button"
-                disabled={!selectedId || isSubmitting}
-                onClick={handleSubmit}
-                className={`mt-4 w-full rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  selectedTopic && !isSubmitting
-                    ? "bg-primary text-white hover:bg-primary-strong"
-                    : "cursor-not-allowed bg-black/10 text-muted-foreground"
-                }`}
-              >
-                {isSubmitting ? "저장 중..." : "선택 완료"}
-              </button>
+              ))}
             </div>
-          </aside>
-
-          <section className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Topics</p>
-                <h2 className="mt-1 text-2xl font-semibold">
-                  {activeCategory?.label ?? "주제 목록"}
-                </h2>
-              </div>
-              <span className="text-xs text-muted-foreground">{filteredTopics.length} topics</span>
+          ) : filteredTopics.length === 0 ? (
+            <p className="rounded-2xl border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+              조건에 맞는 주제가 없습니다.
+            </p>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {filteredTopics.map((topic) => (
+                <TopicCard key={topic.id} topic={topic} selected={selectedId === topic.id} onSelect={handleSelect} />
+              ))}
             </div>
+          )}
+        </section>
+      </div>
 
-            {isLoading ? (
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={`skeleton-${i}`} className="h-24 rounded-3xl border border-black/10 bg-white/60 animate-pulse" />
-                ))}
-              </div>
-            ) : activeCategoryId === CATEGORY_SURVEY ? (
-              <div className="mt-6 space-y-5">
-                {groupedSurveyTopics.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">조건에 맞는 설문 항목이 없습니다.</p>
-                ) : null}
-                {groupedSurveyTopics.map(({ group, items }) => (
-                  <div key={group} className="space-y-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                      {group}
-                    </p>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {items.map((topic) => {
-                        const isSelected = selectedId === topic.id;
-                        return (
-                          <button
-                            key={topic.id}
-                            type="button"
-                            onClick={() => handleSelect(topic)}
-                            className={`rounded-3xl border p-4 text-left transition ${
-                              isSelected
-                                ? "border-transparent bg-primary text-white shadow-lg shadow-primary/20"
-                                : "border-black/10 bg-white hover:border-primary/40"
-                            }`}
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div>
-                                <p className="text-base font-semibold">{topic.title}</p>
-                                <p className={`mt-1 text-xs ${isSelected ? "text-white/80" : "text-muted-foreground"}`}>
-                                  {topic.englishTitle}
-                                </p>
-                              </div>
-                              <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                                isSelected ? "bg-white/20 text-white" : "bg-primary/10 text-primary-strong"
-                              }`}>
-                                {isSelected ? "선택됨" : "선택"}
-                              </span>
-                            </div>
-                            {topic.badges && topic.badges.length > 0 ? (
-                              <div className="mt-3 flex flex-wrap gap-2">
-                                {topic.badges.map((badge) => (
-                                  <span
-                                    key={`${topic.id}-${badge.label}`}
-                                    className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
-                                      isSelected
-                                        ? "border-white/30 text-white/90"
-                                        : "border-primary/20 text-primary-strong"
-                                    }`}
-                                  >
-                                    {badge.label}{badge.count != null ? ` ${badge.count}` : ""}
-                                  </span>
-                                ))}
-                              </div>
-                            ) : null}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {filteredTopics.map((topic) => {
-                  const isSelected = selectedId === topic.id;
-                  return (
-                    <button
-                      key={topic.id}
-                      type="button"
-                      onClick={() => handleSelect(topic)}
-                      className={`rounded-3xl border p-4 text-left transition ${
-                        isSelected
-                          ? "border-transparent bg-primary text-white shadow-lg shadow-primary/20"
-                          : "border-black/10 bg-white hover:border-primary/40"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-base font-semibold">{topic.title}</p>
-                          <p className={`mt-1 text-xs ${isSelected ? "text-white/80" : "text-muted-foreground"}`}>
-                            {topic.englishTitle}
-                          </p>
-                        </div>
-                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                          isSelected ? "bg-white/20 text-white" : "bg-primary/10 text-primary-strong"
-                        }`}>
-                          {isSelected ? "선택됨" : "선택"}
-                        </span>
-                      </div>
-                      {topic.badges && topic.badges.length > 0 ? (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {topic.badges.map((badge) => (
-                            <span
-                              key={`${topic.id}-${badge.label}`}
-                              className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
-                                isSelected
-                                  ? "border-white/30 text-white/90"
-                                  : "border-primary/20 text-primary-strong"
-                              }`}
-                            >
-                              {badge.label}{badge.count != null ? ` ${badge.count}` : ""}
-                            </span>
-                          ))}
-                        </div>
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </section>
+      {/* Mobile sticky CTA */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 px-4 py-3 shadow-raised backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-6xl items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-muted-foreground">선택된 주제</p>
+            <p className="truncate text-sm font-semibold">{selectedTopic?.title ?? "아직 선택된 주제가 없습니다."}</p>
+          </div>
+          <div className="w-32 shrink-0">{submitButton}</div>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }
