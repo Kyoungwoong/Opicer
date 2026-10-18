@@ -78,17 +78,16 @@ export default function AdminPage() {
         }
       />
 
-      {/* Tabs: horizontally scrollable so all five fit at 375px */}
-      <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0">
-        <div role="tablist" aria-label="관리 메뉴" className="inline-flex min-w-full gap-1 rounded-full border bg-card/80 p-1 shadow-card sm:min-w-0">
+      {/* Section switcher (toggle buttons, horizontally scrollable at 375px) */}
+      <nav aria-label="관리 메뉴" className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0">
+        <div className="inline-flex min-w-full gap-1 rounded-full border bg-card/80 p-1 shadow-card sm:min-w-0">
           {TABS.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 type="button"
-                role="tab"
-                aria-selected={isActive}
+                aria-pressed={isActive}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   "shrink-0 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors",
@@ -102,10 +101,10 @@ export default function AdminPage() {
             );
           })}
         </div>
-      </div>
+      </nav>
 
       {/* Tab Content */}
-      <div role="tabpanel">
+      <div>
         {activeTab === "questions" && <QuestionTab />}
         {activeTab === "daily-sentences" && <DailySentenceTab />}
         {activeTab === "universal-sentences" && <UniversalSentenceTab />}
