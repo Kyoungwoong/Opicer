@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { questionApi } from "./api";
 import type { OpicLevel, Question, QuestionType } from "./types";
+import { adminUi } from "@/features/admin/ui";
 
 const OPIC_LEVELS: OpicLevel[] = ["NL", "IL", "IM", "IH", "AL"];
 const QUESTION_TYPES: QuestionType[] = [
@@ -117,43 +118,43 @@ export function QuestionTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={adminUi.section}>
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-black/8 bg-card p-5 space-y-4"
+        className={adminUi.card}
       >
-        <h3 className="font-semibold text-foreground">
+        <h3 className={adminUi.cardTitle}>
           {editId ? "질문 수정" : "질문 추가"}
         </h3>
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+          <p className={adminUi.error}>
             {error}
           </p>
         )}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">
+        <div className={adminUi.grid2}>
+          <label className={adminUi.field}>
+            <span className={adminUi.labelText}>
               Topic
-            </label>
+            </span>
             <input
               required
               value={form.topic}
               onChange={(e) => setForm((f) => ({ ...f, topic: e.target.value }))}
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+              className={adminUi.control}
               placeholder="예: 주거환경"
             />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">
+          </label>
+          <label className={adminUi.field}>
+            <span className={adminUi.labelText}>
               Type
-            </label>
+            </span>
             <select
               value={form.type}
               onChange={(e) =>
                 setForm((f) => ({ ...f, type: e.target.value as QuestionType }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+              className={adminUi.control}
             >
               {QUESTION_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -161,12 +162,12 @@ export function QuestionTab() {
                 </option>
               ))}
             </select>
-          </div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">
-            Prompt Text
           </label>
+        </div>
+        <label className={adminUi.field}>
+          <span className={adminUi.labelText}>
+            Prompt Text
+          </span>
           <textarea
             required
             rows={3}
@@ -174,52 +175,52 @@ export function QuestionTab() {
             onChange={(e) =>
               setForm((f) => ({ ...f, promptText: e.target.value }))
             }
-            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+            className={adminUi.control}
             placeholder="질문 내용"
           />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">
+        </label>
+        <div className={adminUi.grid2}>
+          <label className={adminUi.field}>
+            <span className={adminUi.labelText}>
               Structural Hint (선택)
-            </label>
+            </span>
             <input
               value={form.structuralHint}
               onChange={(e) =>
                 setForm((f) => ({ ...f, structuralHint: e.target.value }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+              className={adminUi.control}
             />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">
+          </label>
+          <label className={adminUi.field}>
+            <span className={adminUi.labelText}>
               Key Expressions (쉼표 구분)
-            </label>
+            </span>
             <input
               value={form.keyExpressions}
               onChange={(e) =>
                 setForm((f) => ({ ...f, keyExpressions: e.target.value }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+              className={adminUi.control}
               placeholder="예: I usually, On weekends"
             />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-muted-foreground">
-            Target Levels
           </label>
-          <div className="flex gap-2">
+        </div>
+        <div className={adminUi.fieldGroup}>
+          <p className={adminUi.labelText}>
+            Target Levels
+          </p>
+          <div className={adminUi.actions}>
             {OPIC_LEVELS.map((level) => (
               <label
                 key={level}
-                className="flex items-center gap-1.5 text-sm cursor-pointer"
+                className={adminUi.checkInline}
               >
                 <input
                   type="checkbox"
                   checked={form.targetLevels.includes(level)}
                   onChange={() => toggleLevel(level)}
-                  className="accent-primary"
+                  className={adminUi.checkbox}
                 />
                 {level}
               </label>
@@ -227,23 +228,23 @@ export function QuestionTab() {
           </div>
         </div>
         {editId && (
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <label className={adminUi.checkRow}>
             <input
               type="checkbox"
               checked={form.active}
               onChange={(e) =>
                 setForm((f) => ({ ...f, active: e.target.checked }))
               }
-              className="accent-primary"
+              className={adminUi.checkbox}
             />
             <span className="text-muted-foreground">Active</span>
           </label>
         )}
-        <div className="flex gap-2">
+        <div className={adminUi.actions}>
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary-strong disabled:opacity-50"
+            className={adminUi.primaryButton}
           >
             {loading ? "저장 중..." : editId ? "수정" : "추가"}
           </button>
@@ -251,7 +252,7 @@ export function QuestionTab() {
             <button
               type="button"
               onClick={cancelEdit}
-              className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-black/5"
+              className={adminUi.secondaryButton}
             >
               취소
             </button>
@@ -260,57 +261,57 @@ export function QuestionTab() {
       </form>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-black/8">
-        <table className="w-full text-sm">
-          <thead className="bg-card text-muted-foreground">
+      <div className={adminUi.tableWrap}>
+        <table className={adminUi.table}>
+          <thead className={adminUi.thead}>
             <tr>
-              <th className="px-4 py-3 text-left font-medium">Topic</th>
-              <th className="px-4 py-3 text-left font-medium">Type</th>
-              <th className="px-4 py-3 text-left font-medium">Levels</th>
-              <th className="px-4 py-3 text-left font-medium">Active</th>
-              <th className="px-4 py-3 text-left font-medium">Actions</th>
+              <th className={adminUi.th}>Topic</th>
+              <th className={adminUi.th}>Type</th>
+              <th className={adminUi.th}>Levels</th>
+              <th className={adminUi.th}>Active</th>
+              <th className={adminUi.th}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-black/5 bg-white">
+          <tbody className={adminUi.tbody}>
             {questions.length === 0 && (
               <tr>
                 <td
                   colSpan={5}
-                  className="px-4 py-6 text-center text-muted-foreground"
+                  className={adminUi.tdEmpty}
                 >
                   질문이 없습니다.
                 </td>
               </tr>
             )}
             {questions.map((q) => (
-              <tr key={q.id} className="hover:bg-background">
-                <td className="px-4 py-3 font-medium">{q.topic}</td>
-                <td className="px-4 py-3 text-muted-foreground">{q.type}</td>
-                <td className="px-4 py-3 text-muted-foreground">
+              <tr key={q.id} className={adminUi.tr}>
+                <td className={adminUi.tdStrong}>{q.topic}</td>
+                <td className={adminUi.tdMuted}>{q.type}</td>
+                <td className={adminUi.tdMuted}>
                   {q.targetLevels.join(", ")}
                 </td>
-                <td className="px-4 py-3">
+                <td className={adminUi.td}>
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                       q.active
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-500"
+                        ? "bg-success-subtle text-success"
+                        : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {q.active ? "ON" : "OFF"}
                   </span>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
+                <td className={adminUi.td}>
+                  <div className={adminUi.actions}>
                     <button
                       onClick={() => startEdit(q)}
-                      className="text-primary hover:underline"
+                      className={adminUi.linkButton}
                     >
                       수정
                     </button>
                     <button
                       onClick={() => handleDelete(q.id)}
-                      className="text-red-500 hover:underline"
+                      className={adminUi.dangerLink}
                     >
                       삭제
                     </button>

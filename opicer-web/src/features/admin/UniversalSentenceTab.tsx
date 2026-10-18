@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { universalSentenceApi } from "./api";
 import type { UniversalSentence, UniversalSentenceType } from "./types";
+import { adminUi } from "@/features/admin/ui";
 
 const SENTENCE_TYPES: UniversalSentenceType[] = [
   "OPINION",
@@ -99,24 +100,24 @@ export function UniversalSentenceTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={adminUi.section}>
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-black/8 bg-card p-5 space-y-4"
+        className={adminUi.card}
       >
-        <h3 className="font-semibold text-foreground">
+        <h3 className={adminUi.cardTitle}>
           {editId ? "만능 문장 수정" : "만능 문장 추가"}
         </h3>
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+          <p className={adminUi.error}>
             {error}
           </p>
         )}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">
+        <div className={adminUi.grid2}>
+          <label className={adminUi.field}>
+            <span className={adminUi.labelText}>
               타입
-            </label>
+            </span>
             <select
               value={form.type}
               onChange={(e) =>
@@ -125,7 +126,7 @@ export function UniversalSentenceTab() {
                   type: e.target.value as UniversalSentenceType,
                 }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+              className={adminUi.control}
             >
               {SENTENCE_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -133,24 +134,24 @@ export function UniversalSentenceTab() {
                 </option>
               ))}
             </select>
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">
+          </label>
+          <label className={adminUi.field}>
+            <span className={adminUi.labelText}>
               제목
-            </label>
+            </span>
             <input
               required
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+              className={adminUi.control}
               placeholder="의견 시작"
             />
-          </div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">
-            문장
           </label>
+        </div>
+        <label className={adminUi.field}>
+          <span className={adminUi.labelText}>
+            문장
+          </span>
           <textarea
             required
             rows={3}
@@ -158,39 +159,39 @@ export function UniversalSentenceTab() {
             onChange={(e) =>
               setForm((f) => ({ ...f, sentence: e.target.value }))
             }
-            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+            className={adminUi.control}
             placeholder="From my perspective ..."
           />
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">
+        </label>
+        <label className={adminUi.field}>
+          <span className={adminUi.labelText}>
             태그 (쉼표로 구분)
-          </label>
+          </span>
           <input
             value={form.tags}
             onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
-            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+            className={adminUi.control}
             placeholder="opinion, starter"
           />
-        </div>
+        </label>
         {editId && (
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <label className={adminUi.checkRow}>
             <input
               type="checkbox"
               checked={form.active}
               onChange={(e) =>
                 setForm((f) => ({ ...f, active: e.target.checked }))
               }
-              className="accent-primary"
+              className={adminUi.checkbox}
             />
             <span className="text-muted-foreground">Active</span>
           </label>
         )}
-        <div className="flex gap-2">
+        <div className={adminUi.actions}>
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary-strong disabled:opacity-50"
+            className={adminUi.primaryButton}
           >
             {loading ? "저장 중..." : editId ? "수정" : "추가"}
           </button>
@@ -198,7 +199,7 @@ export function UniversalSentenceTab() {
             <button
               type="button"
               onClick={cancelEdit}
-              className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-black/5"
+              className={adminUi.secondaryButton}
             >
               취소
             </button>
@@ -206,24 +207,24 @@ export function UniversalSentenceTab() {
         </div>
       </form>
 
-      <div className="overflow-x-auto rounded-xl border border-black/8">
-        <table className="w-full text-sm">
-          <thead className="bg-card text-muted-foreground">
+      <div className={adminUi.tableWrap}>
+        <table className={adminUi.table}>
+          <thead className={adminUi.thead}>
             <tr>
-              <th className="px-4 py-3 text-left font-medium">타입</th>
-              <th className="px-4 py-3 text-left font-medium">제목</th>
-              <th className="px-4 py-3 text-left font-medium">문장</th>
-              <th className="px-4 py-3 text-left font-medium">태그</th>
-              <th className="px-4 py-3 text-left font-medium">Active</th>
-              <th className="px-4 py-3 text-left font-medium">Actions</th>
+              <th className={adminUi.th}>타입</th>
+              <th className={adminUi.th}>제목</th>
+              <th className={adminUi.th}>문장</th>
+              <th className={adminUi.th}>태그</th>
+              <th className={adminUi.th}>Active</th>
+              <th className={adminUi.th}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-black/5 bg-white">
+          <tbody className={adminUi.tbody}>
             {sentences.length === 0 && (
               <tr>
                 <td
                   colSpan={6}
-                  className="px-4 py-6 text-center text-muted-foreground"
+                  className={adminUi.tdEmpty}
                 >
                   등록된 문장이 없습니다.
                 </td>
@@ -231,30 +232,30 @@ export function UniversalSentenceTab() {
             )}
             {sentences.map((sentence) => (
               <tr key={sentence.id}>
-                <td className="px-4 py-3 text-xs text-muted-foreground">
+                <td className={adminUi.tdSmall}>
                   {sentence.type}
                 </td>
-                <td className="px-4 py-3 font-medium">{sentence.title}</td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">
+                <td className={adminUi.tdStrong}>{sentence.title}</td>
+                <td className={adminUi.tdSmall}>
                   {sentence.sentence}
                 </td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">
+                <td className={adminUi.tdSmall}>
                   {sentence.tags.join(", ")}
                 </td>
                 <td className="px-4 py-3 text-xs">
                   {sentence.active ? "Y" : "N"}
                 </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
+                <td className={adminUi.td}>
+                  <div className={adminUi.actions}>
                     <button
                       onClick={() => startEdit(sentence)}
-                      className="rounded-full border border-black/10 px-3 py-1 text-xs text-muted-foreground transition hover:bg-black/5"
+                      className={adminUi.smallButton}
                     >
                       수정
                     </button>
                     <button
                       onClick={() => handleDelete(sentence.id)}
-                      className="rounded-full border border-red-200 px-3 py-1 text-xs text-red-500 transition hover:bg-red-50"
+                      className={adminUi.smallDangerButton}
                     >
                       삭제
                     </button>

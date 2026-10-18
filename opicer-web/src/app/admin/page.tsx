@@ -2,9 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, ShieldAlert } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useAuthState } from "@/lib/use-auth-state";
 import { ROUTES } from "@/lib/routes";
 import { LoadingScreen } from "@/components/common/LoadingScreen";
+import { PageShell } from "@/components/common/PageShell";
+import { SectionHeader } from "@/components/common/SectionHeader";
+import { Button } from "@/components/ui/button";
 import { QuestionTab } from "@/features/admin/QuestionTab";
 import { DailySentenceTab } from "@/features/admin/DailySentenceTab";
 import { PromptVersionTab } from "@/features/admin/PromptVersionTab";
@@ -42,66 +47,71 @@ export default function AdminPage() {
 
   if (auth.user.role !== "ADMIN") {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center space-y-2">
+      <div className="flex min-h-dvh items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-3 rounded-3xl border bg-card/90 px-10 py-12 text-center shadow-card">
+          <ShieldAlert aria-hidden className="size-8 text-destructive" />
           <p className="text-2xl font-bold text-foreground">403</p>
           <p className="text-muted-foreground">접근 권한이 없습니다.</p>
-          <a
-            href={ROUTES.home}
-            className="mt-4 inline-block text-sm text-primary hover:underline"
-          >
-            홈으로 돌아가기
-          </a>
+          <Button asChild variant="outline" className="mt-2 rounded-full px-5">
+            <a href={ROUTES.home}>홈으로 돌아가기</a>
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-10 px-4">
-      <div className="mx-auto max-w-5xl space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">관리자</h1>
-            <p className="text-sm text-muted-foreground">{auth.user.name} 님</p>
-          </div>
-          <a
-            href={ROUTES.home}
-            className="rounded-full border border-black/10 px-4 py-1.5 text-sm text-muted-foreground transition hover:bg-black/5"
-          >
-            ← 홈
-          </a>
-        </div>
+    <PageShell width="lg">
+      <SectionHeader
+        as="h1"
+        eyebrow="Admin"
+        eyebrowLatin
+        title="관리자"
+        description={`${auth.user.name} 님`}
+        action={
+          <Button asChild variant="outline" className="rounded-full px-4">
+            <a href={ROUTES.home}>
+              <ArrowLeft />
+              홈
+            </a>
+          </Button>
+        }
+      />
 
-        {/* Tabs */}
-        <div className="border-b border-black/8">
-          <nav className="flex gap-0">
-            {TABS.map((tab) => (
+      {/* Tabs: horizontally scrollable so all five fit at 375px */}
+      <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0">
+        <div role="tablist" aria-label="관리 메뉴" className="inline-flex min-w-full gap-1 rounded-full border bg-card/80 p-1 shadow-card sm:min-w-0">
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
               <button
                 key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-5 py-3 text-sm font-medium transition border-b-2 -mb-px ${
-                  activeTab === tab.id
-                    ? "border-primary text-primary-strong"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
+                className={cn(
+                  "shrink-0 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
               >
                 {tab.label}
               </button>
-            ))}
-          </nav>
-        </div>
-
-        {/* Tab Content */}
-        <div>
-          {activeTab === "questions" && <QuestionTab />}
-          {activeTab === "daily-sentences" && <DailySentenceTab />}
-          {activeTab === "universal-sentences" && <UniversalSentenceTab />}
-          {activeTab === "good-answers" && <GoodAnswerTab />}
-          {activeTab === "prompts" && <PromptVersionTab />}
+            );
+          })}
         </div>
       </div>
-    </div>
+
+      {/* Tab Content */}
+      <div role="tabpanel">
+        {activeTab === "questions" && <QuestionTab />}
+        {activeTab === "daily-sentences" && <DailySentenceTab />}
+        {activeTab === "universal-sentences" && <UniversalSentenceTab />}
+        {activeTab === "good-answers" && <GoodAnswerTab />}
+        {activeTab === "prompts" && <PromptVersionTab />}
+      </div>
+    </PageShell>
   );
 }

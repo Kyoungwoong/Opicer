@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { dailySentenceApi } from "./api";
 import type { DailySentence, OpicLevel } from "./types";
+import { adminUi } from "@/features/admin/ui";
 
 const OPIC_LEVELS: OpicLevel[] = ["NL", "IL", "IM", "IH", "AL"];
 
@@ -88,43 +89,43 @@ export function DailySentenceTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={adminUi.section}>
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-black/8 bg-card p-5 space-y-4"
+        className={adminUi.card}
       >
-        <h3 className="font-semibold text-foreground">
+        <h3 className={adminUi.cardTitle}>
           {editId ? "오늘의 문장 수정" : "오늘의 문장 추가"}
         </h3>
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+          <p className={adminUi.error}>
             {error}
           </p>
         )}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">
+        <div className={adminUi.grid2}>
+          <label className={adminUi.field}>
+            <span className={adminUi.labelText}>
               날짜
-            </label>
+            </span>
             <input
               required
               type="date"
               value={form.date}
               onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+              className={adminUi.control}
             />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">
+          </label>
+          <label className={adminUi.field}>
+            <span className={adminUi.labelText}>
               Level
-            </label>
+            </span>
             <select
               value={form.level}
               onChange={(e) =>
                 setForm((f) => ({ ...f, level: e.target.value as OpicLevel }))
               }
-              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+              className={adminUi.control}
             >
               {OPIC_LEVELS.map((l) => (
                 <option key={l} value={l}>
@@ -132,39 +133,39 @@ export function DailySentenceTab() {
                 </option>
               ))}
             </select>
-          </div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">
-            문장
           </label>
+        </div>
+        <label className={adminUi.field}>
+          <span className={adminUi.labelText}>
+            문장
+          </span>
           <textarea
             required
             rows={3}
             value={form.text}
             onChange={(e) => setForm((f) => ({ ...f, text: e.target.value }))}
-            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+            className={adminUi.control}
             placeholder="오늘의 학습 문장"
           />
-        </div>
+        </label>
         {editId && (
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <label className={adminUi.checkRow}>
             <input
               type="checkbox"
               checked={form.active}
               onChange={(e) =>
                 setForm((f) => ({ ...f, active: e.target.checked }))
               }
-              className="accent-primary"
+              className={adminUi.checkbox}
             />
             <span className="text-muted-foreground">Active</span>
           </label>
         )}
-        <div className="flex gap-2">
+        <div className={adminUi.actions}>
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary-strong disabled:opacity-50"
+            className={adminUi.primaryButton}
           >
             {loading ? "저장 중..." : editId ? "수정" : "추가"}
           </button>
@@ -172,7 +173,7 @@ export function DailySentenceTab() {
             <button
               type="button"
               onClick={cancelEdit}
-              className="rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-black/5"
+              className={adminUi.secondaryButton}
             >
               취소
             </button>
@@ -181,61 +182,61 @@ export function DailySentenceTab() {
       </form>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-black/8">
-        <table className="w-full text-sm">
-          <thead className="bg-card text-muted-foreground">
+      <div className={adminUi.tableWrap}>
+        <table className={adminUi.table}>
+          <thead className={adminUi.thead}>
             <tr>
-              <th className="px-4 py-3 text-left font-medium">날짜</th>
-              <th className="px-4 py-3 text-left font-medium">Level</th>
-              <th className="px-4 py-3 text-left font-medium">문장</th>
-              <th className="px-4 py-3 text-left font-medium">Active</th>
-              <th className="px-4 py-3 text-left font-medium">Actions</th>
+              <th className={adminUi.th}>날짜</th>
+              <th className={adminUi.th}>Level</th>
+              <th className={adminUi.th}>문장</th>
+              <th className={adminUi.th}>Active</th>
+              <th className={adminUi.th}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-black/5 bg-white">
+          <tbody className={adminUi.tbody}>
             {sentences.length === 0 && (
               <tr>
                 <td
                   colSpan={5}
-                  className="px-4 py-6 text-center text-muted-foreground"
+                  className={adminUi.tdEmpty}
                 >
                   등록된 문장이 없습니다.
                 </td>
               </tr>
             )}
             {sentences.map((s) => (
-              <tr key={s.id} className="hover:bg-background">
-                <td className="px-4 py-3 font-medium">{s.date}</td>
-                <td className="px-4 py-3">
-                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary-strong">
+              <tr key={s.id} className={adminUi.tr}>
+                <td className={adminUi.tdStrong}>{s.date}</td>
+                <td className={adminUi.td}>
+                  <span className={adminUi.pillPrimary}>
                     {s.level}
                   </span>
                 </td>
                 <td className="max-w-xs px-4 py-3 truncate text-muted-foreground">
                   {s.text}
                 </td>
-                <td className="px-4 py-3">
+                <td className={adminUi.td}>
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                       s.active
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-500"
+                        ? "bg-success-subtle text-success"
+                        : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {s.active ? "ON" : "OFF"}
                   </span>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
+                <td className={adminUi.td}>
+                  <div className={adminUi.actions}>
                     <button
                       onClick={() => startEdit(s)}
-                      className="text-primary hover:underline"
+                      className={adminUi.linkButton}
                     >
                       수정
                     </button>
                     <button
                       onClick={() => handleDelete(s.id)}
-                      className="text-red-500 hover:underline"
+                      className={adminUi.dangerLink}
                     >
                       삭제
                     </button>
