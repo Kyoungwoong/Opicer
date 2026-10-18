@@ -64,11 +64,9 @@ function CategoryList({
 
 function HistoryList({
   items,
-  selectedId,
   onSelect,
 }: {
   items: PracticeHistory[];
-  selectedId?: string | null;
   onSelect: (item: PracticeHistory) => void;
 }) {
   if (items.length === 0) {
@@ -82,17 +80,12 @@ function HistoryList({
   return (
     <div className="space-y-3">
       {items.map((item) => {
-        const isActive = item.id === selectedId;
         return (
           <button
             key={item.id}
             type="button"
             onClick={() => onSelect(item)}
-            className={`w-full rounded-2xl border px-4 py-4 text-left transition ${
-              isActive
-                ? "border-[var(--accent)] bg-[var(--accent)]/10 shadow-md"
-                : "border-black/10 bg-white/70 hover:border-[var(--accent)]/40"
-            }`}
+            className="w-full rounded-2xl border border-black/10 bg-white/70 px-4 py-4 text-left transition hover:border-[var(--accent)]/40"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -268,7 +261,7 @@ export function MyPageView({ userLabel, onLogout }: Props) {
               </div>
 
               <div className="mt-6">
-                <HistoryList items={items} selectedId={selected?.id} onSelect={setSelected} />
+                <HistoryList items={items} onSelect={setSelected} />
               </div>
             </section>
           )}
