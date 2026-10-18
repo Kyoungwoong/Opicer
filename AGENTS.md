@@ -35,9 +35,12 @@ This protocol is designed to keep delivery:
 ## 3. Global Rules (Always Applied)
 
 ### 3.1 Approval-Driven Work
-- MUST: Ask the user for confirmation before starting **each phase** (Plan → Build → Verify → Package).
+- MUST: Get the user's explicit **OK on the plan** (Delivery Cycle step 3, §3.5) before creating an issue, a branch, or any code.
+- After that OK, run the Delivery Cycle through to a merge-ready PR **without** asking again at each phase. Still MUST stop and ask when:
+    - scope would expand beyond the approved `plan.md`
+    - requirements are unclear or missing
+    - an action is destructive or otherwise not covered by the plan
 - MUST NOT: Write production code or refactor without explicit approval.
-- MUST: Stop immediately and ask the user if requirements are unclear or missing.
 
 ### 3.2 Source of Truth & Context Hygiene
 Priority order:
@@ -63,6 +66,57 @@ Priority order:
 - MUST: Make **small, feature-scoped commits**. If a change can be split, it must be split.
 - MUST: Use commit message format `<type>(<scope>): <subject>` as defined in `git-workflow`.
 - MUST: Use relevant skills before working, and follow their instructions.
+
+### 3.5 Delivery Cycle (Every Unit of Work)
+Every unit of work, whether feature, fix, refactor, docs or chore, goes through this exact loop.
+Each step is listed with the FSM state from §4 that it belongs to.
+
+1. **Analyze** (Problem Interpretation)
+    - Do a *fresh* analysis of the current state: code, running app, docs, and the last merged result.
+    - Do not reuse assumptions from the previous cycle without re-checking them.
+    - This step is read-only.
+2. **Plan** (Plan Mode)
+    - Write the plan in `plan.md` (template §6). It must include scope in/out, open questions, tasks, and acceptance criteria.
+    - Present the plan to the user.
+3. **User OK** (gate)
+    - STOP and wait for an explicit OK on the plan.
+    - Nothing below may start without it.
+4. **Issue**
+    - Create a GitHub issue that follows `git-workflow` §3: title `[Feature|Bug|Refactor|Docs|Chore] ...`, plus the body template.
+5. **Branch**
+    - Update `main` (`git switch main && git pull --ff-only`).
+    - Create and switch to `opicer-ai/<type>/<issue-number>-<short-description>`.
+    - The issue comes before the branch because the branch name needs the issue number.
+6. **Build** (Build Mode)
+    - Make small, scoped commits (`<type>(<scope>): <subject>`).
+    - Run the local checks before pushing: backend tests, frontend `tsc --noEmit` / `pnpm lint` / build as relevant.
+7. **Pull Request**
+    - Push the branch and open a PR to `main`.
+    - Use `.github/pull_request_template.md` and the `git-workflow` §6 title format, and include `Closes #<issue-number>`.
+8. **Review Loop** (Verify Mode). Repeat until a pass finds nothing:
+    1. **Review** the PR diff as a reviewer, not as its author. Check correctness, scope vs `plan.md`, conventions, tests, security, and UI on desktop and 375px when relevant.
+    2. **Comment on GitHub.**
+        - Post each finding as an inline review comment on the exact line.
+        - Add a summary review (event `COMMENT`; GitHub does not allow approving your own PR).
+        - Findings that exist only in chat or terminal output do not count.
+    3. **Fix.**
+        - Address each finding in new commits. Do not force-push over reviewed history.
+        - Push, then reply on each thread with the fixing commit SHA and resolve it.
+    4. **Re-review** the updated diff from step 1.
+    - The loop ends when a review pass yields **no new findings** and the PR breaks **no check that passes on `main`**.
+        - Run any check that already fails on `main` against both branches.
+        - List those failures in the report as pre-existing, and track them in a follow-up issue. They do not block this PR.
+    - Post a final summary comment that says the loop is done and lists the verification evidence (commands and results).
+    - If a finding is out of scope for this PR, do not fix it here. Open a follow-up issue and link it in the thread.
+9. **Merge** (Package Mode)
+    - Merge only after the review loop has ended cleanly.
+    - If the agent is permitted to merge, it merges the PR itself.
+    - If it is not permitted, it hands the PR link to the user, asks them to merge, and waits.
+10. **Close Out**
+    - After the merge, switch to `main` and pull.
+    - Delete the merged branch locally and on the remote.
+    - Update `plan.md`: progress and Iteration Log.
+    - The next unit of work starts again at **step 1** with a new analysis and a new plan OK.
 
 ---
 
@@ -94,7 +148,8 @@ Convert the user’s idea into a **crisp, testable** problem statement.
 - Ambiguities (questions requiring user decision)
 
 ### Exit Condition
-- MUST: Ask user approval to proceed to Plan Mode.
+- MUST: Proceed to Plan Mode. The approval gate is the plan OK (§3.5 step 3).
+- MUST: Carry any ambiguity into the plan's Open Questions so the user decides it at that gate.
 
 ---
 
@@ -199,7 +254,7 @@ Implement the prototype and documentation as planned.
 - SHOULD: Keep API contracts visible in README to avoid ambiguity claims.
 
 ### Exit Condition
-- MUST: Ask user approval before entering Verify Mode.
+- MUST: Open the PR and continue to Verify Mode (the Review Loop, §3.5 step 8). No separate approval is needed, unless scope changed.
 
 ---
 
@@ -216,13 +271,14 @@ Demonstrate reliability and eliminate “instant fail” risk.
 - MUST: Check edge cases:
     - caps, minSpend failure, negative/zero inputs, shipping clamp, rounding
 - MUST: If any mismatch occurs, return to Build Mode and fix.
+- MUST: Record review findings as GitHub PR review comments, and loop through review → comment → fix → re-review (§3.5 step 8).
 
 ### Exit Condition
-- MUST: Provide a verification report:
+- MUST: Post the verification report as the final PR review comment:
     - commands run
     - pass/fail
     - scenario output confirmations
-- MUST: Ask user approval before entering Package Mode.
+- MUST: Continue to merge (§3.5 step 9) only when the last review pass found nothing.
 
 ---
 
@@ -243,7 +299,8 @@ Prepare the deliverables Opicer expects.
 - short demo GIF or screenshots
 
 ### Exit Condition
-- MUST: Ask user approval before finalizing/publishing.
+- MUST: Merge per §3.5 step 9, or hand the merge to the user if the agent may not merge.
+- MUST: Then do Close Out (§3.5 step 10) and start the next cycle at step 1.
 
 ---
 
@@ -256,6 +313,7 @@ Prepare the deliverables Opicer expects.
 - MUST NOT: Modify files.
 - MUST NOT: Run commands that change repository state.
 - MUST: Only read and report findings.
+- Exception: posting review comments to a GitHub PR is allowed. It does not change the repository.
 
 ---
 

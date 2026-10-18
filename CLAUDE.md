@@ -127,7 +127,15 @@ Follow the **VibeCoding 6-phase FSM** defined in `AGENTS.md`. No skipping phases
 Problem Interpretation → Plan → Build → Verify → Package → Read-Only
 ```
 
-- **Each phase transition requires explicit user approval.**
+- **Every unit of work follows the Delivery Cycle in `AGENTS.md` §3.5:**
+  ```
+  Analyze → Plan (plan.md) → [user OK] → Issue → Branch → Build/Commit → PR
+    → Review loop (review → GitHub review comments → fix → re-review, until clean)
+    → Merge → Close out → next cycle starts again at Analyze
+  ```
+- The only approval gate is the user's OK on the plan. After it, run through to a merge-ready PR. Still stop on scope change or ambiguity.
+- Review findings must be posted as GitHub PR review comments, not only in chat.
+- Merge only after a clean review pass. If the agent may not merge, ask the user to merge.
 - Keep `plan.md` updated as durable working memory.
 - Build in small, reviewable increments. One logical unit per commit.
 - If scope expands, stop and get `plan.md` update approval first.
@@ -177,7 +185,7 @@ opicer-ai/<type>/<issue-number>-<short-description>
 
 Types: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`
 
-**Workflow:** Issue → Branch (from `main`) → Small commits → PR → Review → Merge
+**Workflow:** Issue → Branch (from `main`) → Small commits → PR (`Closes #<issue>`) → Review loop with GitHub comments → Merge → delete branch (see `AGENTS.md` §3.5)
 
 ---
 

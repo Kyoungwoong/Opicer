@@ -158,8 +158,9 @@ This rule exists to:
 4. Open a Pull Request targeting main
    * Follow Pull Request rules 
    * Link the related Issue 
-5. After review and verification, merge the Pull Request into main 
-6. Delete the branch after merge (recommended)
+5. Run the review loop on GitHub: review → inline review comments → fix commits → reply with SHA and resolve → re-review. Repeat until a pass finds nothing (see AGENTS.md §3.5 step 8).
+6. After the loop ends cleanly, merge the Pull Request into main. If the agent may not merge, the user merges.
+7. Delete the branch after merge (local + remote), then pull `main`.
 
 ### 5.4 Restrictions
 - MUST NOT: Commit directly to `main`
