@@ -2,7 +2,28 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  LoaderCircle,
+  Mic,
+  MicOff,
+  PenLine,
+  RotateCcw,
+  Send,
+  Sparkles,
+  Timer,
+  Volume2,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 import { TopNav } from "@/components/common/TopNav";
+import { PageShell } from "@/components/common/PageShell";
+import { Eyebrow, SectionHeader } from "@/components/common/SectionHeader";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import {
   analyzeAnswer,
   fetchPracticeQuestions,
@@ -422,303 +443,313 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
   const topicTitle = currentQuestion?.topic ?? questions[0]?.topic ?? "연습";
   const warning = remainingSeconds <= 10 && remainingSeconds > 0;
 
+
+  const nav = <TopNav userLabel={userLabel} onLogout={onLogout} />;
+
   // ── Submitting screen ────────────────────────────────────────
   if (mode === "submitting") {
     return (
-      <div className="min-h-screen px-6 py-10 text-foreground">
-        <div className="mx-auto flex max-w-4xl flex-col gap-8">
-          <TopNav userLabel={userLabel} onLogout={onLogout} />
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            <p className="text-sm text-muted-foreground">답변 분석 중…</p>
-          </div>
+      <PageShell width="md" nav={nav}>
+        <div role="status" className="flex flex-col items-center justify-center gap-4 py-24">
+          <LoaderCircle aria-hidden className="size-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">답변 분석 중…</p>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   // ── Summary screen ───────────────────────────────────────────
   if (mode === "summary") {
     return (
-      <div className="min-h-screen px-6 py-10 text-foreground">
-        <div className="mx-auto flex max-w-4xl flex-col gap-8">
-          <TopNav userLabel={userLabel} onLogout={onLogout} />
+      <PageShell width="md" nav={nav}>
+        {error ? (
+          <Alert variant="destructive">
+            <AlertCircle />
+            <AlertTitle>크레딧 차감/제출 처리에 실패했습니다.</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
 
-          {error ? (
-            <section className="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-800">
-              <p className="font-semibold">크레딧 차감/제출 처리에 실패했습니다.</p>
-              <p className="mt-1">{error}</p>
-            </section>
-          ) : null}
+        <section className="flex items-center gap-4 rounded-3xl border bg-card/90 p-6 shadow-card sm:p-8">
+          <span className="grid size-12 shrink-0 place-items-center rounded-full bg-success-subtle text-success">
+            <CheckCircle2 aria-hidden className="size-6" />
+          </span>
+          <SectionHeader
+            as="h1"
+            eyebrow="Practice Summary"
+            eyebrowLatin
+            title="연습 완료"
+            description={`${topicTitle} · ${answers.length}문항 답변 완료`}
+          />
+        </section>
 
-          <section className="rounded-[32px] border border-black/5 bg-white/70 p-8 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">Practice Summary</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">연습 완료</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{topicTitle} · {answers.length}문항 답변 완료</p>
-          </section>
+        <ol className="flex flex-col gap-5">
+          {answers.map((answer, idx) => {
+            const ai = getOrInitAiState(answer.questionId);
+            return (
+              <li key={answer.questionId} className="flex flex-col gap-4 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-6">
+                <div className="flex flex-col gap-1.5">
+                  <Eyebrow latin>Question {idx + 1}</Eyebrow>
+                  <p className="text-base font-semibold leading-relaxed">{answer.questionText}</p>
+                </div>
 
-          <div className="space-y-6">
-            {answers.map((answer, idx) => {
-              const ai = getOrInitAiState(answer.questionId);
-              return (
-                <div
-                  key={answer.questionId}
-                  className="rounded-[24px] border border-black/10 bg-white/70 p-5 shadow-sm"
-                >
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                    Question {idx + 1}
-                  </p>
-                  <p className="mt-2 text-base font-semibold">{answer.questionText}</p>
-
-                  {/* Transcript + audio */}
-                  <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/10 p-4">
-                    <p className="text-xs font-semibold text-primary-strong">Your Answer</p>
-                    {answer.transcript ? (
-                      <p className="mt-2 text-sm leading-relaxed">{answer.transcript}</p>
-                    ) : answer.transcribeError ? (
-                      <p className="mt-2 text-sm text-red-500">전사 실패: {answer.transcribeError}</p>
-                    ) : (
-                      <p className="mt-2 text-sm text-muted-foreground">전사 텍스트 없음</p>
-                    )}
-                    {answer.audioUrl ? (
-                      <audio controls src={answer.audioUrl} className="mt-3 w-full" />
-                    ) : (
-                      <p className="mt-2 text-sm text-muted-foreground">녹음된 답변이 없습니다.</p>
-                    )}
-                  </div>
-
-                  {/* Action buttons — only if transcript exists */}
-                  {answer.transcript && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleAnalyze(answer)}
-                        disabled={ai.isAnalyzing || ai.analysis !== null}
-                        className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
-                          ai.isAnalyzing || ai.analysis !== null
-                            ? "cursor-not-allowed bg-black/5 text-muted-foreground"
-                            : "bg-primary text-white hover:bg-primary-strong"
-                        }`}
-                      >
-                        {ai.isAnalyzing ? "분석 중…" : ai.analysis ? "분석 완료" : "분석하기"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleImprove(answer)}
-                        disabled={ai.isImproving || ai.improvement !== null}
-                        className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
-                          ai.isImproving || ai.improvement !== null
-                            ? "cursor-not-allowed bg-black/5 text-muted-foreground"
-                            : "bg-black text-white hover:bg-black/80"
-                        }`}
-                      >
-                        {ai.isImproving ? "수정 중…" : ai.improvement ? "수정 완료" : "수정하기"}
-                      </button>
-                    </div>
+                {/* Transcript + audio */}
+                <div className="rounded-2xl border border-primary/20 bg-accent/60 p-4">
+                  <p className="text-xs font-semibold text-primary-strong">Your Answer</p>
+                  {answer.transcript ? (
+                    <p className="mt-2 text-sm leading-relaxed">{answer.transcript}</p>
+                  ) : answer.transcribeError ? (
+                    <p className="mt-2 text-sm text-destructive">전사 실패: {answer.transcribeError}</p>
+                  ) : (
+                    <p className="mt-2 text-sm text-muted-foreground">전사 텍스트 없음</p>
                   )}
-
-                  {/* Analysis result */}
-                  {ai.analyzeError && (
-                    <p className="mt-3 text-sm text-red-600">{ai.analyzeError}</p>
-                  )}
-                  {ai.analysis && (
-                    <div className="mt-4 rounded-2xl border border-black/10 bg-white/80 p-4 text-sm leading-relaxed whitespace-pre-wrap">
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">AI 분석</p>
-                      {ai.analysis}
-                    </div>
-                  )}
-
-                  {/* Improvement diff */}
-                  {ai.improveError && (
-                    <p className="mt-3 text-sm text-red-600">{ai.improveError}</p>
-                  )}
-                  {ai.improvement && answer.transcript && (
-                    <div className="mt-4">
-                      <TranscriptDiff
-                        original={answer.transcript}
-                        improved={ai.improvement}
-                      />
-                    </div>
+                  {answer.audioUrl ? (
+                    <audio controls src={answer.audioUrl} className="mt-3 w-full" />
+                  ) : (
+                    <p className="mt-2 text-sm text-muted-foreground">녹음된 답변이 없습니다.</p>
                   )}
                 </div>
-              );
-            })}
-          </div>
 
-          <div className="flex flex-col items-center gap-3 pb-10">
-            <button
-              type="button"
-              onClick={() => router.push(ROUTES.practice)}
-              className="rounded-full bg-primary px-8 py-3 text-sm font-semibold text-white hover:bg-primary-strong"
-            >
-              다른 주제 연습하기
-            </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    const selection = await submitTopicSelection(topicId);
-                    router.push(`${ROUTES.practiceSession(topicId)}?selectionId=${selection.id}`);
-                  } catch (err) {
-                    const message = err instanceof Error ? err.message : "새 연습 세션 생성에 실패했습니다.";
-                    setError(message);
-                  }
-                }}
-                className="text-sm text-muted-foreground hover:underline"
-              >
-                같은 주제 다시 연습하기
-              </button>
-          </div>
+                {/* Action buttons — only if transcript exists */}
+                {answer.transcript && (
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      onClick={() => handleAnalyze(answer)}
+                      disabled={ai.isAnalyzing || ai.analysis !== null}
+                      className="h-10 rounded-full px-5"
+                    >
+                      {ai.isAnalyzing ? <LoaderCircle className="animate-spin" /> : <Sparkles />}
+                      {ai.isAnalyzing ? "분석 중…" : ai.analysis ? "분석 완료" : "분석하기"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleImprove(answer)}
+                      disabled={ai.isImproving || ai.improvement !== null}
+                      className="h-10 rounded-full px-5"
+                    >
+                      {ai.isImproving ? <LoaderCircle className="animate-spin" /> : <PenLine />}
+                      {ai.isImproving ? "수정 중…" : ai.improvement ? "수정 완료" : "수정하기"}
+                    </Button>
+                  </div>
+                )}
+
+                {/* Analysis result */}
+                {ai.analyzeError && (
+                  <Alert variant="destructive">
+                    <AlertCircle />
+                    <AlertDescription>{ai.analyzeError}</AlertDescription>
+                  </Alert>
+                )}
+                {ai.analysis && (
+                  <div className="rounded-2xl border bg-background/60 p-4 text-sm leading-relaxed whitespace-pre-wrap">
+                    <Eyebrow className="mb-2">AI 분석</Eyebrow>
+                    {ai.analysis}
+                  </div>
+                )}
+
+                {/* Improvement diff */}
+                {ai.improveError && (
+                  <Alert variant="destructive">
+                    <AlertCircle />
+                    <AlertDescription>{ai.improveError}</AlertDescription>
+                  </Alert>
+                )}
+                {ai.improvement && answer.transcript && (
+                  <TranscriptDiff original={answer.transcript} improved={ai.improvement} />
+                )}
+              </li>
+            );
+          })}
+        </ol>
+
+        <div className="flex flex-col items-center gap-2 pb-10">
+          <Button
+            type="button"
+            onClick={() => router.push(ROUTES.practice)}
+            className="h-11 rounded-full px-8 text-sm font-semibold"
+          >
+            다른 주제 연습하기
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={async () => {
+              try {
+                const selection = await submitTopicSelection(topicId);
+                router.push(`${ROUTES.practiceSession(topicId)}?selectionId=${selection.id}`);
+              } catch (err) {
+                const message = err instanceof Error ? err.message : "새 연습 세션 생성에 실패했습니다.";
+                setError(message);
+              }
+            }}
+            className="text-muted-foreground"
+          >
+            <RotateCcw />
+            같은 주제 다시 연습하기
+          </Button>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   // ── Loading / error screen ───────────────────────────────────
   if (mode === "loading") {
     return (
-      <div className="min-h-screen px-6 py-10 text-foreground">
-        <div className="mx-auto flex max-w-4xl flex-col gap-8">
-          <TopNav userLabel={userLabel} onLogout={onLogout} />
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            {error ? (
-              <>
-                <p className="text-red-600">{error}</p>
-                <button
-                  type="button"
-                  onClick={() => router.push(ROUTES.practice)}
-                  className="text-sm text-muted-foreground hover:underline"
-                >
-                  ← 주제 선택으로 돌아가기
-                </button>
-              </>
-            ) : (
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            )}
-          </div>
+      <PageShell width="md" nav={nav}>
+        <div className="flex flex-col items-center justify-center gap-4 py-24">
+          {error ? (
+            <>
+              <Alert variant="destructive" className="max-w-md">
+                <AlertCircle />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => router.push(ROUTES.practice)}
+                className="text-muted-foreground"
+              >
+                <ArrowLeft />
+                주제 선택으로 돌아가기
+              </Button>
+            </>
+          ) : (
+            <LoaderCircle role="status" aria-label="불러오는 중" className="size-8 animate-spin text-primary" />
+          )}
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   // ── Practice screen ──────────────────────────────────────────
+  const timeLabel = `${Math.floor(remainingSeconds / 60).toString().padStart(2, "0")}:${(remainingSeconds % 60)
+    .toString()
+    .padStart(2, "0")}`;
+
   return (
-    <div className="min-h-screen px-6 py-10 text-foreground">
-      <div className="mx-auto flex max-w-4xl flex-col gap-8">
-        <TopNav userLabel={userLabel} onLogout={onLogout} />
-
-        {/* Header */}
-        <section className="rounded-[32px] border border-black/5 bg-white/70 p-8 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">Topic Practice</p>
-              <h1 className="mt-2 text-3xl font-semibold tracking-tight">{topicTitle}</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                질문 {currentIndex + 1} / {questions.length}
-              </p>
-            </div>
-            <div
-              className={`rounded-2xl border px-4 py-3 text-center ${
-                warning
-                  ? "border-red-400 bg-red-50 text-red-700 animate-pulse"
-                  : "border-black/10 bg-white text-muted-foreground"
-              }`}
-            >
-              <p className="text-xs uppercase tracking-[0.2em]">Time</p>
-              <p className="mt-1 text-xl font-semibold tabular-nums">
-                {Math.floor(remainingSeconds / 60).toString().padStart(2, "0")}:
-                {(remainingSeconds % 60).toString().padStart(2, "0")}
-              </p>
-              {warning ? <p className="text-xs font-semibold">마감 임박</p> : null}
-            </div>
+    <PageShell width="md" nav={nav}>
+      {/* Header */}
+      <section className="flex flex-col gap-5 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <SectionHeader
+            as="h1"
+            eyebrow="Topic Practice"
+            eyebrowLatin
+            title={topicTitle}
+            description={`질문 ${currentIndex + 1} / ${questions.length}`}
+          />
+          <div
+            role="timer"
+            aria-live={warning ? "assertive" : "off"}
+            className={cn(
+              "flex min-w-28 flex-col items-center rounded-2xl border px-4 py-3",
+              warning ? "border-destructive/40 bg-destructive/10 text-destructive" : "bg-background/60 text-foreground"
+            )}
+          >
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
+              <Timer aria-hidden className="size-3.5" />
+              남은 시간
+            </span>
+            <span className={cn("text-2xl font-bold tabular-nums", warning && "animate-pulse")}>{timeLabel}</span>
+            {warning ? <span className="text-xs font-semibold">마감 임박</span> : null}
           </div>
-        </section>
+        </div>
+        <Progress
+          value={(remainingSeconds / PRACTICE_DURATION_SECONDS) * 100}
+          aria-label="남은 답변 시간"
+          className={cn("h-1.5", warning && "*:data-[slot=progress-indicator]:bg-destructive")}
+        />
+      </section>
 
-        {/* Question card */}
-        <section className="rounded-[28px] border border-black/5 bg-white/70 p-6 shadow-sm">
-          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Question</p>
-          <h2 className="mt-3 text-2xl font-semibold leading-relaxed">
+      {/* Question card */}
+      <section className="flex flex-col gap-6 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-8">
+        <div className="flex flex-col gap-3">
+          <Eyebrow latin>Question</Eyebrow>
+          <h2 className="text-xl font-semibold leading-relaxed sm:text-2xl">
             {currentQuestion?.promptText ?? "질문을 불러오는 중입니다."}
           </h2>
           {currentQuestion?.structuralHint ? (
-            <p className="mt-3 text-sm text-muted-foreground">{currentQuestion.structuralHint}</p>
+            <p className="rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">{currentQuestion.structuralHint}</p>
           ) : null}
-
-          {/* Status + replay */}
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            {mode === "playing" ? (
-              <span className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary-strong">
-                <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                질문 재생 중…
-              </span>
-            ) : (
-              <span className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
-                isRecording
-                  ? "bg-red-50 text-red-700"
-                  : "bg-black/5 text-muted-foreground"
-              }`}>
-                <span className={`h-2 w-2 rounded-full ${isRecording ? "bg-red-500 animate-pulse" : "bg-black/20"}`} />
-                {isRecording ? "녹음 중…" : "대기 중"}
-              </span>
-            )}
-
-            {/* Replay button — only during replay window */}
-            {replayWindow > 0 && !hasReplayed && (
-              <button
-                type="button"
-                onClick={handleReplay}
-                className="rounded-full border border-primary/40 px-4 py-2 text-sm font-semibold text-primary-strong hover:bg-primary/10"
-              >
-                다시 듣기 ({replayWindow}s)
-              </button>
-            )}
-          </div>
-
-          {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
-
-          {/* Navigation */}
-          <div className="mt-6 flex justify-end">
-            {!isLastQuestion ? (
-              <button
-                type="button"
-                onClick={goToNext}
-                disabled={mode === "playing"}
-                className={`rounded-full px-6 py-2 text-sm font-semibold ${
-                  mode === "playing"
-                    ? "cursor-not-allowed bg-black/10 text-muted-foreground"
-                    : "bg-black text-white hover:bg-black/80"
-                }`}
-              >
-                다음 질문 →
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={goToNext}
-                disabled={mode === "playing"}
-                className={`rounded-full px-6 py-2 text-sm font-semibold ${
-                  mode === "playing"
-                    ? "cursor-not-allowed bg-black/10 text-muted-foreground"
-                    : "bg-primary text-white hover:bg-primary-strong"
-                }`}
-              >
-                제출하기
-              </button>
-            )}
-          </div>
-        </section>
-
-        {/* Back link */}
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => { stopAll(); router.push(ROUTES.practice); }}
-            className="text-sm text-muted-foreground hover:underline"
-          >
-            ← 주제 선택으로 돌아가기
-          </button>
         </div>
+
+        {/* Status + replay */}
+        <div className="flex flex-wrap items-center gap-3" aria-live="polite">
+          {mode === "playing" ? (
+            <span className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground">
+              <Volume2 aria-hidden className="size-4 animate-pulse" />
+              질문 재생 중…
+            </span>
+          ) : isRecording ? (
+            <span className="inline-flex items-center gap-2 rounded-full bg-destructive/10 px-4 py-2 text-sm font-semibold text-destructive">
+              <span aria-hidden className="relative flex size-2.5">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-destructive/60" />
+                <span className="relative inline-flex size-2.5 rounded-full bg-destructive" />
+              </span>
+              <Mic aria-hidden className="size-4" />
+              녹음 중…
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm font-semibold text-muted-foreground">
+              <MicOff aria-hidden className="size-4" />
+              대기 중
+            </span>
+          )}
+
+          {/* Replay button — only during replay window */}
+          {replayWindow > 0 && !hasReplayed && (
+            <Button type="button" variant="outline" onClick={handleReplay} className="h-9 rounded-full px-4">
+              <RotateCcw />
+              다시 듣기 ({replayWindow}s)
+            </Button>
+          )}
+        </div>
+
+        {error ? (
+          <Alert variant="destructive">
+            <AlertCircle />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
+
+        {/* Navigation */}
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            onClick={goToNext}
+            disabled={mode === "playing"}
+            variant={isLastQuestion ? "default" : "secondary"}
+            className="h-11 rounded-full px-6 text-sm font-semibold"
+          >
+            {isLastQuestion ? (
+              <>
+                <Send />
+                제출하기
+              </>
+            ) : (
+              <>
+                다음 질문
+                <ArrowRight />
+              </>
+            )}
+          </Button>
+        </div>
+      </section>
+
+      {/* Back link */}
+      <div className="flex justify-center">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => { stopAll(); router.push(ROUTES.practice); }}
+          className="text-muted-foreground"
+        >
+          <ArrowLeft />
+          주제 선택으로 돌아가기
+        </Button>
       </div>
-    </div>
+    </PageShell>
   );
 }

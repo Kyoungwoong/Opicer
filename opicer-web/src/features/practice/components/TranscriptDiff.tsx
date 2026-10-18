@@ -11,37 +11,44 @@ export function TranscriptDiff({ original, improved }: Props) {
   const changes = diffWords(original, improved);
 
   return (
-    <div className="rounded-2xl border border-black/10 bg-white/80 p-4 text-sm leading-relaxed">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-        개선 스크립트
-      </p>
-      <p className="flex flex-wrap gap-y-1">
+    <div className="rounded-2xl border bg-background/60 p-4 text-sm leading-7">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-semibold text-primary">개선 스크립트</p>
+        <p className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1">
+            <span aria-hidden className="rounded bg-destructive/10 px-1 text-destructive line-through">
+              가
+            </span>
+            삭제
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span aria-hidden className="rounded bg-success-subtle px-1 text-success underline decoration-2 underline-offset-2">
+              가
+            </span>
+            추가
+          </span>
+        </p>
+      </div>
+      <p>
         {changes.map((change, idx) => {
           if (change.removed) {
             return (
-              <span
-                key={idx}
-                className="line-through text-red-500 opacity-70 mr-1"
-              >
+              <del key={idx} className="rounded bg-destructive/10 px-0.5 text-destructive/80 decoration-destructive/60">
                 {change.value}
-              </span>
+              </del>
             );
           }
           if (change.added) {
             return (
-              <span
+              <ins
                 key={idx}
-                className="bg-green-100 text-green-800 rounded px-0.5 mr-1"
+                className="rounded bg-success-subtle px-0.5 text-success underline decoration-success/60 decoration-2 underline-offset-2"
               >
                 {change.value}
-              </span>
+              </ins>
             );
           }
-          return (
-            <span key={idx} className="mr-1">
-              {change.value}
-            </span>
-          );
+          return <span key={idx}>{change.value}</span>;
         })}
       </p>
     </div>
