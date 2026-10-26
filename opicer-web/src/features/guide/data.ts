@@ -1,10 +1,4 @@
-import type {
-  GuideSection,
-  OpicCalendar,
-  OpicScheduleItem,
-  ReviewGroup,
-  TipItem,
-} from "@/features/guide/types";
+import type { GuideSection, TipItem } from "@/features/guide/types";
 
 export const GUIDE_SECTIONS: GuideSection[] = [
   {
@@ -15,98 +9,17 @@ export const GUIDE_SECTIONS: GuideSection[] = [
   {
     id: "schedule",
     title: "오픽 일정",
-    summary: "정기 시험과 접수 일정 요약 (연동 준비중).",
+    summary: "opic.or.kr 시험 일정과 접수 기간을 달력으로 확인하세요.",
   },
   {
-    id: "reviews",
-    title: "오픽 강의실 별 지원자들 후기",
-    summary: "시험장 분위기와 좌석 경험을 미리 확인하세요.",
+    id: "centers",
+    title: "시험센터 & 후기",
+    summary: "지역별 시험센터 위치와 응시자 후기를 확인하세요.",
   },
   {
     id: "tips",
     title: "오픽 보러 갈 때의 꿀팁",
     summary: "준비물, 시간 관리, 멘탈 케어까지 체크리스트.",
-  },
-];
-
-export const OPIC_SCHEDULE: OpicScheduleItem[] = [
-  {
-    id: "s1",
-    dateLabel: "3월 7일",
-    title: "접수 시작",
-    note: "오전 10시부터 접수 오픈",
-  },
-  {
-    id: "s2",
-    dateLabel: "3월 21일",
-    title: "정기 시험",
-    note: "오후 2시 시험 회차",
-  },
-];
-
-export const OPIC_CALENDAR: OpicCalendar = {
-  monthLabel: "2026년 3월",
-  startWeekday: 0,
-  daysInMonth: 31,
-  events: [
-    { id: "c1", date: 7, label: "접수 시작", type: "registration" },
-    { id: "c2", date: 21, label: "정기 시험", type: "exam" },
-  ],
-};
-
-export const REVIEW_GROUPS: ReviewGroup[] = [
-  {
-    id: "gangnam",
-    classroom: "강남센터 3층",
-    reviews: [
-      {
-        id: "g1",
-        quote: "조명이 밝고 마이크 음질이 깔끔했어요.",
-        rating: 5,
-      },
-      {
-        id: "g2",
-        quote: "대기 공간이 넓어서 긴장 완화에 도움이 됐습니다.",
-        rating: 4,
-      },
-      {
-        id: "g3",
-        quote: "시험실 공기가 약간 건조했지만 전반적으로 만족.",
-        rating: 4,
-      },
-    ],
-  },
-  {
-    id: "jongro",
-    classroom: "종로센터 5층",
-    reviews: [
-      {
-        id: "j1",
-        quote: "좌석 간 간격이 넉넉해서 집중하기 좋았습니다.",
-        rating: 4,
-      },
-      {
-        id: "j2",
-        quote: "모니터 높이가 적당해서 질문 보기 편했어요.",
-        rating: 5,
-      },
-    ],
-  },
-  {
-    id: "busan",
-    classroom: "부산센터 2층",
-    reviews: [
-      {
-        id: "b1",
-        quote: "에어컨 소리가 조금 있었지만 전반적으로 조용했어요.",
-        rating: 4,
-      },
-      {
-        id: "b2",
-        quote: "안내 직원 응대가 빠르고 친절했습니다.",
-        rating: 5,
-      },
-    ],
   },
 ];
 

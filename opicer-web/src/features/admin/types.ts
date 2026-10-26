@@ -82,3 +82,30 @@ export type GoodAnswerUploadItem = {
   audioUrl: string;
   sampleText: string;
 };
+
+export type AdminOpicCenterReview = {
+  id: string;
+  centerId: string;
+  rating: number;
+  content: string;
+  sourceLabel: string | null;
+  visible: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminOpicCenterReviewInput = {
+  rating: number;
+  content: string;
+  sourceLabel?: string;
+  visible: boolean;
+};
+
+export type OpicSyncTarget = "all" | "schedules" | "centers";
+
+export type OpicSyncResult = {
+  schedulesUpserted: number | null;
+  schedulesRemoved: number | null;
+  centersUpserted: number | null;
+  centersDeactivated: number | null;
+};

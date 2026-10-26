@@ -5,7 +5,7 @@ import { GuideHeader } from "@/features/guide/components/GuideHeader";
 import { GuideNav } from "@/features/guide/components/GuideNav";
 import { OpicIntroSection } from "@/features/guide/components/OpicIntroSection";
 import { OpicScheduleSection } from "@/features/guide/components/OpicScheduleSection";
-import { OpicReviewsSection } from "@/features/guide/components/OpicReviewsSection";
+import { OpicCentersSection } from "@/features/guide/components/OpicCentersSection";
 import { OpicTipsSection } from "@/features/guide/components/OpicTipsSection";
 import { GUIDE_SECTIONS } from "@/features/guide/data";
 import { TopNav } from "@/components/common/TopNav";
@@ -20,8 +20,8 @@ export default function GuidePage() {
     switch (activeId) {
       case "schedule":
         return OpicScheduleSection;
-      case "reviews":
-        return OpicReviewsSection;
+      case "centers":
+        return OpicCentersSection;
       case "tips":
         return OpicTipsSection;
       default:

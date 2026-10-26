@@ -1,7 +1,4 @@
-import type {
-  OpicCalendar,
-  UniversalSentence,
-} from "@/features/home/types";
+import type { UniversalSentence } from "@/features/home/types";
 import { ko } from "@/locales/ko";
 
 export const UNIVERSAL_SENTENCES: UniversalSentence[] = [
@@ -34,23 +31,3 @@ export const UNIVERSAL_SENTENCES: UniversalSentence[] = [
     tags: ["solution", "structure"],
   },
 ];
-
-export const OPIC_CALENDAR: OpicCalendar = {
-  monthLabel: ko.home.homeData.calendar.monthLabel,
-  startWeekday: 0,
-  daysInMonth: 31,
-  events: [
-    {
-      id: "e1",
-      date: 7,
-      label: ko.home.homeData.calendar.registrationStart,
-      type: "registration",
-    },
-    {
-      id: "e2",
-      date: 21,
-      label: ko.home.homeData.calendar.regularExam,
-      type: "exam",
-    },
-  ],
-};

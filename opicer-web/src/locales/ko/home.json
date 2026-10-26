@@ -14,11 +14,7 @@
     "questionCount": "{n}문항"
   },
   "opicSchedule": {
-    "description": "오픽 일정 캘린더",
-    "actionLabel": "연동 준비중",
-    "officialNotice": "공식 일정 연동 예정",
-    "dateUnit": "일",
-    "eventSeparator": "·"
+    "description": "오픽 시험 일정"
   },
   "homeData": {
     "universalTitles": {
@@ -26,11 +22,6 @@
       "experience": "경험 공유 템플릿",
       "compare": "비교/대조 템플릿",
       "solution": "문제 해결 템플릿"
-    },
-    "calendar": {
-      "monthLabel": "2026년 3월",
-      "registrationStart": "시험 접수 시작",
-      "regularExam": "정기 시험"
     }
   }
 }

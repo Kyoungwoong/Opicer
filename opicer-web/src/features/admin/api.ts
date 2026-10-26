@@ -1,4 +1,6 @@
 import type {
+  AdminOpicCenterReview,
+  AdminOpicCenterReviewInput,
   DailySentence,
   OpicLevel,
   PromptUseCase,
@@ -9,6 +11,8 @@ import type {
   GoodAnswerUploadItem,
   UniversalSentence,
   UniversalSentenceType,
+  OpicSyncResult,
+  OpicSyncTarget,
 } from "./types";
 
 const BASE = "/api/admin";
@@ -214,4 +218,26 @@ export const goodAnswerApi = {
   },
   delete: (id: string) =>
     request<void>(`good-answers/${id}`, { method: "DELETE" }),
+};
+
+export const opicCenterReviewApi = {
+  list: (centerId: string) =>
+    request<AdminOpicCenterReview[]>(`opic-centers/${centerId}/reviews`),
+  create: (centerId: string, data: AdminOpicCenterReviewInput) =>
+    request<AdminOpicCenterReview>(`opic-centers/${centerId}/reviews`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  update: (id: string, data: AdminOpicCenterReviewInput) =>
+    request<AdminOpicCenterReview>(`opic-center-reviews/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  delete: (id: string) =>
+    request<void>(`opic-center-reviews/${id}`, { method: "DELETE" }),
+};
+
+export const opicSyncApi = {
+  run: (target: OpicSyncTarget = "all") =>
+    request<OpicSyncResult>(`opic-sync?target=${target}`, { method: "POST" }),
 };
