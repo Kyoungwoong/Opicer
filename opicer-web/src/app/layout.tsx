@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { JetBrains_Mono, Jua } from "next/font/google";
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
 
-// Body text uses Pretendard (see globals.css); Space Grotesk is kept for the
-// wordmark/display only.
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+// Body text uses Pretendard (see globals.css); Jua is only for the "opicer" wordmark.
+const jua = Jua({
+  variable: "--font-jua",
+  weight: "400",
   subsets: ["latin"],
 });
 
@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${spaceGrotesk.variable} ${jetBrainsMono.variable}`}>
+    <html lang="ko" className={`${jua.variable} ${jetBrainsMono.variable}`}>
       <body>{children}</body>
     </html>
   );

@@ -10,7 +10,7 @@ export function OpicTipsSection() {
     >
       <ol className="flex flex-col gap-2">
         {TIP_ITEMS.map((tip, index) => (
-          <li key={tip.id} className="flex items-start gap-4 rounded-2xl border bg-background/60 px-4 py-3.5">
+          <li key={tip.id} className="flex items-start gap-4 rounded-2xl border bg-secondary px-4 py-3.5">
             <span className="grid size-8 shrink-0 place-items-center rounded-full bg-accent text-sm font-bold text-accent-foreground">
               {index + 1}
             </span>

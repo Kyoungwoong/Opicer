@@ -9,7 +9,7 @@ type Props = {
 
 export function GuideSection({ id, title, subtitle, children }: Props) {
   return (
-    <section id={id} className="scroll-mt-24 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-8">
+    <section id={id} className="scroll-mt-24 rounded-3xl border bg-card p-5 shadow-card sm:p-8">
       <SectionHeader eyebrow={title} title={subtitle} />
       <div className="mt-6">{children}</div>
     </section>

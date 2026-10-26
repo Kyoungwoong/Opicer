@@ -11,7 +11,7 @@ export function TranscriptDiff({ original, improved }: Props) {
   const changes = diffWords(original, improved);
 
   return (
-    <div className="rounded-2xl border bg-background/60 p-4 text-sm leading-7">
+    <div className="rounded-2xl border bg-secondary p-4 text-sm leading-7">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs font-semibold text-primary">개선 스크립트</p>
         <p className="flex items-center gap-3 text-xs text-muted-foreground">

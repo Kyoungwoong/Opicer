@@ -27,8 +27,8 @@ const SECTION_META: Record<PracticeHistoryType, { label: string; helper: string 
   },
 };
 
-const CARD = "flex flex-col gap-5 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-6";
-const PLACEHOLDER = "rounded-2xl border border-dashed bg-background/60 px-4 py-4 text-sm text-muted-foreground";
+const CARD = "flex flex-col gap-5 rounded-3xl border bg-card p-5 shadow-card sm:p-6";
+const PLACEHOLDER = "rounded-2xl border border-dashed bg-secondary px-4 py-4 text-sm text-muted-foreground";
 
 function CategoryList({
   activeType,
@@ -40,9 +40,9 @@ function CategoryList({
   counts: Record<PracticeHistoryType, number>;
 }) {
   return (
-    <nav aria-label="연습 종류" className="-mx-4 px-4 lg:mx-0 lg:rounded-3xl lg:border lg:bg-card/90 lg:p-5 lg:shadow-card">
-      <Eyebrow latin className="mb-3 hidden lg:block">
-        Categories
+    <nav aria-label="연습 종류" className="-mx-4 px-4 lg:mx-0 lg:rounded-3xl lg:border lg:bg-card lg:p-5 lg:shadow-card">
+      <Eyebrow className="mb-3 hidden lg:block">
+        연습 종류
       </Eyebrow>
       <ul className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] lg:flex-col lg:overflow-visible lg:pb-0">
         {(["topic", "mock"] as const).map((type) => {
@@ -91,7 +91,7 @@ function HistoryList({
             <button
               type="button"
               onClick={() => onSelect(item)}
-              className="group flex w-full flex-col gap-3 rounded-2xl border bg-background/60 px-4 py-4 text-left transition-colors hover:border-primary/40 hover:bg-card"
+              className="group flex w-full flex-col gap-3 rounded-2xl border bg-secondary px-4 py-4 text-left transition-colors hover:border-primary/40 hover:bg-card"
             >
               <span className="flex items-start justify-between gap-4">
                 <span className="min-w-0">
@@ -129,8 +129,6 @@ function HistoryDetail({
     return (
       <div className={CARD}>
         <SectionHeader
-          eyebrow="Detail"
-          eyebrowLatin
           title="선택된 기록 없음"
           description="가운데 목록에서 히스토리를 선택하면 연습 상세 화면이 나타납니다."
         />
@@ -142,8 +140,6 @@ function HistoryDetail({
     <div className="flex min-w-0 flex-col gap-6">
       <section className={CARD}>
         <SectionHeader
-          eyebrow="Practice Summary"
-          eyebrowLatin
           title={item.title}
           description={`${item.topicLabel} · ${item.date} · ${item.durationMinutes}분`}
           action={
@@ -158,8 +154,6 @@ function HistoryDetail({
 
       <section className={CARD}>
         <SectionHeader
-          eyebrow="Analysis"
-          eyebrowLatin
           title="연습 완료 화면"
           description="오디오 재생, 스크립트, 수정 기능은 추후 제공됩니다."
           action={<Badge variant="secondary">준비 중</Badge>}
@@ -172,11 +166,11 @@ function HistoryDetail({
       </section>
 
       <section className={CARD}>
-        <SectionHeader eyebrow="Answers" eyebrowLatin title="질문/답변 리스트" />
+        <SectionHeader title="질문/답변 리스트" />
         <ol className="flex flex-col gap-2">
           {item.answers.map((answer, index) => (
-            <li key={answer.id} className="flex flex-col gap-2 rounded-2xl border bg-background/60 p-4">
-              <Eyebrow latin>Question {index + 1}</Eyebrow>
+            <li key={answer.id} className="flex flex-col gap-2 rounded-2xl border bg-secondary p-4">
+              <Eyebrow>질문 {index + 1}</Eyebrow>
               <p className="text-sm font-semibold">{answer.question}</p>
               <div className="rounded-xl border border-dashed px-3 py-2 text-xs text-muted-foreground">
                 녹음 미리듣기 준비 중
@@ -211,11 +205,9 @@ export function MyPageView({ userLabel, onLogout }: Props) {
 
   return (
     <PageShell nav={<TopNav userLabel={userLabel} onLogout={onLogout} maxWidthClassName="max-w-6xl" />}>
-      <section className="rounded-3xl border bg-card/90 p-6 shadow-card sm:p-8">
+      <section className="rounded-3xl border bg-card p-6 shadow-card sm:p-8">
         <SectionHeader
           as="h1"
-          eyebrow="My Page"
-          eyebrowLatin
           title="연습 히스토리"
           description="주제별/실전 연습 기록을 확인하고 연습 상세 화면으로 이동할 수 있어요."
         />
@@ -235,8 +227,6 @@ export function MyPageView({ userLabel, onLogout }: Props) {
         ) : (
           <section className={CARD}>
             <SectionHeader
-              eyebrow="History"
-              eyebrowLatin
               title={SECTION_META[activeType].label}
               description={SECTION_META[activeType].helper}
               action={<span className="text-sm text-muted-foreground">{items.length}건</span>}

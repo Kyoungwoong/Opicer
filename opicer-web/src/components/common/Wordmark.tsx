@@ -1,18 +1,15 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-/** Opicer logotype (Space Grotesk) with the brand dot. Server-safe. */
+/** "opicer" logotype in Jua. Server-safe. */
 export function Wordmark({ className }: { className?: string }) {
   return (
     <Link
       href="/"
-      className={cn(
-        "inline-flex shrink-0 items-center gap-2 rounded-md font-display text-xl font-bold tracking-tight text-primary-strong",
-        className
-      )}
+      aria-label="Opicer 홈"
+      className={cn("inline-flex shrink-0 items-center rounded-md font-display text-[28px] leading-none text-primary", className)}
     >
-      <span aria-hidden className="size-2.5 rounded-full bg-primary ring-4 ring-primary/15" />
-      Opicer
+      opicer
     </Link>
   );
 }

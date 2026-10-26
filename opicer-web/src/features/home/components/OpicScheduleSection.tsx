@@ -17,8 +17,7 @@ export function OpicScheduleSection() {
 
   return (
     <SectionShell
-      title="OPIC schedule"
-      description={ko.home.opicSchedule.description}
+      title={ko.home.opicSchedule.description}
       action={<Badge variant="secondary">{ko.home.opicSchedule.actionLabel}</Badge>}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -42,7 +41,7 @@ export function OpicScheduleSection() {
             <div
               key={day}
               className={cn(
-                "relative flex h-9 items-center justify-center rounded-lg border bg-background/60 text-sm",
+                "relative flex h-9 items-center justify-center rounded-lg border bg-card text-sm",
                 event?.type === "exam" && "border-primary/40 font-semibold text-primary-strong"
               )}
             >

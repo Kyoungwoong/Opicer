@@ -5,38 +5,33 @@ import { Button } from "@/components/ui/button";
 import { ko } from "@/locales/ko";
 
 const STATUS = {
-  complete: { label: ko.home.recentActivity.status.complete, className: "bg-success-subtle text-success" },
-  in_progress: { label: ko.home.recentActivity.status.in_progress, className: "bg-info-subtle text-info" },
-  recommended: { label: ko.home.recentActivity.status.recommended, className: "bg-highlight/50 text-highlight-foreground" },
+  complete: { label: ko.home.recentActivity.status.complete, dot: "bg-primary" },
+  in_progress: { label: ko.home.recentActivity.status.in_progress, dot: "bg-highlight" },
+  recommended: { label: ko.home.recentActivity.status.recommended, dot: "bg-info" },
 } as const;
 
 export function RecentActivitySection() {
   return (
     <SectionShell
-      title="Recent activity"
-      description={ko.home.recentActivity.description}
+      title={ko.home.recentActivity.description}
       action={
-        <Button variant="outline" className="h-9 rounded-full px-4">
+        <Button variant="ghost" className="h-9 rounded-full px-3 font-semibold text-primary">
           {ko.home.recentActivity.viewAll}
         </Button>
       }
     >
-      <ul className="flex flex-col gap-2">
+      <ul className="grid gap-3 sm:grid-cols-3">
         {RECENT_ACTIVITIES.map((item) => (
           <li
             key={item.id}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-background/60 px-4 py-3.5"
+            className="flex h-full flex-col gap-2.5 rounded-2xl border border-accent bg-secondary px-5 py-4"
           >
-            <div className="min-w-0">
-              <p className="text-sm font-semibold">{item.title}</p>
-              <p className="mt-0.5 text-sm text-muted-foreground">{item.summary}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground">{item.dateLabel}</span>
-              <span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", STATUS[item.status].className)}>
-                {STATUS[item.status].label}
-              </span>
-            </div>
+            <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+              <span aria-hidden className={cn("size-2 rounded-full", STATUS[item.status].dot)} />
+              {item.dateLabel} · {STATUS[item.status].label}
+            </span>
+            <span className="text-lg font-bold">{item.title}</span>
+            <span className="text-sm text-muted-foreground">{item.summary}</span>
           </li>
         ))}
       </ul>

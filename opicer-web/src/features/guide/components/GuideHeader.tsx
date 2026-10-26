@@ -7,8 +7,8 @@ type Props = {
 
 export function GuideHeader({ title, description }: Props) {
   return (
-    <header className="rounded-3xl border bg-card/90 px-6 py-8 shadow-card sm:px-8 sm:py-10">
-      <SectionHeader as="h1" eyebrow="OPIC Guide" eyebrowLatin title={title} description={description} />
+    <header className="rounded-3xl border bg-card px-6 py-8 shadow-card sm:px-8 sm:py-10">
+      <SectionHeader as="h1" title={title} description={description} />
     </header>
   );
 }

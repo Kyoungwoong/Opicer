@@ -182,9 +182,8 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
   if (mode === "ready") {
     return (
       <PageShell width="md" nav={<TopNav userLabel={userLabel} onLogout={onLogout} />}>
-        <section className="mx-auto flex w-full max-w-xl flex-col items-center gap-8 rounded-3xl border bg-card/90 px-6 py-12 text-center shadow-raised sm:px-10">
+        <section className="mx-auto flex w-full max-w-xl flex-col items-center gap-8 rounded-3xl border bg-card px-6 py-12 text-center shadow-raised sm:px-10">
           <div className="flex flex-col items-center gap-3">
-            <Eyebrow latin>Topic Practice</Eyebrow>
             <h1 className="text-3xl font-bold sm:text-4xl">{selectedTopic?.title ?? ""}</h1>
             {selectedTopic?.englishTitle ? (
               <p className="text-base text-muted-foreground">{selectedTopic.englishTitle}</p>
@@ -256,11 +255,9 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
       className="pb-28 lg:pb-0"
       nav={<TopNav maxWidthClassName="max-w-6xl" userLabel={userLabel} onLogout={onLogout} />}
     >
-      <section className="flex flex-col gap-5 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-8 md:flex-row md:items-end md:justify-between">
+      <section className="flex flex-col gap-5 rounded-3xl border bg-card p-5 shadow-card sm:p-8 md:flex-row md:items-end md:justify-between">
         <SectionHeader
           as="h1"
-          eyebrow="Topic Practice"
-          eyebrowLatin
           title="주제별 연습을 시작해볼까요?"
           description="하나의 주제를 선택하면 그 주제에 맞는 연습 흐름을 준비합니다."
         />
@@ -290,7 +287,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="flex flex-col gap-4">
           {/* Categories: scrollable chips on mobile, card list on desktop */}
-          <nav aria-label="카테고리" className="-mx-4 px-4 lg:mx-0 lg:rounded-3xl lg:border lg:bg-card/90 lg:p-5 lg:shadow-card">
+          <nav aria-label="카테고리" className="-mx-4 px-4 lg:mx-0 lg:rounded-3xl lg:border lg:bg-card lg:p-5 lg:shadow-card">
             <Eyebrow className="mb-3 hidden lg:block">카테고리</Eyebrow>
             <ul className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] lg:flex-col lg:overflow-visible lg:pb-0">
               {categories.map((category) => {
@@ -328,7 +325,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
           </nav>
 
           {/* Selection summary + CTA (desktop). Mobile uses the sticky bar below. */}
-          <div className="hidden flex-col gap-4 rounded-3xl border bg-card/90 p-5 shadow-card lg:sticky lg:top-6 lg:flex">
+          <div className="hidden flex-col gap-4 rounded-3xl border bg-card p-5 shadow-card lg:sticky lg:top-6 lg:flex">
             <Eyebrow>선택된 주제</Eyebrow>
             {selectedTopic ? (
               <div className="rounded-2xl border border-primary/30 bg-accent p-4">
@@ -352,10 +349,8 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
           </div>
         </aside>
 
-        <section className="flex flex-col gap-5 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-6">
+        <section className="flex flex-col gap-5 rounded-3xl border bg-card p-5 shadow-card sm:p-6">
           <SectionHeader
-            eyebrow="Topics"
-            eyebrowLatin
             title={activeCategory?.label ?? "주제 목록"}
             action={<span className="text-sm text-muted-foreground">{topicCount(filteredTopics.length)}</span>}
           />
