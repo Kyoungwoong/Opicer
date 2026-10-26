@@ -1,6 +1,5 @@
 import type {
   OpicCalendar,
-  RecentActivity,
   UniversalSentence,
 } from "@/features/home/types";
 import { ko } from "@/locales/ko";
@@ -33,30 +32,6 @@ export const UNIVERSAL_SENTENCES: UniversalSentence[] = [
     title: ko.home.homeData.universalTitles.solution,
     sentence: "In that situation, the first thing I did was to...",
     tags: ["solution", "structure"],
-  },
-];
-
-export const RECENT_ACTIVITIES: RecentActivity[] = [
-  {
-    id: "a1",
-    title: "Mock Test #12",
-    summary: ko.home.homeData.recent.summary1,
-    dateLabel: ko.home.homeData.recent.today,
-    status: "complete",
-  },
-  {
-    id: "a2",
-    title: ko.home.homeData.recent.title2,
-    summary: ko.home.homeData.recent.summary2,
-    dateLabel: ko.home.homeData.recent.yesterday,
-    status: "in_progress",
-  },
-  {
-    id: "a3",
-    title: ko.home.homeData.recent.title3,
-    summary: ko.home.homeData.recent.summary3,
-    dateLabel: ko.home.homeData.recent.recommended,
-    status: "recommended",
   },
 ];
 
