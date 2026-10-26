@@ -66,6 +66,8 @@ export function EvaluationGuideTab() {
   const [guides, setGuides] = useState<EvaluationGuide[]>([]);
   const [kind, setKind] = useState<EvaluationGuideKind>("SCORING_NOTES");
   const [editor, setEditor] = useState<Editor>(emptyEditor("SCORING_NOTES"));
+  // Title and content as last loaded, to tell whether the editor holds unsaved changes.
+  const [baseline, setBaseline] = useState({ title: "", contentMd: "" });
   // Below lg the editor and the preview share one panel.
   const [pane, setPane] = useState<"write" | "preview">("write");
   const [saving, setSaving] = useState(false);
@@ -98,20 +100,33 @@ export function EvaluationGuideTab() {
   const activeVersion = versions.find((g) => g.active);
   const length = editor.contentMd.length;
   const tooLong = length > MAX_CONTENT_LENGTH;
+  const dirty = editor.title !== baseline.title || editor.contentMd !== baseline.contentMd;
+
+  /** Loads the editor without asking; for after a save or delete. */
+  function resetEditor(next: Editor) {
+    setEditor(next);
+    setBaseline({ title: next.title, contentMd: next.contentMd });
+    setError(null);
+  }
+
+  /** Loads the editor, asking first when it holds unsaved changes. Returns false if the admin keeps them. */
+  function replaceEditor(next: Editor): boolean {
+    if (dirty && !confirm("저장하지 않은 내용이 사라져요. 계속할까요?")) return false;
+    resetEditor(next);
+    return true;
+  }
 
   function switchKind(next: EvaluationGuideKind) {
+    if (next === kind || !replaceEditor(emptyEditor(next))) return;
     setKind(next);
-    setEditor(emptyEditor(next));
-    setError(null);
   }
 
   function duplicate(guide: EvaluationGuide) {
-    setEditor({ mode: "new", kind: guide.kind, title: guide.title, contentMd: guide.contentMd, basedOn: guide.version });
-    setError(null);
+    replaceEditor({ mode: "new", kind: guide.kind, title: guide.title, contentMd: guide.contentMd, basedOn: guide.version });
   }
 
   function edit(guide: EvaluationGuide) {
-    setEditor({
+    replaceEditor({
       mode: "edit",
       id: guide.id,
       kind: guide.kind,
@@ -119,7 +134,6 @@ export function EvaluationGuideTab() {
       title: guide.title,
       contentMd: guide.contentMd,
     });
-    setError(null);
   }
 
   async function run(action: () => Promise<unknown>, after?: () => void) {
@@ -142,7 +156,7 @@ export function EvaluationGuideTab() {
         editor.mode === "edit"
           ? evaluationGuideApi.update(editor.id, { title: editor.title, contentMd: editor.contentMd })
           : evaluationGuideApi.create({ kind: editor.kind, title: editor.title, contentMd: editor.contentMd }),
-      () => setEditor(emptyEditor(kind))
+      () => resetEditor(emptyEditor(kind))
     );
     setSaving(false);
   }
@@ -150,7 +164,7 @@ export function EvaluationGuideTab() {
   function handleDelete(guide: EvaluationGuide) {
     if (!confirm(`v${guide.version} "${guide.title}"을(를) 삭제할까요?`)) return;
     run(() => evaluationGuideApi.delete(guide.id), () => {
-      if (editor.mode === "edit" && editor.id === guide.id) setEditor(emptyEditor(kind));
+      if (editor.mode === "edit" && editor.id === guide.id) resetEditor(emptyEditor(kind));
     });
   }
 
@@ -181,9 +195,10 @@ export function EvaluationGuideTab() {
               >
                 {k.label}
                 <span
-                  aria-label={active ? "사용 중" : "사용 안 함"}
+                  aria-hidden
                   className={cn("size-2 rounded-full", active ? "bg-success" : "bg-muted-foreground/30")}
                 />
+                <span className="sr-only">{active ? "(사용 중)" : "(사용 안 함)"}</span>
               </button>
             );
           })}
@@ -270,7 +285,7 @@ export function EvaluationGuideTab() {
             {saving ? "저장 중..." : editor.mode === "edit" ? "수정 저장" : "새 버전으로 저장"}
           </button>
           {(editor.mode === "edit" || editor.basedOn || editor.title || editor.contentMd) && (
-            <button type="button" onClick={() => setEditor(emptyEditor(kind))} className={adminUi.secondaryButton}>
+            <button type="button" onClick={() => replaceEditor(emptyEditor(kind))} className={adminUi.secondaryButton}>
               취소
             </button>
           )}
