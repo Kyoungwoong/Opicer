@@ -6,7 +6,7 @@ import com.opicer.api.prompt.application.PromptVersionQueryService;
 import com.opicer.api.prompt.domain.PromptUseCase;
 import com.opicer.api.prompt.domain.PromptVersion;
 import com.opicer.api.goodanswer.application.GoodAnswerSampleQueryService;
-import com.opicer.api.goodanswer.domain.GoodAnswerSample;
+import com.opicer.api.goodanswer.application.ReferenceSample;
 import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
@@ -103,7 +103,7 @@ public class PracticeAiService {
 		String prompt = template
 			.replace("{questionText}", questionText)
 			.replace("{transcript}", transcript);
-		prompt = attachRagContext(prompt, topicId, transcript, questionType, targetLevel);
+		prompt = attachRagContext(prompt, topicId, transcript);
 		return callClaude(apiKey, prompt);
 	}
 
@@ -124,24 +124,12 @@ public class PracticeAiService {
 		String prompt = template
 			.replace("{questionText}", questionText)
 			.replace("{transcript}", transcript);
-		prompt = attachRagContext(prompt, topicId, transcript, questionType, targetLevel);
+		prompt = attachRagContext(prompt, topicId, transcript);
 		return callClaude(apiKey, prompt);
 	}
 
-	private String attachRagContext(
-		String prompt,
-		UUID topicId,
-		String transcript,
-		String questionType,
-		OpicLevel targetLevel
-	) {
-		List<GoodAnswerSample> samples = goodAnswerSampleQueryService.findSimilar(
-			topicId,
-			transcript,
-			3,
-			questionType,
-			targetLevel
-		);
+	private String attachRagContext(String prompt, UUID topicId, String transcript) {
+		List<ReferenceSample> samples = goodAnswerSampleQueryService.findReferenceSamples(topicId, transcript);
 		if (samples.isEmpty()) return prompt;
 		StringJoiner joiner = new StringJoiner("\n\n");
 		joiner.add("### RAG Reference Samples");
@@ -153,14 +141,14 @@ public class PracticeAiService {
 			- If references conflict with learner context, prefer learner context.
 			""");
 		for (int i = 0; i < samples.size(); i++) {
-			GoodAnswerSample sample = samples.get(i);
+			ReferenceSample sample = samples.get(i);
 			joiner.add(String.format(
 				"%d) Level: %s\nSummary: %s\nKey Expressions: %s\nSample: %s",
 				i + 1,
-				sample.getLevel(),
-				sample.getSummary() == null ? "-" : sample.getSummary(),
-				sample.getKeyExpressions() == null ? "-" : String.join(", ", sample.getKeyExpressions()),
-				sample.getSampleText()
+				sample.level(),
+				sample.summary() == null ? "-" : sample.summary(),
+				sample.keyExpressions().isEmpty() ? "-" : String.join(", ", sample.keyExpressions()),
+				sample.sampleText()
 			));
 		}
 		joiner.add("""
