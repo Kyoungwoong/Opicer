@@ -33,8 +33,8 @@ export function Mascot({ className, backdrop = true, label = "연습 도우미 �
           <ellipse cx="130" cy="220" rx="70" ry="8" style={{ fill: "color-mix(in oklab, var(--accent) 70%, var(--primary))" }} />
         </>
       ) : null}
-      <path d="M66 122c0-45 29-80 64-80s64 35 64 80v36c0 28-22 50-50 50h-28c-28 0-50-22-50-50z" style={{ fill: "var(--primary)" }} />
-      <path d="M88 120c0-28 19-48 42-48s42 20 42 48v24c0 20-16 36-36 36h-12c-20 0-36-16-36-36z" fill="#fdfbf6" />
+      <path d="M66 122c0-45 29-80 64-80s64 35 64 80v36c0 28-22 50-50 50h-28c-28 0-50-22-50-50z" style={{ fill: "var(--brand)" }} />
+      <path d="M88 120c0-28 19-48 42-48s42 20 42 48v24c0 20-16 36-36 36h-12c-20 0-36-16-36-36z" fill="#ffffff" />
       <circle cx="114" cy="124" r="6" style={{ fill: "var(--foreground)" }} />
       <circle cx="146" cy="124" r="6" style={{ fill: "var(--foreground)" }} />
       {expression === "talk" ? (
