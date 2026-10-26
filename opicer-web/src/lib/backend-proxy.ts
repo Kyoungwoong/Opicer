@@ -19,12 +19,20 @@ export async function forwardToBackend(
     headers["Content-Type"] = "application/json";
   }
 
-  const res = await fetch(`${baseUrl}${backendPath}${request.nextUrl.search}`, {
-    method,
-    headers,
-    body,
-    cache: "no-store",
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${baseUrl}${backendPath}${request.nextUrl.search}`, {
+      method,
+      headers,
+      body,
+      cache: "no-store",
+    });
+  } catch {
+    return NextResponse.json(
+      { code: "BACKEND_UNAVAILABLE", message: "서버에 연결할 수 없습니다." },
+      { status: 502 }
+    );
+  }
 
   if (res.status === 204) {
     return new NextResponse(null, { status: 204 });
@@ -33,6 +41,14 @@ export async function forwardToBackend(
   if (!text) {
     return NextResponse.json(null, { status: res.status });
   }
-  const json = JSON.parse(text) as { data?: unknown };
+  let json: { data?: unknown };
+  try {
+    json = JSON.parse(text) as { data?: unknown };
+  } catch {
+    return NextResponse.json(
+      { code: "BAD_GATEWAY", message: "서버 응답을 해석할 수 없습니다." },
+      { status: 502 }
+    );
+  }
   return NextResponse.json(res.ok ? json.data ?? null : json, { status: res.status });
 }
