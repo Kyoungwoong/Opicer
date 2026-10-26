@@ -3,7 +3,7 @@
 - 날짜: 2026-10-26
 - 관련
   - PR [#112](https://github.com/Kyoungwoong/Opicer/pull/112), [#114](https://github.com/Kyoungwoong/Opicer/pull/114)
-  - 이 기록 PR(#115)
+  - 기록 규칙: 이슈 #115, PR [#116](https://github.com/Kyoungwoong/Opicer/pull/116)
   - ADR [0001](../adr/0001-vector-similarity.md)
   - 계획 파일 `~/.claude/plans/temporal-shimmying-sifakis.md`, `plan.md`(평가 파이프라인 섹션)
 
@@ -96,7 +96,7 @@
 |---|---|---|
 | #112 | 코사인+MMR 검색, `SimilarityRanker`, `RagProperties`, topic 인덱스, 임베딩 저장 버그 수정, `VectorExtensionCheck`, ADR. 리뷰 R1: 검색 실패 시 샘플 없이 진행 | `./gradlew test` 108개 통과(실제 pgvector 0.8.7) |
 | #114 | `CompetencyDimension`, `CorrectionCategory`, `SpeechSignalsCalculator`(MATTR), `LevelAggregator`/`SessionReport`. 리뷰 R1: 숫자를 단어로 세고, 소수점에서 문장을 끊지 않음 | `./gradlew test` 134개 통과 |
-| #115 | 이 기록 규칙(AGENTS.md §3.4, CLAUDE.md §7)과 worklog 디렉토리 | 문서 |
+| #116 (이슈 #115) | 이 기록 규칙(AGENTS.md §3.4, CLAUDE.md §7)과 worklog 디렉토리 | 문서 |
 
 ## 남은 일 / 후속
 - 다음: STT 목 모드 → PR-3(모델·계약, ai_job) → PR-4(평가기, 추천 표현) → 관리자 md 평가 가이드 → PR-5 → PR-6/7(템플릿 리포트 화면) → PR-8
