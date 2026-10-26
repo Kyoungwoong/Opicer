@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -74,6 +76,19 @@ public class GlobalExceptionHandler {
 		ErrorResponse response = ErrorResponse.from(ErrorCode.DATA_INTEGRITY_VIOLATION,
 			ErrorCode.DATA_INTEGRITY_VIOLATION.getDefaultMessage());
 		return ResponseEntity.status(ErrorCode.DATA_INTEGRITY_VIOLATION.getHttpStatus()).body(response);
+	}
+
+	/** An unmapped path (including removed endpoints) is a 404, not a server error. */
+	@ExceptionHandler(NoResourceFoundException.class)
+	public ResponseEntity<ErrorResponse> handleNoResource(NoResourceFoundException ex) {
+		ErrorResponse response = ErrorResponse.from(ErrorCode.NOT_FOUND);
+		return ResponseEntity.status(ErrorCode.NOT_FOUND.getHttpStatus()).body(response);
+	}
+
+	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+		ErrorResponse response = ErrorResponse.from(ErrorCode.METHOD_NOT_ALLOWED);
+		return ResponseEntity.status(ErrorCode.METHOD_NOT_ALLOWED.getHttpStatus()).body(response);
 	}
 
 	@ExceptionHandler(Exception.class)

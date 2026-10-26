@@ -14,6 +14,8 @@ public enum ErrorCode {
 	TOPIC_INACTIVE("TOPIC_INACTIVE", HttpStatus.CONFLICT, "Topic is inactive"),
 	VALIDATION_ERROR("VALIDATION_ERROR", HttpStatus.BAD_REQUEST, "Validation failed"),
 	BAD_REQUEST("BAD_REQUEST", HttpStatus.BAD_REQUEST, "Bad request"),
+	NOT_FOUND("NOT_FOUND", HttpStatus.NOT_FOUND, "No such endpoint"),
+	METHOD_NOT_ALLOWED("METHOD_NOT_ALLOWED", HttpStatus.METHOD_NOT_ALLOWED, "Method not allowed for this endpoint"),
 	DATA_INTEGRITY_VIOLATION("DATA_INTEGRITY_VIOLATION", HttpStatus.CONFLICT, "Data integrity violation"),
 	INTERNAL_ERROR("INTERNAL_ERROR", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
 	AI_NOT_CONFIGURED("AI_NOT_CONFIGURED", HttpStatus.SERVICE_UNAVAILABLE, "AI service is not configured"),
