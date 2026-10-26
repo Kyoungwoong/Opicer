@@ -6,13 +6,12 @@
     "sentenceLoading": "데이터를 준비 중입니다."
   },
   "recentActivity": {
-    "description": "최근 활동 요약",
+    "description": "최근 연습",
     "viewAll": "전체 보기",
-    "status": {
-      "complete": "완료",
-      "in_progress": "진행 중",
-      "recommended": "추천"
-    }
+    "empty": "아직 연습 기록이 없어요. 주제를 골라 2분만 말해 볼까요?",
+    "startFirst": "첫 연습 시작하기",
+    "error": "최근 연습을 불러오지 못했어요.",
+    "questionCount": "{n}문항"
   },
   "opicSchedule": {
     "description": "오픽 일정 캘린더",
@@ -27,16 +26,6 @@
       "experience": "경험 공유 템플릿",
       "compare": "비교/대조 템플릿",
       "solution": "문제 해결 템플릿"
-    },
-    "recent": {
-      "title2": "주제별 연습: Travel",
-      "title3": "추천 연습: Role-play",
-      "summary1": "IM 레벨 타깃 답변 구조 점검",
-      "summary2": "스토리텔링 흐름 개선 필요",
-      "summary3": "대화형 답변 템플릿 복습",
-      "today": "오늘",
-      "yesterday": "어제",
-      "recommended": "추천"
     },
     "calendar": {
       "monthLabel": "2026년 3월",

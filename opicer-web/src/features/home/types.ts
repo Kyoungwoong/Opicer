@@ -6,14 +6,6 @@ export type UniversalSentence = {
   tags: string[];
 };
 
-export type RecentActivity = {
-  id: string;
-  title: string;
-  summary: string;
-  dateLabel: string;
-  status: "complete" | "in_progress" | "recommended";
-};
-
 export type OpicScheduleEvent = {
   id: string;
   date: number;
