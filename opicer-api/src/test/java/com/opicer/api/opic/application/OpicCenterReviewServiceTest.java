@@ -118,8 +118,7 @@ class OpicCenterReviewServiceTest {
 	}
 
 	private OpicTestCenter center(String name) {
-		OpicTestCenter center = new OpicTestCenter(name + "|서울");
-		center.apply(name, "서울 어딘가", null, null, null, null, null, "C001", "서울", Instant.now());
+		OpicTestCenter center = new OpicTestCenter(name, "서울 어딘가", null, null, null, "서울", Instant.now());
 		return centerRepository.save(center);
 	}
 
