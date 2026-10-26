@@ -96,6 +96,19 @@ class OpicCenterReviewServiceTest {
 	}
 
 	@Test
+	void inactiveCenterReviewsAreAdminOnly() {
+		OpicTestCenter center = center("폐쇄센터");
+		commandService.create(center.getId(), 4, "예전엔 좋았어요", null, true);
+		center.deactivate();
+		centerRepository.save(center);
+
+		assertThatThrownBy(() -> reviewQueryService.visibleReviews(center.getId()))
+			.isInstanceOfSatisfying(ApiException.class,
+				e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.OPIC_CENTER_NOT_FOUND));
+		assertThat(reviewQueryService.allReviews(center.getId())).hasSize(1);
+	}
+
+	@Test
 	void unknownCenterIsRejected() {
 		UUID missing = UUID.randomUUID();
 		assertThatThrownBy(() -> commandService.create(missing, 3, "x", null, true))

@@ -23,21 +23,23 @@ public class OpicCenterReviewQueryService {
 		this.reviewRepository = reviewRepository;
 	}
 
-	/** Public view: visible reviews only, newest first. */
+	/** Public view: visible reviews of an active center, newest first. Inactive centers are hidden like in the list. */
 	public List<OpicCenterReview> visibleReviews(UUID centerId) {
-		requireCenter(centerId);
+		if (!centerRepository.existsByIdAndActiveTrue(centerId)) {
+			throw centerNotFound(centerId);
+		}
 		return reviewRepository.findByCenterIdAndVisibleTrueOrderByCreatedAtDesc(centerId);
 	}
 
-	/** Admin view: every review including hidden ones, newest first. */
+	/** Admin view: every review including hidden ones, newest first; inactive centers stay manageable. */
 	public List<OpicCenterReview> allReviews(UUID centerId) {
-		requireCenter(centerId);
+		if (!centerRepository.existsById(centerId)) {
+			throw centerNotFound(centerId);
+		}
 		return reviewRepository.findByCenterIdOrderByCreatedAtDesc(centerId);
 	}
 
-	private void requireCenter(UUID centerId) {
-		if (!centerRepository.existsById(centerId)) {
-			throw new ApiException(ErrorCode.OPIC_CENTER_NOT_FOUND, "OPIc test center not found: " + centerId);
-		}
+	private static ApiException centerNotFound(UUID centerId) {
+		return new ApiException(ErrorCode.OPIC_CENTER_NOT_FOUND, "OPIc test center not found: " + centerId);
 	}
 }
