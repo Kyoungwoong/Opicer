@@ -6,6 +6,8 @@ import com.opicer.api.config.AuthProperties;
 import com.opicer.api.practice.application.PracticeHistoryCommandService;
 import com.opicer.api.practice.application.PracticeHistoryQueryService;
 import com.opicer.api.practice.application.PracticeSessionCommandService;
+import com.opicer.api.practice.domain.SessionEvaluationStatus;
+import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
 import com.opicer.api.user.domain.AuthProvider;
@@ -24,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -82,9 +85,10 @@ class PracticeSessionControllerTest {
 			UUID.randomUUID(),
 			false,
 			2,
-			sessionId
+			sessionId,
+			SessionEvaluationStatus.PENDING
 		);
-		when(practiceSessionCommandService.submit(any(), any(), any())).thenReturn(result);
+		when(practiceSessionCommandService.submit(any(), any(), any(), any())).thenReturn(result);
 
 		mockMvc.perform(post("/api/practice/sessions/submit")
 				.cookie(userCookie)
@@ -96,13 +100,14 @@ class PracticeSessionControllerTest {
 					"""))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.deductedCredits").value(2))
-			.andExpect(jsonPath("$.data.sessionId").value(sessionId.toString()));
+			.andExpect(jsonPath("$.data.sessionId").value(sessionId.toString()))
+			.andExpect(jsonPath("$.data.evaluationStatus").value("PENDING"));
 	}
 
 	@Test
 	void submitWithAnswersPassesThemToService() throws Exception {
-		when(practiceSessionCommandService.submit(any(), any(), any())).thenReturn(
-			new PracticeSessionCommandService.SubmitResult(UUID.randomUUID(), false, 2, UUID.randomUUID())
+		when(practiceSessionCommandService.submit(any(), any(), any(), any())).thenReturn(
+			new PracticeSessionCommandService.SubmitResult(UUID.randomUUID(), false, 2, UUID.randomUUID(), null)
 		);
 
 		mockMvc.perform(post("/api/practice/sessions/submit")
@@ -118,11 +123,64 @@ class PracticeSessionControllerTest {
 					""".formatted(QUESTION_ID)))
 			.andExpect(status().isOk());
 
-		verify(practiceSessionCommandService).submit(any(), any(), eq(List.of(
+		verify(practiceSessionCommandService).submit(any(), any(), isNull(), eq(List.of(
 			new PracticeSessionCommandService.AnswerInput(
 				UUID.fromString(QUESTION_ID), "Describe your home.", "I live in an apartment."
 			)
 		)));
+	}
+
+	@Test
+	void submitPassesTargetLevelAndRecordingLengths() throws Exception {
+		when(practiceSessionCommandService.submit(any(), any(), any(), any())).thenReturn(
+			new PracticeSessionCommandService.SubmitResult(UUID.randomUUID(), false, 2, UUID.randomUUID(),
+				SessionEvaluationStatus.PENDING)
+		);
+
+		mockMvc.perform(post("/api/practice/sessions/submit")
+				.cookie(userCookie)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{
+					  "topicSelectionId": "11111111-1111-1111-1111-111111111111",
+					  "targetLevel": "IH",
+					  "answers": [
+					    {"questionId": "%s", "questionText": "Describe your home.", "transcript": "I live here.", "durationSeconds": 74}
+					  ]
+					}
+					""".formatted(QUESTION_ID)))
+			.andExpect(status().isOk());
+
+		verify(practiceSessionCommandService).submit(any(), any(), eq(OpicLevel.IH), eq(List.of(
+			new PracticeSessionCommandService.AnswerInput(UUID.fromString(QUESTION_ID), "Describe your home.", "I live here.", 74)
+		)));
+	}
+
+	@Test
+	void submitRejectsOutOfRangeRecordingLength() throws Exception {
+		mockMvc.perform(post("/api/practice/sessions/submit")
+				.cookie(userCookie)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{
+					  "topicSelectionId": "11111111-1111-1111-1111-111111111111",
+					  "answers": [{"questionId": "%s", "questionText": "Q", "transcript": "a", "durationSeconds": 0}]
+					}
+					""".formatted(QUESTION_ID)))
+			.andExpect(status().isBadRequest());
+
+		verify(practiceSessionCommandService, never()).submit(any(), any(), any(), any());
+	}
+
+	@Test
+	void submitRejectsUnknownTargetLevel() throws Exception {
+		mockMvc.perform(post("/api/practice/sessions/submit")
+				.cookie(userCookie)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{"topicSelectionId": "11111111-1111-1111-1111-111111111111", "targetLevel": "IM2"}
+					"""))
+			.andExpect(status().isBadRequest());
 	}
 
 	@Test
@@ -141,12 +199,12 @@ class PracticeSessionControllerTest {
 					""".formatted(QUESTION_ID)))
 			.andExpect(status().isBadRequest());
 
-		verify(practiceSessionCommandService, never()).submit(any(), any(), any());
+		verify(practiceSessionCommandService, never()).submit(any(), any(), any(), any());
 	}
 
 	@Test
 	void submitInsufficientBalanceReturns402() throws Exception {
-		when(practiceSessionCommandService.submit(any(), any(), any()))
+		when(practiceSessionCommandService.submit(any(), any(), any(), any()))
 			.thenThrow(new ApiException(ErrorCode.CREDIT_INSUFFICIENT_BALANCE));
 
 		mockMvc.perform(post("/api/practice/sessions/submit")
