@@ -22,6 +22,8 @@ export function isEvaluationRetryable(status: SessionEvaluationStatus | null | u
  */
 export function useSessionEvaluation(sessionId: string | null) {
   const [session, setSession] = useState<PracticeSessionDetail | null>(null);
+  // The session is gone (404): deleted, or never saved.
+  const [missing, setMissing] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
   const [pollFailed, setPollFailed] = useState(false);
   const [retrying, setRetrying] = useState(false);
@@ -40,6 +42,7 @@ export function useSessionEvaluation(sessionId: string | null) {
         const detail = await fetchPracticeSession(sessionId);
         if (!alive) return;
         setPollFailed(false);
+        setMissing(detail === null);
         setSession(detail);
         if (!detail || !isEvaluationInProgress(detail.evaluationStatus)) return;
       } catch {
@@ -82,5 +85,5 @@ export function useSessionEvaluation(sessionId: string | null) {
     }
   }, [sessionId]);
 
-  return { session, timedOut, pollFailed, retrying, retryError, checkAgain, retry };
+  return { session, missing, timedOut, pollFailed, retrying, retryError, checkAgain, retry };
 }

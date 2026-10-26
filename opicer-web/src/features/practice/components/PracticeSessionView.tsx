@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
@@ -450,6 +451,32 @@ export function PracticeSessionView({ topicId, topicSelectionId, targetLevel, us
             onRetry={evaluation.retry}
             onCheckAgain={evaluation.checkAgain}
           />
+        ) : sessionId && (evaluation.missing || evaluation.timedOut) ? (
+          // The detail never loaded, so EvaluationStatusNotice has nothing to render from.
+          <Alert>
+            <AlertCircle />
+            <AlertTitle>
+              {evaluation.missing ? "연습 기록을 찾을 수 없어요" : "평가 결과를 불러오지 못했어요"}
+            </AlertTitle>
+            <AlertDescription className="flex flex-col gap-3">
+              <p>
+                {evaluation.missing
+                  ? "기록이 삭제되었을 수 있어요. 마이페이지에서 기록을 확인해 주세요."
+                  : "연결 상태를 확인한 뒤 다시 시도해 주세요. 평가는 서버에서 계속 진행돼요."}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {!evaluation.missing && (
+                  <Button type="button" variant="outline" size="sm" onClick={evaluation.checkAgain} className="rounded-full px-4">
+                    <RotateCcw />
+                    다시 확인
+                  </Button>
+                )}
+                <Button asChild variant="ghost" size="sm" className="rounded-full px-4">
+                  <Link href={evaluation.missing ? ROUTES.mypage : historyPath(sessionId)}>마이페이지에서 보기</Link>
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
         ) : sessionId ? (
           <Skeleton className="h-24 rounded-3xl" />
         ) : null}
