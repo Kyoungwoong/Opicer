@@ -142,3 +142,40 @@
     background: rgb(47 107 94 / 0.18);
   }
 }
+
+/* Interviewer + audio panel motion (practice screen). Callers add motion-reduce:animate-none. */
+@theme {
+  --animate-opi-talk: opi-talk 0.42s ease-in-out infinite;
+  --animate-opi-listen: opi-listen 1.4s ease-in-out infinite;
+  --animate-eq-bar: eq-bar 0.9s ease-in-out infinite;
+
+  @keyframes opi-talk {
+    0%,
+    100% {
+      transform: scaleY(0.3);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes opi-listen {
+    0%,
+    100% {
+      opacity: 0.2;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes eq-bar {
+    0%,
+    100% {
+      transform: scaleY(0.25);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+}
