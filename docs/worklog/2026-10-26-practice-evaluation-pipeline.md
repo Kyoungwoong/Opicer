@@ -51,6 +51,15 @@
 
 > 응 PR-4 진행해줘
 
+> 왜 갑자기 Claude API를 쓰는거야? 그냥 OpenAI API 사용해주지.
+
+> 아니 잠만 원래 OpenAI로 되어있지 않았어? 너가 Claude로 바꾼거야?
+
+- 확인 결과(git): 기존 분석·수정 기능은 `fd16877`(2026-02-26)부터 Claude(`claude-opus-4-6`)를 썼다. OpenAI는 STT와 임베딩에만 쓰였다. 이번 세션에서 공급자를 바꾼 적은 없다.
+- 결정(선택지 답): 평가 AI는 **OpenAI**, 기본 모델은 **`gpt-5.6-sol`**(사용자 입력. 모델 페이지에는 `gpt-6.1-sol`로 나와 있어 확인 요청).
+
+> 이거 하면서 PR-4 같이 진행해줘
+
 ## 분석 (구현 전 상태)
 - **벡터**
   - `good_answer_sample.embedding vector(1536)` 하나뿐이다(OpenAI text-embedding-3-small, 단위 벡터).
