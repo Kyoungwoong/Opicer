@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +43,8 @@ function roundLabel(roundName: string): string {
 function registrationStatus(schedule: OpicSchedule, today: string): { label: string; open: boolean } {
   const { registrationStart: start, registrationEnd: end } = schedule;
   if (start && today < start) return { label: `접수 예정 · ${shortDateLabel(start)}부터`, open: false };
-  if (end && today <= end) return { label: `접수 중 · ${shortDateLabel(end)} 마감`, open: true };
+  if (!end) return { label: "접수 기간 미정", open: false };
+  if (today <= end) return { label: `접수 중 · ${shortDateLabel(end)} 마감`, open: true };
   return { label: "접수 마감", open: false };
 }
 
@@ -52,8 +53,21 @@ function defaultSelection(schedules: OpicSchedule[], today: string): string | nu
   return dates.find((d) => d >= today) ?? dates[0] ?? null;
 }
 
+const noopSubscribe = () => () => {};
+
+/**
+ * `/` and `/guide` are prerendered at build time, so "today" must not be baked into the HTML:
+ * the server snapshot is null (skeleton) and the browser fills in the real Seoul date.
+ */
 export function OpicCalendar({ size = "compact", className }: Props) {
-  const today = useMemo(() => seoulToday(), []);
+  const today = useSyncExternalStore(noopSubscribe, seoulToday, () => null);
+  if (!today) {
+    return <Skeleton className={cn("rounded-2xl", size === "compact" ? "h-96" : "h-[28rem]", className)} />;
+  }
+  return <OpicCalendarBody today={today} size={size} className={className} />;
+}
+
+function OpicCalendarBody({ today, size, className }: Required<Pick<Props, "size">> & Props & { today: string }) {
   const firstMonth = monthOf(today);
   const lastMonth = shiftMonth(firstMonth, MONTHS_AHEAD);
 
