@@ -11,7 +11,8 @@ type Props = {
   pollFailed: boolean;
   retrying: boolean;
   retryError: string | null;
-  historyHref: string;
+  /** Link to the history page; omit when already on it. */
+  historyHref?: string;
   onRetry: () => void;
   onCheckAgain: () => void;
 };
@@ -51,15 +52,20 @@ export function EvaluationStatusNotice({
           <Info />
           <AlertTitle>평가가 평소보다 오래 걸리고 있어요</AlertTitle>
           <AlertDescription className="flex flex-col gap-3">
-            <p>평가는 계속 진행돼요. 이 화면을 닫아도 마이페이지 기록에서 결과를 확인할 수 있어요.</p>
+            <p>
+              평가는 계속 진행돼요.
+              {historyHref ? " 이 화면을 닫아도 마이페이지 기록에서 결과를 확인할 수 있어요." : " 잠시 후 다시 확인해 주세요."}
+            </p>
             <div className="flex flex-wrap gap-2">
               <Button type="button" variant="outline" size="sm" onClick={onCheckAgain} className="rounded-full px-4">
                 <RefreshCw />
                 다시 확인
               </Button>
-              <Button asChild variant="ghost" size="sm" className="rounded-full px-4">
-                <Link href={historyHref}>마이페이지 기록에서 보기</Link>
-              </Button>
+              {historyHref && (
+                <Button asChild variant="ghost" size="sm" className="rounded-full px-4">
+                  <Link href={historyHref}>마이페이지 기록에서 보기</Link>
+                </Button>
+              )}
             </div>
           </AlertDescription>
         </Alert>
@@ -78,7 +84,7 @@ export function EvaluationStatusNotice({
             {evaluable.length > 0 ? ` (${settled.length}/${evaluable.length})` : ""}
           </p>
           <p className="text-sm text-muted-foreground">
-            보통 1~2분 걸려요. 화면을 닫아도 마이페이지 기록에서 결과를 볼 수 있어요.
+            보통 1~2분 걸려요.{historyHref ? " 화면을 닫아도 마이페이지 기록에서 결과를 볼 수 있어요." : ""}
             {pollFailed ? " 연결이 잠시 끊겨 다시 확인하는 중이에요." : ""}
           </p>
         </div>
