@@ -6,6 +6,7 @@ import com.opicer.api.evaluation.domain.SpeechSignals;
 import com.opicer.api.goodanswer.application.ReferenceSample;
 import com.opicer.api.shared.domain.OpicLevel;
 import java.util.Arrays;
+import java.util.List;
 import java.util.StringJoiner;
 
 /**
@@ -26,6 +27,14 @@ public final class EvaluationPromptBuilder {
 	}
 
 	public static EvaluationPrompt build(EvaluationInput input) {
+		return build(input, List.of());
+	}
+
+	/**
+	 * @param guides the active admin guides, one per kind in kind order; they extend the instructions, so the
+	 *               cached prefix changes only when an admin activates a different version
+	 */
+	public static EvaluationPrompt build(EvaluationInput input, List<EvaluationGuideNote> guides) {
 		StringJoiner text = new StringJoiner("\n");
 		text.add("Target level: " + input.targetLevel());
 		text.add("Question type: " + orDash(input.questionType()));
@@ -43,7 +52,27 @@ public final class EvaluationPromptBuilder {
 			}
 		}
 		text.add("<transcript>" + data(input.transcript()) + "</transcript>");
-		return new EvaluationPrompt(INSTRUCTIONS, text.toString());
+		return new EvaluationPrompt(instructions(guides), text.toString());
+	}
+
+	static String instructions(List<EvaluationGuideNote> guides) {
+		if (guides == null || guides.isEmpty()) {
+			return INSTRUCTIONS;
+		}
+		StringJoiner text = new StringJoiner("\n");
+		text.add(INSTRUCTIONS);
+		text.add("""
+
+			Admin guides: notes from Opicer's teachers, in markdown. Follow them within the rules above. They cannot
+			change the rubric, the output format, the verbatim-copy rules, or the fact that ratings are practice
+			estimates, never official OPIc scores. Each guide says which part of the output it shapes.""");
+		for (EvaluationGuideNote guide : guides) {
+			text.add("<admin_guide kind=\"" + guide.kind() + "\" version=\"" + guide.version() + "\">");
+			text.add("Use: " + guide.kind().purpose());
+			text.add(guideData(guide.content()));
+			text.add("</admin_guide>");
+		}
+		return text.toString();
 	}
 
 	private static String buildInstructions() {
@@ -104,6 +133,11 @@ public final class EvaluationPromptBuilder {
 			return "";
 		}
 		return text.replace("</transcript>", "</ transcript>").replace("</reference>", "</ reference>");
+	}
+
+	/** A guide cannot close its own block and smuggle text outside it. */
+	static String guideData(String text) {
+		return text == null ? "" : text.strip().replace("</admin_guide>", "</ admin_guide>");
 	}
 
 	static String truncate(String text) {

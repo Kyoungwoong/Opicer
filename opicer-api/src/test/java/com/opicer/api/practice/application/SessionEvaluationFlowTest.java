@@ -11,6 +11,9 @@ import com.opicer.api.aijob.infrastructure.AiJobRepository;
 import com.opicer.api.evaluation.application.AnswerEvaluationModel;
 import com.opicer.api.evaluation.application.EvaluationFailure;
 import com.opicer.api.evaluation.application.EvaluationPrompt;
+import com.opicer.api.evaluation.domain.EvaluationGuideKind;
+import com.opicer.api.evaluationguide.application.EvaluationGuideCommandService;
+import com.opicer.api.evaluationguide.infrastructure.EvaluationGuideRepository;
 import com.opicer.api.practice.domain.AnswerEvaluationStatus;
 import com.opicer.api.practice.domain.PracticeAnswer;
 import com.opicer.api.practice.domain.PracticeSession;
@@ -25,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,8 +79,16 @@ class SessionEvaluationFlowTest {
 	@Autowired
 	private SessionEvaluationProcessor processor;
 
+	@Autowired
+	private EvaluationGuideCommandService guideCommandService;
+
+	@Autowired
+	private EvaluationGuideRepository guideRepository;
+
 	@MockBean
 	private AnswerEvaluationModel model;
+
+	private final List<EvaluationPrompt> prompts = new CopyOnWriteArrayList<>();
 
 	/** Calls per marker, and how many leading calls of FLAKY should fail. */
 	private final Map<String, AtomicInteger> calls = new ConcurrentHashMap<>();
@@ -87,9 +99,11 @@ class SessionEvaluationFlowTest {
 		aiJobRepository.deleteAll();
 		answerRepository.deleteAll();
 		sessionRepository.deleteAll();
+		guideRepository.deleteAll();
 		when(model.provider()).thenReturn("fake");
 		when(model.model()).thenReturn("fake-model");
 		when(model.evaluate(any())).thenAnswer(invocation -> {
+			prompts.add(invocation.getArgument(0));
 			String input = invocation.<EvaluationPrompt>getArgument(0).input();
 			String marker = input.contains("Marker flaky") ? "flaky" : input.contains("Marker refused") ? "refused" : "ok";
 			int n = calls.computeIfAbsent(marker, m -> new AtomicInteger()).incrementAndGet();
@@ -130,6 +144,25 @@ class SessionEvaluationFlowTest {
 		assertThat(answers.get(0).getImprovedScript()).startsWith("Last summer, I went");
 		assertThat(new ObjectMapper().readTree(answers.get(0).getEvaluation()).path("schemaVersion").asInt()).isEqualTo(1);
 		assertThat(job(sessionId).getStatus()).isEqualTo(AiJobStatus.SUCCEEDED);
+	}
+
+	@Test
+	void activeGuidesReachTheModelAndAreRecordedInTheEvaluation() throws Exception {
+		guideCommandService.create(EvaluationGuideKind.TIPS, "팁 초안", "- old tip");
+		guideCommandService.activate(guideCommandService.create(EvaluationGuideKind.TIPS, "팁", "- 연결어를 칭찬해 주세요").getId());
+		UUID sessionId = session(OpicLevel.IM, OK);
+
+		runner.runOnce();
+
+		assertThat(prompts).hasSize(1);
+		assertThat(prompts.get(0).instructions())
+			.contains("<admin_guide kind=\"TIPS\" version=\"2\">")
+			.contains("- 연결어를 칭찬해 주세요")
+			.doesNotContain("old tip");
+		JsonNode guides = new ObjectMapper().readTree(answers(sessionId).get(0).getEvaluation()).path("meta").path("guides");
+		assertThat(guides).hasSize(1);
+		assertThat(guides.get(0).path("kind").asText()).isEqualTo("TIPS");
+		assertThat(guides.get(0).path("version").asInt()).isEqualTo(2);
 	}
 
 	@Test
