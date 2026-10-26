@@ -81,11 +81,3 @@ opicer:
   credit:
     unsafe-delay-ms: ${OPICER_CREDIT_UNSAFE_DELAY_MS:0}
     idempotency-ttl-hours: ${OPICER_CREDIT_IDEMPOTENCY_TTL_HOURS:24}
-  # opic.or.kr disallows generic crawlers in robots.txt: keep the scheduled sync off unless
-  # explicitly enabled, and get Multicampus' permission before enabling it in production.
-  opic-sync:
-    enabled: ${OPICER_OPIC_SYNC_ENABLED:false}
-    schedule-cron: ${OPICER_OPIC_SYNC_SCHEDULE_CRON:0 30 4 * * *}
-    center-cron: ${OPICER_OPIC_SYNC_CENTER_CRON:0 0 5 * * MON}
-    months-ahead: 2
-    request-delay-ms: 1500

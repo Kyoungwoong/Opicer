@@ -9,7 +9,7 @@ import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.UUID;
 
-/** An OPIc test center from opic.or.kr. Centers missing from the latest sync are deactivated, not deleted. */
+/** An OPIc test center. Centers are deactivated rather than deleted, so their reviews stay linked. */
 @Entity
 @Table(
 	name = "opic_test_center",
@@ -21,7 +21,7 @@ public class OpicTestCenter {
 	@GeneratedValue
 	private UUID id;
 
-	/** opic.or.kr exposes no center id, so name + road address is the natural key. */
+	/** Name + road address: the natural key that keeps the same center from being added twice. */
 	@Column(name = "external_key", nullable = false, length = 600)
 	private String externalKey;
 

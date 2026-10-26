@@ -9,7 +9,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
   {
     id: "schedule",
     title: "오픽 일정",
-    summary: "opic.or.kr 시험 일정과 접수 기간을 달력으로 확인하세요.",
+    summary: "시험 일정과 접수 기간은 opic.or.kr 공식 사이트에서 확인해요.",
   },
   {
     id: "centers",

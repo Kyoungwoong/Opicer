@@ -163,7 +163,7 @@ export function OpicCentersSection() {
         </p>
       ) : all.length === 0 ? (
         <p className="rounded-2xl bg-secondary px-4 py-6 text-sm text-muted-foreground">
-          아직 시험센터 정보가 없어요. opic.or.kr에서 정보를 가져오는 중이에요.
+          아직 등록된 시험센터가 없어요.
         </p>
       ) : (
         <div className="flex flex-col gap-4">
@@ -218,7 +218,7 @@ export function OpicCentersSection() {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            센터 정보 출처: opic.or.kr · 후기는 운영자가 수집하고 검토해 등록해요.
+            센터 정보는 운영자가 확인해 등록해요. 방문 전 opic.or.kr에서 최신 정보를 확인하세요. 후기도 운영자가 검토해 등록해요.
           </p>
         </div>
       )}

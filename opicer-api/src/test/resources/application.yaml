@@ -40,6 +40,3 @@ opicer:
     cookie-secure: false
     admin-allowlist: ""
     frontend-base-url: http://localhost:3000
-  opic-sync:
-    enabled: false
-    request-delay-ms: 0
