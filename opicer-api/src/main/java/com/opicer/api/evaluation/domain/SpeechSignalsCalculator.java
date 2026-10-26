@@ -14,8 +14,10 @@ public final class SpeechSignalsCalculator {
 
 	static final int MATTR_WINDOW = 50;
 
-	private static final Pattern WORD = Pattern.compile("[A-Za-z]+(?:'[A-Za-z]+)?");
-	private static final Pattern SENTENCE_END = Pattern.compile("[.!?]+");
+	/** Words (with contractions) and numbers as Whisper writes them, e.g. "2019", "1,200", "3.5". */
+	private static final Pattern WORD = Pattern.compile("[A-Za-z]+(?:'[A-Za-z]+)?|\\d+(?:[.,]\\d+)*");
+	/** Sentence-ending punctuation followed by a space or the end, so "3.5" is not a sentence break. */
+	private static final Pattern SENTENCE_END = Pattern.compile("[.!?]+(?=\\s|$)");
 	private static final Set<String> FILLERS = Set.of("um", "uh", "er", "erm", "hmm", "uhm", "mm");
 
 	private SpeechSignalsCalculator() {

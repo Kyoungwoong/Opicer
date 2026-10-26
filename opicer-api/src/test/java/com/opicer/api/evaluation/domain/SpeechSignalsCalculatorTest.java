@@ -12,7 +12,17 @@ class SpeechSignalsCalculatorTest {
 	void emptyOrNonEnglishTranscriptYieldsEmptySignals() {
 		assertThat(SpeechSignalsCalculator.calculate(null, 30)).isEqualTo(SpeechSignals.EMPTY);
 		assertThat(SpeechSignalsCalculator.calculate("   ", 30)).isEqualTo(SpeechSignals.EMPTY);
-		assertThat(SpeechSignalsCalculator.calculate("... 123 !!", 30)).isEqualTo(SpeechSignals.EMPTY);
+		assertThat(SpeechSignalsCalculator.calculate("... !! —", 30)).isEqualTo(SpeechSignals.EMPTY);
+	}
+
+	@Test
+	void countsNumbersAsWordsBecauseTheyFeedTheLengthCap() {
+		SpeechSignals signals = SpeechSignalsCalculator.calculate(
+			"I moved here in 2019 and paid 1,200 dollars for 3.5 years.", null);
+
+		// I moved here in 2019 and paid 1,200 dollars for 3.5 years
+		assertThat(signals.wordCount()).isEqualTo(12);
+		assertThat(signals.sentenceCount()).isEqualTo(1);
 	}
 
 	@Test
