@@ -50,6 +50,14 @@ public class AnswerEvaluator {
 	 * @throws EvaluationFailure when the model declines, errors, or returns unusable output
 	 */
 	public AnswerEvaluationResult evaluate(AnswerToEvaluate answer) {
+		return evaluate(answer, List.of());
+	}
+
+	/**
+	 * @param guides active admin guides to add to the instructions; may be empty
+	 * @throws EvaluationFailure when the model declines, errors, or returns unusable output
+	 */
+	public AnswerEvaluationResult evaluate(AnswerToEvaluate answer, List<EvaluationGuideNote> guides) {
 		SpeechSignals signals = SpeechSignalsCalculator.calculate(answer.transcript(), answer.durationSeconds());
 		if (signals.wordCount() < MIN_WORDS) {
 			return AnswerEvaluationResult.skipped(signals);
@@ -59,11 +67,11 @@ public class AnswerEvaluator {
 			answer.structuralHint(), answer.keyExpressions(), answer.transcript(), answer.targetLevel(), signals, references);
 
 		EvaluationOutput evaluation = EvaluationValidator.validate(
-			model.evaluate(EvaluationPromptBuilder.build(input)), answer.transcript());
+			model.evaluate(EvaluationPromptBuilder.build(input, guides)), answer.transcript());
 
 		AnswerAssessment assessment = assessment(evaluation, signals);
 		OpicLevel overall = aggregator.answerLevel(assessment);
-		return new AnswerEvaluationResult(false, signals, document(evaluation, overall, signals, references), overall,
+		return new AnswerEvaluationResult(false, signals, document(evaluation, overall, signals, references, guides), overall,
 			EvaluationSummaryRenderer.render(evaluation, overall), evaluation.targetScript(), assessment);
 	}
 
@@ -89,13 +97,14 @@ public class AnswerEvaluator {
 	}
 
 	private String document(EvaluationOutput evaluation, OpicLevel overall, SpeechSignals signals,
-		List<ReferenceSample> references) {
+		List<ReferenceSample> references, List<EvaluationGuideNote> guides) {
 		Map<String, Object> meta = new LinkedHashMap<>();
 		meta.put("provider", model.provider());
 		meta.put("model", model.model());
 		meta.put("promptVersion", EvaluationPromptBuilder.PROMPT_VERSION);
 		meta.put("referenceSampleIds", references.stream().map(ReferenceSample::id).toList());
 		meta.put("referenceSimilarities", references.stream().map(r -> Math.round(r.similarity() * 1000) / 1000.0).toList());
+		meta.put("guides", guides.stream().map(g -> new GuideUsed(g.kind().name(), g.version())).toList());
 
 		Map<String, Object> doc = new LinkedHashMap<>();
 		doc.put("schemaVersion", SCHEMA_VERSION);
@@ -113,6 +122,9 @@ public class AnswerEvaluator {
 			throw new IllegalStateException("evaluation document is not serialisable", e);
 		}
 	}
+
+	/** Which guide version shaped an evaluation, kept in its meta for tracing. */
+	private record GuideUsed(String kind, int version) {}
 
 	/**
 	 * One stored answer plus the question metadata the prompt uses.

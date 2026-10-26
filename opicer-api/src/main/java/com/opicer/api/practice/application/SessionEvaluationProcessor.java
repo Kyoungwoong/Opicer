@@ -8,10 +8,12 @@ import com.opicer.api.evaluation.application.AnswerEvaluator;
 import com.opicer.api.evaluation.application.AnswerEvaluator.AnswerToEvaluate;
 import com.opicer.api.evaluation.application.EvaluationDocuments;
 import com.opicer.api.evaluation.application.EvaluationFailure;
+import com.opicer.api.evaluation.application.EvaluationGuideNote;
 import com.opicer.api.evaluation.domain.AnswerAssessment;
 import com.opicer.api.evaluation.domain.LevelAggregator;
 import com.opicer.api.evaluation.domain.LevelPolicy;
 import com.opicer.api.evaluation.domain.SessionReport;
+import com.opicer.api.evaluationguide.application.EvaluationGuideQueryService;
 import com.opicer.api.practice.domain.AnswerEvaluationStatus;
 import com.opicer.api.practice.domain.PracticeAnswer;
 import com.opicer.api.practice.domain.PracticeSession;
@@ -49,17 +51,20 @@ public class SessionEvaluationProcessor implements AiJobProcessor {
 	private final PracticeAnswerRepository answerRepository;
 	private final QuestionRepository questionRepository;
 	private final AnswerEvaluator evaluator;
+	private final EvaluationGuideQueryService guides;
 	private final TransactionTemplate tx;
 	private final ExecutorService executor;
 	private final LevelAggregator aggregator = new LevelAggregator(LevelPolicy.DEFAULT);
 
 	public SessionEvaluationProcessor(PracticeSessionRepository sessionRepository,
 		PracticeAnswerRepository answerRepository, QuestionRepository questionRepository, AnswerEvaluator evaluator,
-		PlatformTransactionManager transactionManager, WorkerProperties workerProperties) {
+		EvaluationGuideQueryService guides, PlatformTransactionManager transactionManager,
+		WorkerProperties workerProperties) {
 		this.sessionRepository = sessionRepository;
 		this.answerRepository = answerRepository;
 		this.questionRepository = questionRepository;
 		this.evaluator = evaluator;
+		this.guides = guides;
 		this.tx = new TransactionTemplate(transactionManager);
 		this.executor = Executors.newFixedThreadPool(Math.max(1, workerProperties.getConcurrency()), r -> {
 			Thread thread = new Thread(r, "answer-evaluation");
@@ -80,13 +85,13 @@ public class SessionEvaluationProcessor implements AiJobProcessor {
 
 	@Override
 	public Outcome process(UUID sessionId, boolean finalAttempt) {
-		List<PendingAnswer> pending = tx.execute(status -> start(sessionId));
-		if (pending == null) {
+		Snapshot snapshot = tx.execute(status -> start(sessionId));
+		if (snapshot == null) {
 			return Outcome.COMPLETED; // session deleted meanwhile: nothing to do
 		}
 
-		List<CompletableFuture<Boolean>> runs = pending.stream()
-			.map(answer -> CompletableFuture.supplyAsync(() -> evaluate(answer, finalAttempt), executor))
+		List<CompletableFuture<Boolean>> runs = snapshot.pending().stream()
+			.map(answer -> CompletableFuture.supplyAsync(() -> evaluate(answer, snapshot.guides(), finalAttempt), executor))
 			.toList();
 		boolean transientFailure = runs.stream().map(CompletableFuture::join).anyMatch(stillPending -> stillPending);
 		if (transientFailure && !finalAttempt) {
@@ -109,8 +114,11 @@ public class SessionEvaluationProcessor implements AiJobProcessor {
 		tx.executeWithoutResult(status -> finish(sessionId));
 	}
 
-	/** Marks the session running and snapshots what to evaluate; null when the session no longer exists. */
-	private List<PendingAnswer> start(UUID sessionId) {
+	/**
+	 * Marks the session running and snapshots what to evaluate, plus the active admin guides (read once here so
+	 * parallel answer evaluations do not each take a connection); null when the session no longer exists.
+	 */
+	private Snapshot start(UUID sessionId) {
 		PracticeSession session = sessionRepository.findById(sessionId).orElse(null);
 		if (session == null) {
 			return null;
@@ -136,13 +144,13 @@ public class SessionEvaluationProcessor implements AiJobProcessor {
 				target
 			)));
 		}
-		return pending;
+		return new Snapshot(pending, guides.activeNotes());
 	}
 
 	/** @return true when the answer is still pending because of a transient failure */
-	private boolean evaluate(PendingAnswer pending, boolean finalAttempt) {
+	private boolean evaluate(PendingAnswer pending, List<EvaluationGuideNote> guides, boolean finalAttempt) {
 		try {
-			AnswerEvaluationResult result = evaluator.evaluate(pending.answer());
+			AnswerEvaluationResult result = evaluator.evaluate(pending.answer(), guides);
 			save(pending.answerId(), answer -> {
 				if (result.skipped()) {
 					answer.skipEvaluation();
@@ -204,4 +212,6 @@ public class SessionEvaluationProcessor implements AiJobProcessor {
 	}
 
 	private record PendingAnswer(UUID answerId, AnswerToEvaluate answer) {}
+
+	private record Snapshot(List<PendingAnswer> pending, List<EvaluationGuideNote> guides) {}
 }
