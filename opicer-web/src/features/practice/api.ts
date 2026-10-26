@@ -4,6 +4,7 @@ import type {
   PracticeSessionDetail,
   PracticeSessionSummary,
   PracticeSubmitResult,
+  SessionEvaluationStatus,
   TopicItem,
   TopicSelection,
 } from "@/features/practice/types";
@@ -159,6 +160,16 @@ export async function savePracticeAnswerResult(
     }
   );
   if (!res.ok) throw new Error(await errorMessage(res, "분석 결과 저장에 실패했습니다."));
+}
+
+/** Free retry of a FAILED or PARTIAL evaluation; the server allows a few per session (409 after that). */
+export async function retryPracticeEvaluation(sessionId: string): Promise<SessionEvaluationStatus> {
+  const res = await fetch(`/api/practice/sessions/${encodeURIComponent(sessionId)}/evaluation/retry`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error(await errorMessage(res, "평가를 다시 요청하지 못했습니다."));
+  const body = (await res.json()) as { evaluationStatus: SessionEvaluationStatus };
+  return body.evaluationStatus;
 }
 
 export async function deletePracticeSession(sessionId: string): Promise<void> {
