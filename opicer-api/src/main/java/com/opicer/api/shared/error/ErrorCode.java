@@ -27,6 +27,8 @@ public enum ErrorCode {
 	PRACTICE_ANSWER_NOT_FOUND("PRACTICE_ANSWER_NOT_FOUND", HttpStatus.NOT_FOUND, "Practice answer not found"),
 	OPIC_CENTER_NOT_FOUND("OPIC_CENTER_NOT_FOUND", HttpStatus.NOT_FOUND, "OPIc test center not found"),
 	OPIC_CENTER_REVIEW_NOT_FOUND("OPIC_CENTER_REVIEW_NOT_FOUND", HttpStatus.NOT_FOUND, "OPIc test center review not found"),
+	EVALUATION_NOT_RETRYABLE("EVALUATION_NOT_RETRYABLE", HttpStatus.CONFLICT, "Evaluation can only be retried after it failed"),
+	EVALUATION_RETRY_LIMIT("EVALUATION_RETRY_LIMIT", HttpStatus.CONFLICT, "No evaluation retries left for this session"),
 	OPIC_SYNC_FAILED("OPIC_SYNC_FAILED", HttpStatus.BAD_GATEWAY, "Failed to sync data from opic.or.kr"),
 	CREDIT_INSUFFICIENT_BALANCE("CREDIT_INSUFFICIENT_BALANCE", HttpStatus.PAYMENT_REQUIRED, "Insufficient credits");
 

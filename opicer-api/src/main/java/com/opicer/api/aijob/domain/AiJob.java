@@ -56,6 +56,10 @@ public class AiJob {
 	@Column(name = "last_error", columnDefinition = "TEXT")
 	private String lastError;
 
+	/** Learner-requested retries; the default lets ddl-auto add the column to existing rows. */
+	@Column(name = "manual_retries", nullable = false, columnDefinition = "integer default 0 not null")
+	private int manualRetries;
+
 	@Column(name = "created_at", nullable = false)
 	private Instant createdAt;
 
@@ -70,6 +74,49 @@ public class AiJob {
 		return type.name() + ":" + subjectId;
 	}
 
+	public void claim(String node, Instant now) {
+		this.status = AiJobStatus.RUNNING;
+		this.lockedBy = node;
+		this.lockedAt = now;
+		this.attempts++;
+		this.updatedAt = now;
+	}
+
+	public void succeed(Instant now) {
+		this.status = AiJobStatus.SUCCEEDED;
+		this.lastError = null;
+		unlock(now);
+	}
+
+	public void retryAt(Instant nextRunAt, String error, Instant now) {
+		this.status = AiJobStatus.READY;
+		this.nextRunAt = nextRunAt;
+		this.lastError = error;
+		unlock(now);
+	}
+
+	public void fail(String error, Instant now) {
+		this.status = AiJobStatus.FAILED;
+		this.lastError = error;
+		unlock(now);
+	}
+
+	/** A learner asked to try again: fresh automatic attempts, run as soon as possible. */
+	public void requeueManually(Instant now) {
+		this.status = AiJobStatus.READY;
+		this.attempts = 0;
+		this.nextRunAt = now;
+		this.lastError = null;
+		this.manualRetries++;
+		unlock(now);
+	}
+
+	private void unlock(Instant now) {
+		this.lockedBy = null;
+		this.lockedAt = null;
+		this.updatedAt = now;
+	}
+
 	public UUID getId() { return id; }
 	public AiJobType getType() { return type; }
 	public UUID getSubjectId() { return subjectId; }
@@ -80,6 +127,7 @@ public class AiJob {
 	public Instant getLockedAt() { return lockedAt; }
 	public String getLockedBy() { return lockedBy; }
 	public String getLastError() { return lastError; }
+	public int getManualRetries() { return manualRetries; }
 	public Instant getCreatedAt() { return createdAt; }
 	public Instant getUpdatedAt() { return updatedAt; }
 }
