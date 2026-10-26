@@ -52,6 +52,20 @@ export type PromptVersion = {
   updatedAt: string;
 };
 
+export type EvaluationGuideKind = "SCORING_NOTES" | "TIPS" | "EXPRESSIONS" | "REPORT";
+
+export type EvaluationGuide = {
+  id: string;
+  kind: EvaluationGuideKind;
+  kindLabel: string;
+  version: number;
+  title: string;
+  contentMd: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type UniversalSentence = {
   id: string;
   type: UniversalSentenceType;
