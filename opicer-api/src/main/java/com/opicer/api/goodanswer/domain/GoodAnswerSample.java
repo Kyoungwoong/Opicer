@@ -13,18 +13,20 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.ColumnTransformer;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "good_answer_sample")
+@Table(name = "good_answer_sample", indexes = @Index(name = "idx_good_answer_sample_topic", columnList = "topic_id"))
 public class GoodAnswerSample {
 
 	@Id
@@ -58,7 +60,9 @@ public class GoodAnswerSample {
 	@Column(name = "expression", nullable = false)
 	private List<String> keyExpressions = new ArrayList<>();
 
+	// Bound as text and cast on write; without the cast Postgres rejects the parameter type.
 	@Convert(converter = PgVectorConverter.class)
+	@ColumnTransformer(write = "cast(? as vector)")
 	@Column(columnDefinition = "vector(1536)")
 	private float[] embedding;
 
