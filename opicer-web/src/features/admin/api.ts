@@ -2,6 +2,8 @@ import type {
   AdminOpicCenterReview,
   AdminOpicCenterReviewInput,
   DailySentence,
+  EvaluationGuide,
+  EvaluationGuideKind,
   OpicLevel,
   PromptUseCase,
   PromptVersion,
@@ -159,6 +161,29 @@ export const promptApi = {
     request<PromptVersion>(`prompts/${id}/activate`, { method: "POST" }),
   delete: (id: string) =>
     request<void>(`prompts/${id}`, { method: "DELETE" }),
+};
+
+// ── Evaluation Guides ─────────────────────────────────────
+
+export const evaluationGuideApi = {
+  list: () => request<EvaluationGuide[]>("evaluation-guides"),
+  create: (data: { kind: EvaluationGuideKind; title: string; contentMd: string }) =>
+    request<EvaluationGuide>("evaluation-guides", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  /** Inactive versions only; the server answers 409 for the active one. */
+  update: (id: string, data: { title: string; contentMd: string }) =>
+    request<EvaluationGuide>(`evaluation-guides/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  activate: (id: string) =>
+    request<EvaluationGuide>(`evaluation-guides/${id}/activate`, { method: "POST" }),
+  deactivate: (id: string) =>
+    request<EvaluationGuide>(`evaluation-guides/${id}/deactivate`, { method: "POST" }),
+  delete: (id: string) =>
+    request<void>(`evaluation-guides/${id}`, { method: "DELETE" }),
 };
 
 // ── Universal Sentences ───────────────────────────────────
