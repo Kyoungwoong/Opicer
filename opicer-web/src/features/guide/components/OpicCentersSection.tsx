@@ -218,7 +218,7 @@ export function OpicCentersSection() {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            센터 정보 출처: opic.or.kr · 후기는 운영자가 수집하고 검토해 등록해요.
+            센터 정보는 운영자가 확인해 등록해요. 방문 전 opic.or.kr에서 최신 정보를 확인하세요. 후기도 운영자가 검토해 등록해요.
           </p>
         </div>
       )}
