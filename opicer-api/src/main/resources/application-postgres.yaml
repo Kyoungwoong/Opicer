@@ -10,3 +10,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+opicer:
+  ai:
+    stt:
+      # Production uses real speech recognition; a missing key fails loudly (AI_NOT_CONFIGURED)
+      # instead of silently serving canned transcripts. Local (default profile) keeps the mock.
+      provider: ${OPICER_STT_PROVIDER:openai}

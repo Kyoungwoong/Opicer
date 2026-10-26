@@ -45,6 +45,8 @@
 >
 > 그리고 AGENTS.md나 CLAUDE.md에 항상 내가 전달한 프롬프트랑 그 개발 및 요약, 계획을 md로 저장해. 적절한 디렉토리에.
 
+> 음 STT목 데이터 진행해줘. 당연히 나중에 교체할거니까 그 구조는 유지해야돼. 쉽게 교체할 수 있게
+
 ## 분석 (구현 전 상태)
 - **벡터**
   - `good_answer_sample.embedding vector(1536)` 하나뿐이다(OpenAI text-embedding-3-small, 단위 벡터).
