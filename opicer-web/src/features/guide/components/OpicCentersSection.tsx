@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ExternalLink, MapPin, Phone, Star, TrainFront } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GuideSection } from "@/features/guide/components/GuideSection";
+import { OpicCenterMap } from "@/features/guide/components/OpicCenterMap";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchOpicCenterReviews, fetchOpicCenters } from "@/features/opic/api";
@@ -88,7 +89,7 @@ function CenterDetail({ center }: { center: OpicCenter }) {
         <div>
           <Button asChild variant="outline" size="sm" className="rounded-full">
             <a
-              href={`https://map.naver.com/p/search/${encodeURIComponent(center.address)}`}
+              href={`https://map.naver.com/p/search/${encodeURIComponent(`${center.name} ${center.address}`)}`}
               target="_blank"
               rel="noreferrer"
             >
@@ -147,7 +148,11 @@ export function OpicCentersSection() {
     () => [ALL_REGIONS, ...Array.from(new Set(all.map((c) => c.regionName ?? "기타")))],
     [all]
   );
-  const visible = region === ALL_REGIONS ? all : all.filter((c) => (c.regionName ?? "기타") === region);
+  // Memoised so the map only redraws its markers when the region (or the data) changes.
+  const visible = useMemo(
+    () => (region === ALL_REGIONS ? all : all.filter((c) => (c.regionName ?? "기타") === region)),
+    [all, region]
+  );
   const selected = visible.find((c) => c.id === selectedId) ?? visible[0] ?? null;
 
   return (
@@ -188,6 +193,9 @@ export function OpicCentersSection() {
               </button>
             ))}
           </div>
+
+          {/* Only an explicit pick moves the map; the default detail (first center) leaves the fitted view alone. */}
+          <OpicCenterMap centers={visible} selectedId={selectedId} onSelect={setSelectedId} />
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
             <ul className="flex max-h-[32rem] flex-col gap-2 overflow-y-auto pr-1" aria-label="시험센터 목록">
