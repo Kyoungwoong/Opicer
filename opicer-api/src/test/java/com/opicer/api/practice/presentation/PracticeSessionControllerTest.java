@@ -3,6 +3,7 @@ package com.opicer.api.practice.presentation;
 import com.opicer.api.auth.application.JwtService;
 import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.config.AuthProperties;
+import com.opicer.api.practice.application.PracticeEvaluationCommandService;
 import com.opicer.api.practice.application.PracticeHistoryCommandService;
 import com.opicer.api.practice.application.PracticeHistoryQueryService;
 import com.opicer.api.practice.application.PracticeSessionCommandService;
@@ -64,6 +65,9 @@ class PracticeSessionControllerTest {
 
 	@MockBean
 	private PracticeHistoryCommandService practiceHistoryCommandService;
+
+	@MockBean
+	private PracticeEvaluationCommandService practiceEvaluationCommandService;
 
 	private Cookie userCookie;
 
@@ -292,6 +296,37 @@ class PracticeSessionControllerTest {
 			.andExpect(status().isBadRequest());
 
 		verify(practiceHistoryCommandService, never()).recordAiResult(any(), any(), any(), any(), any());
+	}
+
+	@Test
+	void retryEvaluationReturns202() throws Exception {
+		when(practiceEvaluationCommandService.retry(any(), eq(UUID.fromString(SESSION_ID))))
+			.thenReturn(SessionEvaluationStatus.PENDING);
+
+		mockMvc.perform(post("/api/practice/sessions/" + SESSION_ID + "/evaluation/retry").cookie(userCookie))
+			.andExpect(status().isAccepted())
+			.andExpect(jsonPath("$.message").value("EVALUATION_RETRY_QUEUED"))
+			.andExpect(jsonPath("$.data.evaluationStatus").value("PENDING"));
+	}
+
+	@Test
+	void retryEvaluationMapsRefusalsToConflictAndForeignSessionsToNotFound() throws Exception {
+		for (ErrorCode code : List.of(ErrorCode.EVALUATION_NOT_RETRYABLE, ErrorCode.EVALUATION_RETRY_LIMIT)) {
+			doThrow(new ApiException(code)).when(practiceEvaluationCommandService).retry(any(), any());
+			mockMvc.perform(post("/api/practice/sessions/" + SESSION_ID + "/evaluation/retry").cookie(userCookie))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.code").value(code.getCode()));
+		}
+		doThrow(new ApiException(ErrorCode.PRACTICE_SESSION_NOT_FOUND))
+			.when(practiceEvaluationCommandService).retry(any(), any());
+		mockMvc.perform(post("/api/practice/sessions/" + SESSION_ID + "/evaluation/retry").cookie(userCookie))
+			.andExpect(status().isNotFound());
+	}
+
+	@Test
+	void retryEvaluationRequiresAuthentication() throws Exception {
+		mockMvc.perform(post("/api/practice/sessions/" + SESSION_ID + "/evaluation/retry"))
+			.andExpect(status().isUnauthorized());
 	}
 
 	@Test

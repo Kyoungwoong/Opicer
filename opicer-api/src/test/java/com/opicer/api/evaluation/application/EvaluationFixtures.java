@@ -9,15 +9,15 @@ import com.opicer.api.shared.domain.OpicLevel;
 import java.util.List;
 
 /** A realistic model output for {@link #TRANSCRIPT} (an IM-ish past-experience answer). */
-final class EvaluationFixtures {
+public final class EvaluationFixtures {
 
-	static final String TRANSCRIPT = "Last summer I go to Jeju island with my family. We stayed in a hotel near the beach. "
+	public static final String TRANSCRIPT = "Last summer I go to Jeju island with my family. We stayed in a hotel near the beach. "
 		+ "The weather was really hot, so we swim in the sea every day. I eat a lot of seafood and it was so delicious.";
 
 	private EvaluationFixtures() {
 	}
 
-	static EvaluationOutput validOutput() {
+	public static EvaluationOutput validOutput() {
 		return new EvaluationOutput(
 			List.of(
 				new DimensionRating(CompetencyDimension.TASK, OpicLevel.IM, "We stayed in a hotel near the beach", "경험을 구체적으로 말했어요."),

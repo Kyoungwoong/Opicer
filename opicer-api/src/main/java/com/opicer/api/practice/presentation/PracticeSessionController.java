@@ -2,6 +2,7 @@ package com.opicer.api.practice.presentation;
 
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.opicer.api.auth.domain.AuthUserPrincipal;
+import com.opicer.api.practice.application.PracticeEvaluationCommandService;
 import com.opicer.api.practice.application.PracticeHistoryCommandService;
 import com.opicer.api.practice.application.PracticeHistoryQueryService;
 import com.opicer.api.practice.application.PracticeSessionCommandService;
@@ -24,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,15 +45,18 @@ public class PracticeSessionController {
 	private final PracticeSessionCommandService practiceSessionCommandService;
 	private final PracticeHistoryQueryService practiceHistoryQueryService;
 	private final PracticeHistoryCommandService practiceHistoryCommandService;
+	private final PracticeEvaluationCommandService practiceEvaluationCommandService;
 
 	public PracticeSessionController(
 		PracticeSessionCommandService practiceSessionCommandService,
 		PracticeHistoryQueryService practiceHistoryQueryService,
-		PracticeHistoryCommandService practiceHistoryCommandService
+		PracticeHistoryCommandService practiceHistoryCommandService,
+		PracticeEvaluationCommandService practiceEvaluationCommandService
 	) {
 		this.practiceSessionCommandService = practiceSessionCommandService;
 		this.practiceHistoryQueryService = practiceHistoryQueryService;
 		this.practiceHistoryCommandService = practiceHistoryCommandService;
+		this.practiceEvaluationCommandService = practiceEvaluationCommandService;
 	}
 
 	@PostMapping("/submit")
@@ -137,6 +142,21 @@ public class PracticeSessionController {
 		return ResponseEntity.ok(ApiResponse.ok("PRACTICE_ANSWER_UPDATED", AnswerResponse.from(answer)));
 	}
 
+	/** Queues a failed or partial evaluation again (free, limited per session). 202: poll GET for the result. */
+	@PostMapping("/{sessionId}/evaluation/retry")
+	public ResponseEntity<ApiResponse<RetryResponse>> retryEvaluation(
+		Authentication authentication,
+		@PathVariable UUID sessionId
+	) {
+		AuthUserPrincipal principal = principalOf(authentication);
+		if (principal == null) {
+			return ResponseEntity.status(401).build();
+		}
+		SessionEvaluationStatus status = practiceEvaluationCommandService.retry(principal.id(), sessionId);
+		return ResponseEntity.accepted().body(ApiResponse.of(HttpStatus.ACCEPTED,
+			"EVALUATION_RETRY_QUEUED", new RetryResponse(sessionId, status)));
+	}
+
 	@DeleteMapping("/{sessionId}")
 	public ResponseEntity<Void> delete(Authentication authentication, @PathVariable UUID sessionId) {
 		AuthUserPrincipal principal = principalOf(authentication);
@@ -183,6 +203,9 @@ public class PracticeSessionController {
 		UUID sessionId,
 		SessionEvaluationStatus evaluationStatus
 	) {
+	}
+
+	public record RetryResponse(UUID sessionId, SessionEvaluationStatus evaluationStatus) {
 	}
 
 	public record SessionSummaryResponse(

@@ -16,3 +16,6 @@ opicer:
       # Production uses real speech recognition; a missing key fails loudly (AI_NOT_CONFIGURED)
       # instead of silently serving canned transcripts. Local (default profile) keeps the mock.
       provider: ${OPICER_STT_PROVIDER:openai}
+    worker:
+      # Off in production until the evaluation screens (PR-6/7) ship; enable with OPICER_AI_WORKER_ENABLED=true.
+      enabled: ${OPICER_AI_WORKER_ENABLED:false}

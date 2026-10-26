@@ -134,6 +134,7 @@ public class OpenAiAnswerEvaluationModel implements AnswerEvaluationModel {
 		if (response == null) {
 			throw EvaluationFailure.retryable("INVALID_OUTPUT", "empty response");
 		}
+		logUsage(response.path("usage"));
 		if ("incomplete".equals(response.path("status").asText())) {
 			throw EvaluationFailure.retryable("TRUNCATED", response.path("incomplete_details").path("reason").asText());
 		}
@@ -160,6 +161,16 @@ public class OpenAiAnswerEvaluationModel implements AnswerEvaluationModel {
 		} catch (JsonProcessingException e) {
 			throw EvaluationFailure.retryable("INVALID_OUTPUT", e.getOriginalMessage());
 		}
+	}
+
+	/** Token usage per call, to calibrate {@code max-output-tokens} and watch prompt-cache hits. */
+	private void logUsage(JsonNode usage) {
+		if (usage.isMissingNode()) {
+			return;
+		}
+		log.info("[Eval:openai] model={} input={} cached={} output={} reasoning={}", properties.getOpenaiModel(),
+			usage.path("input_tokens").asInt(), usage.path("input_tokens_details").path("cached_tokens").asInt(),
+			usage.path("output_tokens").asInt(), usage.path("output_tokens_details").path("reasoning_tokens").asInt());
 	}
 
 	private static SimpleClientHttpRequestFactory timeouts(EvaluationProperties properties) {
