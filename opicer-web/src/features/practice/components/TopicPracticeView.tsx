@@ -14,6 +14,7 @@ import { TopicCard } from "@/features/practice/components/TopicCard";
 import { fetchTopics, submitTopicSelection } from "@/features/practice/api";
 import { ROUTES } from "@/lib/routes";
 import type { TopicCategory, TopicItem } from "@/features/practice/types";
+import { Mascot } from "@/components/brand/Mascot";
 
 type Props = {
   userLabel?: string;
@@ -183,6 +184,12 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
     return (
       <PageShell width="md" nav={<TopNav userLabel={userLabel} onLogout={onLogout} />}>
         <section className="mx-auto flex w-full max-w-xl flex-col items-center gap-8 rounded-3xl border bg-card px-6 py-12 text-center shadow-raised sm:px-10">
+          <div className="flex flex-col items-center gap-2">
+            <Mascot label="" className="max-w-36" />
+            <p className="text-sm text-muted-foreground">
+              인터뷰어 오피가 영어로 질문을 읽어 드려요. 질문이 끝나면 바로 녹음이 시작돼요.
+            </p>
+          </div>
           <div className="flex flex-col items-center gap-3">
             <h1 className="text-3xl font-bold sm:text-4xl">{selectedTopic?.title ?? ""}</h1>
             {selectedTopic?.englishTitle ? (

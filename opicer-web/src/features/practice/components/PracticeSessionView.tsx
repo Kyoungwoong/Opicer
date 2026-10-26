@@ -7,6 +7,8 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
+  Eye,
+  EyeOff,
   LoaderCircle,
   Mic,
   MicOff,
@@ -36,6 +38,8 @@ import {
 import { ROUTES } from "@/lib/routes";
 import type { PracticeAnswer, PracticeQuestion } from "@/features/practice/types";
 import { TranscriptDiff } from "@/features/practice/components/TranscriptDiff";
+import { MicLevelMeter } from "@/features/practice/components/MicLevelMeter";
+import { Mascot } from "@/components/brand/Mascot";
 
 const PRACTICE_DURATION_SECONDS = 120;
 const REPLAY_WINDOW_SECONDS = 5;
@@ -77,6 +81,10 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
   const [hasReplayed, setHasReplayed] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [timeExpired, setTimeExpired] = useState(false);
+  // Live mic stream while recording, for the input level meter only.
+  const [micStream, setMicStream] = useState<MediaStream | null>(null);
+  // Like the real test, the question is audio-first; the text stays hidden unless asked for.
+  const [showQuestionText, setShowQuestionText] = useState(false);
 
   // ── Refs (always fresh, no stale closure risk) ──────────────
   const timerRef = useRef<number | null>(null);
@@ -222,6 +230,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
       };
       recorder.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
+        setMicStream(null);
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         const url = URL.createObjectURL(blob);
         const newAnswer: PracticeAnswer = {
@@ -247,6 +256,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
       recorderRef.current = recorder;
       recorder.start();
       setIsRecording(true);
+      setMicStream(stream);
     } catch {
       setError("마이크 접근이 필요합니다. 브라우저에서 마이크 권한을 허용해주세요.");
     }
@@ -642,116 +652,187 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
     .toString()
     .padStart(2, "0")}`;
 
+  const interviewer =
+    mode === "playing"
+      ? { expression: "talk" as const, caption: "오피가 질문을 읽고 있어요" }
+      : isRecording
+        ? { expression: "listen" as const, caption: "답변을 듣고 있어요. 편하게 말해 보세요" }
+        : { expression: "smile" as const, caption: "준비되면 다음 질문으로 넘어가세요" };
+
   return (
-    <PageShell width="md" nav={nav}>
+    <PageShell width="lg" nav={nav}>
       {/* Header */}
-      <section className="flex flex-col gap-5 rounded-3xl border bg-card p-5 shadow-card sm:p-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <SectionHeader
-            as="h1"
-            title={topicTitle}
-            description={`질문 ${currentIndex + 1} / ${questions.length}`}
-          />
-          <div
-            role="timer"
-            aria-live={warning ? "assertive" : "off"}
-            className={cn(
-              "flex min-w-28 flex-col items-center rounded-2xl border px-4 py-3",
-              warning ? "border-destructive/40 bg-destructive/10 text-destructive" : "bg-secondary text-foreground"
-            )}
-          >
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
-              <Timer aria-hidden className="size-3.5" />
-              남은 시간
-            </span>
-            <span className={cn("text-2xl font-bold tabular-nums", warning && "animate-pulse")}>{timeLabel}</span>
-            {warning ? <span className="text-xs font-semibold">마감 임박</span> : null}
-          </div>
-        </div>
-        <Progress
-          value={(remainingSeconds / PRACTICE_DURATION_SECONDS) * 100}
-          aria-label="남은 답변 시간"
-          className={cn("h-1.5", warning && "*:data-[slot=progress-indicator]:bg-destructive")}
-        />
+      <section className="flex flex-col gap-4 rounded-3xl border bg-card p-5 shadow-card sm:p-6">
+        <SectionHeader as="h1" title={topicTitle} description={`질문 ${currentIndex + 1} / ${questions.length}`} />
+        <ol aria-hidden className="flex gap-1.5">
+          {questions.map((question, index) => (
+            <li
+              key={question.id}
+              className={cn(
+                "h-1.5 flex-1 rounded-full transition-colors",
+                index < currentIndex ? "bg-primary" : index === currentIndex ? "bg-primary/50" : "bg-muted"
+              )}
+            />
+          ))}
+        </ol>
       </section>
 
-      {/* Question card */}
-      <section className="flex flex-col gap-6 rounded-3xl border bg-card p-5 shadow-card sm:p-8">
-        <div className="flex flex-col gap-3">
-          <Eyebrow>질문</Eyebrow>
-          <h2 className="text-xl font-semibold leading-relaxed sm:text-2xl">
-            {currentQuestion?.promptText ?? "질문을 불러오는 중입니다."}
-          </h2>
-          {currentQuestion?.structuralHint ? (
-            <p className="rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">{currentQuestion.structuralHint}</p>
-          ) : null}
-        </div>
-
-        {/* Status + replay */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Only the status pill is live; the replay countdown changes every second. */}
-          <div aria-live="polite" className="flex">
-            {mode === "playing" ? (
-              <span className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground">
-                <Volume2 aria-hidden className="size-4 animate-pulse" />
-                질문 재생 중…
-              </span>
-            ) : isRecording ? (
-              <span className="inline-flex items-center gap-2 rounded-full bg-destructive/10 px-4 py-2 text-sm font-semibold text-destructive">
-                <span aria-hidden className="relative flex size-2.5">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-destructive/60" />
-                  <span className="relative inline-flex size-2.5 rounded-full bg-destructive" />
-                </span>
-                <Mic aria-hidden className="size-4" />
-                녹음 중…
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm font-semibold text-muted-foreground">
-                <MicOff aria-hidden className="size-4" />
-                대기 중
-              </span>
-            )}
+      <div className="grid gap-6 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        {/* Interviewer */}
+        <section
+          aria-label="인터뷰어"
+          className="flex flex-col items-center justify-center gap-4 rounded-3xl border bg-card p-6 text-center shadow-card"
+        >
+          <Mascot expression={interviewer.expression} label="" className="max-w-56 md:max-w-64" />
+          <div className="flex flex-col gap-1">
+            <p className="text-lg font-bold">
+              오피 <span className="text-sm font-medium text-muted-foreground">· 인터뷰어</span>
+            </p>
+            <p className="text-sm text-muted-foreground">{interviewer.caption}</p>
           </div>
+        </section>
 
-          {/* Replay button — only during replay window */}
-          {replayWindow > 0 && !hasReplayed && (
-            <Button type="button" variant="outline" onClick={handleReplay} className="h-9 rounded-full px-4">
-              <RotateCcw />
-              다시 듣기 ({replayWindow}s)
+        {/* Audio panel */}
+        <section aria-label="오디오 패널" className="flex flex-col gap-5 rounded-3xl border bg-card p-5 shadow-card sm:p-6">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <Eyebrow>질문 {currentIndex + 1}</Eyebrow>
+              {replayWindow > 0 && !hasReplayed && (
+                <Button type="button" variant="outline" size="sm" onClick={handleReplay} className="rounded-full px-3">
+                  <RotateCcw />
+                  다시 듣기 ({replayWindow}s)
+                </Button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-4 rounded-2xl bg-secondary px-4 py-4">
+              <span
+                className={cn(
+                  "grid size-12 shrink-0 place-items-center rounded-full",
+                  mode === "playing" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                )}
+              >
+                <Volume2 aria-hidden className="size-5" />
+              </span>
+              {/* Equalizer: moves only while the question is being read. */}
+              <div aria-hidden className="flex h-10 flex-1 items-center gap-1">
+                {Array.from({ length: 16 }, (_, i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      "h-full flex-1 origin-center rounded-full",
+                      mode === "playing"
+                        ? "animate-eq-bar bg-primary motion-reduce:animate-none"
+                        : "scale-y-[0.2] bg-muted-foreground/30"
+                    )}
+                    style={mode === "playing" ? { animationDelay: `${(i % 5) * 0.12 + (i % 3) * 0.07}s` } : undefined}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              aria-expanded={showQuestionText}
+              aria-controls="practice-question-text"
+              onClick={() => setShowQuestionText((v) => !v)}
+              className="self-start rounded-full px-3 text-muted-foreground"
+            >
+              {showQuestionText ? <EyeOff /> : <Eye />}
+              {showQuestionText ? "질문 텍스트 숨기기" : "질문 텍스트 보기"}
             </Button>
-          )}
-        </div>
-
-        {error ? (
-          <Alert variant="destructive">
-            <AlertCircle />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        {/* Navigation */}
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            onClick={goToNext}
-            disabled={mode === "playing"}
-            variant={isLastQuestion ? "default" : "secondary"}
-            className="h-11 rounded-full px-6 text-sm font-semibold"
-          >
-            {isLastQuestion ? (
-              <>
-                <Send />
-                제출하기
-              </>
-            ) : (
-              <>
-                다음 질문
-                <ArrowRight />
-              </>
+            <div id="practice-question-text" hidden={!showQuestionText} className="flex flex-col gap-2">
+              <h2 className="text-lg font-semibold leading-relaxed sm:text-xl">
+                {currentQuestion?.promptText ?? "질문을 불러오는 중입니다."}
+              </h2>
+              {currentQuestion?.structuralHint ? (
+                <p className="rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">{currentQuestion.structuralHint}</p>
+              ) : null}
+            </div>
+            {!showQuestionText && (
+              <p className="text-xs text-muted-foreground">실제 시험처럼 질문은 소리로만 나와요. 필요하면 텍스트를 열어 보세요.</p>
             )}
-          </Button>
-        </div>
-      </section>
+          </div>
+
+          <div className="flex flex-col gap-3 border-t pt-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              {/* Only the status pill is live; the countdowns change every second. */}
+              <div aria-live="polite" className="flex">
+                {mode === "playing" ? (
+                  <span className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground">
+                    <Volume2 aria-hidden className="size-4" />
+                    질문 재생 중…
+                  </span>
+                ) : isRecording ? (
+                  <span className="inline-flex items-center gap-2 rounded-full bg-destructive/10 px-4 py-2 text-sm font-semibold text-destructive">
+                    <span aria-hidden className="relative flex size-2.5">
+                      <span className="absolute inline-flex size-full animate-ping rounded-full bg-destructive/60 motion-reduce:animate-none" />
+                      <span className="relative inline-flex size-2.5 rounded-full bg-destructive" />
+                    </span>
+                    <Mic aria-hidden className="size-4" />
+                    녹음 중…
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm font-semibold text-muted-foreground">
+                    <MicOff aria-hidden className="size-4" />
+                    대기 중
+                  </span>
+                )}
+              </div>
+              <div
+                role="timer"
+                aria-live={warning ? "assertive" : "off"}
+                className={cn(
+                  "flex items-center gap-2 rounded-full px-4 py-2",
+                  warning ? "bg-destructive/10 text-destructive" : "bg-secondary text-foreground"
+                )}
+              >
+                <Timer aria-hidden className="size-4 text-muted-foreground" />
+                <span className="sr-only">남은 시간</span>
+                <span className={cn("text-lg font-bold tabular-nums", warning && "animate-pulse")}>{timeLabel}</span>
+                {warning ? <span className="text-xs font-semibold">마감 임박</span> : null}
+              </div>
+            </div>
+            <Progress
+              value={(remainingSeconds / PRACTICE_DURATION_SECONDS) * 100}
+              aria-label="남은 답변 시간"
+              className={cn("h-1.5", warning && "*:data-[slot=progress-indicator]:bg-destructive")}
+            />
+            <MicLevelMeter stream={micStream} />
+          </div>
+
+          {error ? (
+            <Alert variant="destructive">
+              <AlertCircle />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
+
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              onClick={goToNext}
+              disabled={mode === "playing"}
+              variant={isLastQuestion ? "default" : "secondary"}
+              className="h-11 rounded-full px-6 text-sm font-semibold"
+            >
+              {isLastQuestion ? (
+                <>
+                  <Send />
+                  제출하기
+                </>
+              ) : (
+                <>
+                  다음 질문
+                  <ArrowRight />
+                </>
+              )}
+            </Button>
+          </div>
+        </section>
+      </div>
 
       {/* Back link */}
       <div className="flex justify-center">
