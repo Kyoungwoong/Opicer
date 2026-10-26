@@ -128,8 +128,18 @@ public class PracticeAiService {
 		return callClaude(apiKey, prompt);
 	}
 
+	/** Reference samples only enrich the prompt, so a retrieval failure degrades to "no samples". */
+	List<ReferenceSample> referenceSamplesOrEmpty(UUID topicId, String transcript) {
+		try {
+			return goodAnswerSampleQueryService.findReferenceSamples(topicId, transcript);
+		} catch (ApiException e) {
+			log.warn("[RAG] reference retrieval skipped: {}", e.getErrorCode());
+			return List.of();
+		}
+	}
+
 	private String attachRagContext(String prompt, UUID topicId, String transcript) {
-		List<ReferenceSample> samples = goodAnswerSampleQueryService.findReferenceSamples(topicId, transcript);
+		List<ReferenceSample> samples = referenceSamplesOrEmpty(topicId, transcript);
 		if (samples.isEmpty()) return prompt;
 		StringJoiner joiner = new StringJoiner("\n\n");
 		joiner.add("### RAG Reference Samples");
