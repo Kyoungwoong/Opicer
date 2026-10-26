@@ -72,7 +72,7 @@ export function UniversalSentencesSection() {
           {current?.title ?? ko.home.universalSentences.titleLoading}
         </p>
         <p className="text-xl leading-relaxed font-bold break-words text-foreground sm:text-2xl">
-          “{current?.sentence ?? ko.home.universalSentences.sentenceLoading}”
+          {current ? `“${current.sentence}”` : ko.home.universalSentences.sentenceLoading}
         </p>
 
         <div className="flex flex-wrap gap-2">
@@ -94,7 +94,7 @@ export function UniversalSentencesSection() {
                   "h-2 rounded-full transition-all",
                   dotIndex === index ? "w-6 bg-foreground" : "w-2 bg-foreground/20 hover:bg-foreground/40"
                 )}
-                aria-label={`Go to sentence ${dotIndex + 1}`}
+                aria-label={`${dotIndex + 1}번째 문장 보기`}
                 aria-current={dotIndex === index ? "true" : undefined}
               />
             ))}
@@ -106,7 +106,7 @@ export function UniversalSentencesSection() {
               size="icon-lg"
               onClick={() => goTo(index - 1)}
               className="rounded-full border-highlight/40 bg-card"
-              aria-label="Previous sentence"
+              aria-label="이전 문장"
             >
               <ChevronLeft />
             </Button>
@@ -115,7 +115,7 @@ export function UniversalSentencesSection() {
               size="icon-lg"
               onClick={() => goTo(index + 1)}
               className="rounded-full bg-foreground text-background hover:bg-foreground/85"
-              aria-label="Next sentence"
+              aria-label="다음 문장"
             >
               <ChevronRight />
             </Button>
