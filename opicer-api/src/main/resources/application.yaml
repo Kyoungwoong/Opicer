@@ -51,6 +51,10 @@ opicer:
     anthropic-api-key: ${ANTHROPIC_API_KEY:}
     openai-embedding-model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
     openai-embedding-dimension: ${OPENAI_EMBEDDING_DIMENSION:1536}
+    stt:
+      # mock = canned transcripts, no network (default for now). openai = Whisper (needs OPENAI_API_KEY).
+      provider: ${OPICER_STT_PROVIDER:mock}
+      openai-model: ${OPICER_STT_OPENAI_MODEL:whisper-1}
   rag:
     # docs/adr/0001-vector-similarity.md
     candidates: ${OPICER_RAG_CANDIDATES:12}
