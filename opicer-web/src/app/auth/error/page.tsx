@@ -3,12 +3,12 @@ import { CircleAlert } from "lucide-react";
 import { ROUTES } from "@/lib/routes";
 import { Button } from "@/components/ui/button";
 
-export default function AuthError({
+export default async function AuthError({
   searchParams,
 }: {
-  searchParams: { reason?: string };
+  searchParams: Promise<{ reason?: string }>;
 }) {
-  const reason = searchParams.reason ?? "unknown";
+  const { reason = "unknown" } = await searchParams;
 
   return (
     <div className="flex min-h-dvh items-center justify-center px-4">
