@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Clock, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GuideSection } from "@/features/guide/components/GuideSection";
@@ -28,6 +28,7 @@ const PANEL_ENTER = "animate-in fade-in slide-in-from-bottom-1 duration-300 moti
 
 function ExamFlow() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const panelId = useId();
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const step = EXAM_STEPS[activeIndex];
 
@@ -64,6 +65,7 @@ function ExamFlow() {
                 }}
                 type="button"
                 aria-pressed={isActive}
+                aria-controls={panelId}
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => setActiveIndex(index)}
                 className={cn(
@@ -88,7 +90,13 @@ function ExamFlow() {
         })}
       </ol>
 
-      <div key={step.id} aria-live="polite" className={cn("flex flex-col gap-3 rounded-2xl bg-secondary p-4 sm:p-5", PANEL_ENTER)}>
+      <div
+        key={step.id}
+        id={panelId}
+        role="region"
+        aria-label="선택한 단계 설명"
+        className={cn("flex flex-col gap-3 rounded-2xl bg-secondary p-4 sm:p-5", PANEL_ENTER)}
+      >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="font-semibold">
             <span className="text-primary">{activeIndex + 1}단계</span> {step.title}
@@ -110,6 +118,7 @@ function ExamFlow() {
 
 function LevelFocus() {
   const [activeId, setActiveId] = useState<LevelGuide["id"]>("IM");
+  const panelId = useId();
   const level = LEVEL_GUIDES.find((item) => item.id === activeId) ?? LEVEL_GUIDES[0];
   const dimmed = (id: LevelGuide["id"]) => id !== activeId;
 
@@ -157,6 +166,7 @@ function LevelFocus() {
               <button
                 type="button"
                 aria-pressed={item.id === activeId}
+                aria-controls={panelId}
                 onClick={() => setActiveId(item.id)}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-[opacity,filter,border-color,background-color] duration-300 motion-reduce:transition-none",
@@ -178,7 +188,13 @@ function LevelFocus() {
         </ul>
       </div>
 
-      <div key={level.id} aria-live="polite" className={cn("flex flex-col gap-4 rounded-2xl bg-secondary p-4 sm:p-5", PANEL_ENTER)}>
+      <div
+        key={level.id}
+        id={panelId}
+        role="region"
+        aria-label="선택한 레벨 설명"
+        className={cn("flex flex-col gap-4 rounded-2xl bg-secondary p-4 sm:p-5", PANEL_ENTER)}
+      >
         <p className="font-semibold">
           <span className="text-primary">{level.label}</span> 레벨에 필요한 것
         </p>
