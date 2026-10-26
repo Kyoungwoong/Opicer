@@ -25,7 +25,21 @@ export function formatDateTime(iso: string): string {
 
 export type HistoryStatus = { label: string; tone: "done" | "partial" | "none" };
 
-export function historyStatus(session: Pick<PracticeSessionSummary, "answerCount" | "analyzedCount">): HistoryStatus {
+/** Automatic-evaluation status when the session has one; older sessions fall back to the analyzed-answer count. */
+export function historyStatus(
+  session: Pick<PracticeSessionSummary, "answerCount" | "analyzedCount" | "evaluationStatus">
+): HistoryStatus {
+  switch (session.evaluationStatus) {
+    case "PENDING":
+    case "RUNNING":
+      return { label: "평가 중", tone: "partial" };
+    case "DONE":
+      return { label: "평가 완료", tone: "done" };
+    case "PARTIAL":
+      return { label: "일부 평가", tone: "partial" };
+    case "FAILED":
+      return { label: "평가 못 함", tone: "none" };
+  }
   if (session.answerCount > 0 && session.analyzedCount >= session.answerCount) {
     return { label: "분석 완료", tone: "done" };
   }

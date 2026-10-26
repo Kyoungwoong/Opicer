@@ -74,6 +74,7 @@ export function RecentActivitySection() {
                   <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
                     <span aria-hidden className={cn("size-2 rounded-full", HISTORY_STATUS_DOT[status.tone])} />
                     {formatShortDate(session.completedAt)} · {status.label}
+                    {session.estimatedLevel ? ` · ${t.estimatedLevel.replace("{level}", session.estimatedLevel)}` : ""}
                   </span>
                   <span className="text-lg font-bold group-hover:text-primary-strong">{session.topicTitle}</span>
                   <span className="text-sm text-muted-foreground">

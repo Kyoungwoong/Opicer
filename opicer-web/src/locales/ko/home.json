@@ -11,7 +11,8 @@
     "empty": "아직 연습 기록이 없어요. 주제를 골라 2분만 말해 볼까요?",
     "startFirst": "첫 연습 시작하기",
     "error": "최근 연습을 불러오지 못했어요.",
-    "questionCount": "{n}문항"
+    "questionCount": "{n}문항",
+    "estimatedLevel": "예상 {level}"
   },
   "opicSchedule": {
     "description": "오픽 시험 일정"
