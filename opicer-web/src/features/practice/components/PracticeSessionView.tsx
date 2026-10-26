@@ -677,14 +677,14 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
         </ol>
       </section>
 
-      <div className="grid gap-6 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-        {/* Interviewer */}
+      <div className="grid gap-4 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-6">
+        {/* Interviewer: a compact row on phones so the audio controls stay above the fold. */}
         <section
           aria-label="인터뷰어"
-          className="flex flex-col items-center justify-center gap-4 rounded-3xl border bg-card p-6 text-center shadow-card"
+          className="flex items-center gap-4 rounded-3xl border bg-card p-4 shadow-card md:flex-col md:justify-center md:p-6 md:text-center"
         >
-          <Mascot expression={interviewer.expression} label="" className="max-w-56 md:max-w-64" />
-          <div className="flex flex-col gap-1">
+          <Mascot expression={interviewer.expression} label="" className="max-w-20 shrink-0 md:max-w-64" />
+          <div className="flex min-w-0 flex-col gap-1">
             <p className="text-lg font-bold">
               오피 <span className="text-sm font-medium text-muted-foreground">· 인터뷰어</span>
             </p>
