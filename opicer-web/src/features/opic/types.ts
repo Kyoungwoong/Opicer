@@ -1,20 +1,3 @@
-/** Dates are ISO local dates (YYYY-MM-DD) as published by opic.or.kr. */
-export type OpicSchedule = {
-  examDate: string;
-  registrationStart: string | null;
-  registrationEnd: string | null;
-  scoreReleaseDate: string | null;
-  roundName: string;
-  earlyRelease: boolean;
-};
-
-export type OpicScheduleMonth = {
-  /** YYYY-MM */
-  month: string;
-  source: string;
-  schedules: OpicSchedule[];
-};
-
 export type OpicCenter = {
   id: string;
   name: string;

@@ -13,8 +13,6 @@ import type {
   GoodAnswerUploadItem,
   UniversalSentence,
   UniversalSentenceType,
-  OpicSyncResult,
-  OpicSyncTarget,
 } from "./types";
 
 const BASE = "/api/admin";
@@ -260,9 +258,4 @@ export const opicCenterReviewApi = {
     }),
   delete: (id: string) =>
     request<void>(`opic-center-reviews/${id}`, { method: "DELETE" }),
-};
-
-export const opicSyncApi = {
-  run: (target: OpicSyncTarget = "all") =>
-    request<OpicSyncResult>(`opic-sync?target=${target}`, { method: "POST" }),
 };

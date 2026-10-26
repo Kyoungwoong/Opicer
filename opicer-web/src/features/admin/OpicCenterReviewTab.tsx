@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { opicCenterReviewApi, opicSyncApi } from "./api";
-import type { AdminOpicCenterReview, OpicSyncResult } from "./types";
+import { opicCenterReviewApi } from "./api";
+import type { AdminOpicCenterReview } from "./types";
 import { adminUi } from "@/features/admin/ui";
 import { fetchOpicCenters } from "@/features/opic/api";
 import type { OpicCenter } from "@/features/opic/types";
@@ -16,13 +16,6 @@ const emptyForm = {
   visible: true,
 };
 
-function syncSummary(result: OpicSyncResult): string {
-  return [
-    `일정 ${result.schedulesUpserted ?? 0}건 반영, ${result.schedulesRemoved ?? 0}건 삭제`,
-    `센터 ${result.centersUpserted ?? 0}곳 반영, ${result.centersDeactivated ?? 0}곳 비활성화`,
-  ].join(" · ");
-}
-
 export function OpicCenterReviewTab() {
   const [centers, setCenters] = useState<OpicCenter[]>([]);
   const [centerId, setCenterId] = useState("");
@@ -30,8 +23,6 @@ export function OpicCenterReviewTab() {
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [syncing, setSyncing] = useState(false);
-  const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,22 +59,6 @@ export function OpicCenterReviewTab() {
       setReviews(await opicCenterReviewApi.list(id));
     } catch {
       setError("Failed to load reviews.");
-    }
-  }
-
-  async function handleSync() {
-    if (!confirm("opic.or.kr에서 일정과 시험센터를 다시 가져올까요? 수십 초 걸릴 수 있어요.")) return;
-    setSyncing(true);
-    setSyncMessage(null);
-    setError(null);
-    try {
-      const result = await opicSyncApi.run("all");
-      setSyncMessage(syncSummary(result));
-      await loadCenters();
-    } catch (err) {
-      setError(String(err));
-    } finally {
-      setSyncing(false);
     }
   }
 
@@ -141,21 +116,6 @@ export function OpicCenterReviewTab() {
 
   return (
     <div className={adminUi.section}>
-      {/* Sync */}
-      <div className={adminUi.card}>
-        <h3 className={adminUi.cardTitle}>opic.or.kr 동기화</h3>
-        <p className="text-sm text-muted-foreground">
-          시험 일정(이번 달부터 2개월 뒤까지)과 시험센터 목록을 다시 가져옵니다. 운영 환경에서는 멀티캠퍼스 허가 후에
-          사용하세요.
-        </p>
-        {syncMessage && <p className="text-sm text-primary-strong">{syncMessage}</p>}
-        <div className={adminUi.actions}>
-          <button type="button" onClick={handleSync} disabled={syncing} className={adminUi.secondaryButton}>
-            {syncing ? "동기화 중..." : "지금 동기화"}
-          </button>
-        </div>
-      </div>
-
       {/* Form */}
       <form onSubmit={handleSubmit} className={adminUi.card}>
         <h3 className={adminUi.cardTitle}>{editId ? "후기 수정" : "후기 추가"}</h3>
@@ -168,7 +128,7 @@ export function OpicCenterReviewTab() {
             className={adminUi.control}
             disabled={centers.length === 0}
           >
-            {centers.length === 0 && <option value="">센터 없음 — 먼저 동기화하세요</option>}
+            {centers.length === 0 && <option value="">등록된 센터가 없어요</option>}
             {centersByRegion.map(([region, items]) => (
               <optgroup key={region} label={region}>
                 {items.map((center) => (

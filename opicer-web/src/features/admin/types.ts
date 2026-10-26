@@ -114,12 +114,3 @@ export type AdminOpicCenterReviewInput = {
   sourceLabel?: string;
   visible: boolean;
 };
-
-export type OpicSyncTarget = "all" | "schedules" | "centers";
-
-export type OpicSyncResult = {
-  schedulesUpserted: number | null;
-  schedulesRemoved: number | null;
-  centersUpserted: number | null;
-  centersDeactivated: number | null;
-};
