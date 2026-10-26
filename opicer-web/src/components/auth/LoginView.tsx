@@ -2,6 +2,7 @@ import { Brain, Sparkles, Target, TrendingUp } from "lucide-react";
 import { ROUTES } from "@/lib/routes";
 import { KakaoIcon } from "@/components/auth/KakaoIcon";
 import { Wordmark } from "@/components/common/Wordmark";
+import { Mascot } from "@/components/brand/Mascot";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -14,7 +15,7 @@ const FEATURES = [
 /** Illustrative sample of what feedback looks like. Not real user data. */
 function FeedbackPreview() {
   return (
-    <Card className="w-full max-w-sm gap-4 rounded-2xl bg-card/90 py-5 shadow-raised ring-border backdrop-blur">
+    <Card className="w-full max-w-sm gap-4 rounded-2xl bg-card py-5 shadow-raised ring-border backdrop-blur">
       <CardContent className="flex flex-col gap-4 px-5">
         <div className="flex items-center justify-between">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
@@ -48,15 +49,18 @@ export function LoginView() {
       <div className="grid w-full max-w-5xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
         {/* Brand / value proposition */}
         <section className="flex flex-col items-center gap-8 text-center lg:items-start lg:text-left">
-          <div className="flex flex-col items-center gap-3 lg:items-start">
-            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-              AI Speaking Coach
-            </span>
-            <Wordmark className="text-4xl [&>span]:size-3.5" />
+          <div className="flex items-center gap-4">
+            <div className="w-20 shrink-0 sm:w-24">
+              <Mascot label="" />
+            </div>
+            <div className="flex flex-col items-start gap-1">
+              <Wordmark className="text-[40px]" />
+              <span className="text-sm font-semibold text-muted-foreground">AI 오픽 스피킹 코치</span>
+            </div>
           </div>
 
           <div className="flex flex-col gap-4">
-            <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
+            <h1 className="text-3xl leading-tight font-extrabold sm:text-4xl">
               말하기 실력,
               <br />
               <span className="text-primary">AI가 기억합니다.</span>
@@ -71,7 +75,7 @@ export function LoginView() {
             {FEATURES.map(({ icon: Icon, label }) => (
               <li
                 key={label}
-                className="inline-flex items-center gap-1.5 rounded-full border bg-card/80 px-3 py-1.5 text-sm font-medium text-primary-strong"
+                className="inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-sm font-medium text-foreground"
               >
                 <Icon aria-hidden className="size-4 text-primary" />
                 {label}

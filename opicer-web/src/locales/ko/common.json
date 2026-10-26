@@ -14,8 +14,11 @@
     }
   },
   "homeGreeting": {
-    "fallback": "반갑습니다",
-    "headline": "안녕하세요, {name} 👋",
-    "subHeadline": "오늘도 말하기 연습을 시작해볼까요?"
+    "fallback": "오늘도\n같이 말해봐요",
+    "badge": "오늘의 연습 준비 완료",
+    "headline": "{name}님, 오늘도\n같이 말해봐요",
+    "subHeadline": "오피가 질문을 읽어 줄게요. 듣고, 2분 동안 편하게 대답하면 끝.",
+    "primaryCta": "연습 시작하기",
+    "secondaryCta": "오픽이 처음이에요"
   }
 }

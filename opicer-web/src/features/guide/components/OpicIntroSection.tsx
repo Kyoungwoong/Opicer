@@ -28,7 +28,7 @@ export function OpicIntroSection() {
             {STEPS.map((label, index) => (
               <li
                 key={label}
-                className="flex flex-col items-center gap-2 rounded-2xl border bg-background/60 px-1 py-3 text-center sm:py-4"
+                className="flex flex-col items-center gap-2 rounded-2xl border bg-secondary px-1 py-3 text-center sm:py-4"
               >
                 <span className="grid size-7 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                   {index + 1}
@@ -67,7 +67,7 @@ export function OpicIntroSection() {
 
             <ul className="flex flex-col gap-2">
               {LEVELS.map((item) => (
-                <li key={item.level} className="flex items-center gap-3 rounded-2xl border bg-background/60 px-4 py-3">
+                <li key={item.level} className="flex items-center gap-3 rounded-2xl border bg-secondary px-4 py-3">
                   <span aria-hidden className="size-3 shrink-0 rounded-full" style={{ backgroundColor: item.fill }} />
                   <span className="w-16 shrink-0 text-sm font-bold text-primary-strong">{item.level}</span>
                   <span className="text-sm text-muted-foreground">{item.detail.join(" · ")}</span>

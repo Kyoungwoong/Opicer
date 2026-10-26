@@ -12,7 +12,7 @@ export default function AuthError({
 
   return (
     <div className="flex min-h-dvh items-center justify-center px-4">
-      <div className="flex w-full max-w-sm flex-col items-center gap-3 rounded-3xl border bg-card/90 px-6 py-10 text-center shadow-raised">
+      <div className="flex w-full max-w-sm flex-col items-center gap-3 rounded-3xl border bg-card px-6 py-10 text-center shadow-raised">
         <span className="grid size-12 place-items-center rounded-full bg-destructive/10 text-destructive">
           <CircleAlert aria-hidden className="size-6" />
         </span>

@@ -98,11 +98,9 @@ export function CreditPurchaseView({
         />
       }
     >
-      <section className="rounded-3xl border bg-card/90 p-6 shadow-card sm:p-8">
+      <section className="rounded-3xl border bg-card p-6 shadow-card sm:p-8">
         <SectionHeader
           as="h1"
-          eyebrow="Credit Purchase"
-          eyebrowLatin
           title="결제/크레딧 구매"
           description="패키지를 선택하면 주문 생성 후 결제 확정까지 자동으로 진행됩니다."
         />
@@ -140,7 +138,7 @@ export function CreditPurchaseView({
         })}
       </section>
 
-      <section className="flex flex-col gap-4 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-6">
+      <section className="flex flex-col gap-4 rounded-3xl border bg-card p-5 shadow-card sm:p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm text-muted-foreground">선택된 패키지</p>

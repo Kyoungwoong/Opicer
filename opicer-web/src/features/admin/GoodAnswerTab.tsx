@@ -179,7 +179,7 @@ export function GoodAnswerTab() {
             className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-sm transition ${
               dragActive
                 ? "border-primary bg-primary/10 text-foreground"
-                : "border-input bg-background/60 text-muted-foreground hover:border-primary"
+                : "border-input bg-secondary text-muted-foreground hover:border-primary"
             }`}
               onDragOver={(e) => {
                 e.preventDefault();
@@ -233,7 +233,7 @@ export function GoodAnswerTab() {
               {form.audio.map((file, index) => (
                 <div
                   key={`${file.name}-${index}`}
-                  className="flex items-center justify-between rounded-lg border bg-background/60 px-3 py-2 text-xs text-muted-foreground"
+                  className="flex items-center justify-between rounded-lg border bg-secondary px-3 py-2 text-xs text-muted-foreground"
                 >
                   <span className="truncate">
                     {file.name} · {(file.size / 1024 / 1024).toFixed(2)}MB

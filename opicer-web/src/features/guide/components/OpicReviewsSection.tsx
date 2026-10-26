@@ -68,7 +68,7 @@ export function OpicReviewsSection() {
 
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         {pageReviews.map((review) => (
-          <figure key={review.id} className="flex flex-col gap-3 rounded-2xl border bg-background/60 p-4">
+          <figure key={review.id} className="flex flex-col gap-3 rounded-2xl border bg-secondary p-4">
             <div className="flex items-center justify-between gap-3">
               <figcaption className="text-sm font-semibold">{activeRoom?.classroom}</figcaption>
               <Rating value={Math.min(5, Math.max(0, review.rating))} />

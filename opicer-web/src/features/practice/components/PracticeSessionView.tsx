@@ -470,14 +470,12 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
           </Alert>
         ) : null}
 
-        <section className="flex items-center gap-4 rounded-3xl border bg-card/90 p-6 shadow-card sm:p-8">
+        <section className="flex items-center gap-4 rounded-3xl border bg-card p-6 shadow-card sm:p-8">
           <span className="grid size-12 shrink-0 place-items-center rounded-full bg-success-subtle text-success">
             <CheckCircle2 aria-hidden className="size-6" />
           </span>
           <SectionHeader
             as="h1"
-            eyebrow="Practice Summary"
-            eyebrowLatin
             title="연습 완료"
             description={`${topicTitle} · ${answers.length}문항 답변 완료`}
           />
@@ -487,9 +485,9 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
           {answers.map((answer, idx) => {
             const ai = getOrInitAiState(answer.questionId);
             return (
-              <li key={answer.questionId} className="flex flex-col gap-4 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-6">
+              <li key={answer.questionId} className="flex flex-col gap-4 rounded-3xl border bg-card p-5 shadow-card sm:p-6">
                 <div className="flex flex-col gap-1.5">
-                  <Eyebrow latin>Question {idx + 1}</Eyebrow>
+                  <Eyebrow>질문 {idx + 1}</Eyebrow>
                   <p className="text-base font-semibold leading-relaxed">{answer.questionText}</p>
                 </div>
 
@@ -543,7 +541,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
                   </Alert>
                 )}
                 {ai.analysis && (
-                  <div className="rounded-2xl border bg-background/60 p-4 text-sm leading-relaxed whitespace-pre-wrap">
+                  <div className="rounded-2xl border bg-secondary p-4 text-sm leading-relaxed whitespace-pre-wrap">
                     <Eyebrow className="mb-2">AI 분석</Eyebrow>
                     {ai.analysis}
                   </div>
@@ -631,12 +629,10 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
   return (
     <PageShell width="md" nav={nav}>
       {/* Header */}
-      <section className="flex flex-col gap-5 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-8">
+      <section className="flex flex-col gap-5 rounded-3xl border bg-card p-5 shadow-card sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <SectionHeader
             as="h1"
-            eyebrow="Topic Practice"
-            eyebrowLatin
             title={topicTitle}
             description={`질문 ${currentIndex + 1} / ${questions.length}`}
           />
@@ -645,7 +641,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
             aria-live={warning ? "assertive" : "off"}
             className={cn(
               "flex min-w-28 flex-col items-center rounded-2xl border px-4 py-3",
-              warning ? "border-destructive/40 bg-destructive/10 text-destructive" : "bg-background/60 text-foreground"
+              warning ? "border-destructive/40 bg-destructive/10 text-destructive" : "bg-secondary text-foreground"
             )}
           >
             <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
@@ -664,9 +660,9 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
       </section>
 
       {/* Question card */}
-      <section className="flex flex-col gap-6 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-8">
+      <section className="flex flex-col gap-6 rounded-3xl border bg-card p-5 shadow-card sm:p-8">
         <div className="flex flex-col gap-3">
-          <Eyebrow latin>Question</Eyebrow>
+          <Eyebrow>질문</Eyebrow>
           <h2 className="text-xl font-semibold leading-relaxed sm:text-2xl">
             {currentQuestion?.promptText ?? "질문을 불러오는 중입니다."}
           </h2>

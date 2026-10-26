@@ -17,7 +17,7 @@ export function OpicScheduleSection() {
 
   return (
     <GuideSection id="schedule" title="오픽 일정" subtitle="연동 준비중 일정">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-background/60 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-secondary px-4 py-3">
         <div>
           <p className="text-xs text-muted-foreground">공식 일정 연동 준비중</p>
           <p className="text-base font-semibold text-primary-strong">{OPIC_CALENDAR.monthLabel}</p>
@@ -30,7 +30,7 @@ export function OpicScheduleSection() {
         </Button>
       </div>
 
-      <div className="mt-4 rounded-2xl border bg-background/60 p-3 sm:p-4">
+      <div className="mt-4 rounded-2xl border bg-secondary p-3 sm:p-4">
         <div className="grid grid-cols-7 gap-1.5 text-center text-xs font-medium text-muted-foreground sm:gap-2">
           {WEEKDAY_LABELS.map((label) => (
             <span key={label}>{label}</span>
@@ -76,7 +76,7 @@ export function OpicScheduleSection() {
         {OPIC_SCHEDULE.map((item) => (
           <li
             key={item.id}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-background/60 px-4 py-3"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-secondary px-4 py-3"
           >
             <div>
               <p className="text-sm font-semibold">{item.title}</p>

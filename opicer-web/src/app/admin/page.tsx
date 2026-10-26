@@ -48,7 +48,7 @@ export default function AdminPage() {
   if (auth.user.role !== "ADMIN") {
     return (
       <div className="flex min-h-dvh items-center justify-center px-4">
-        <div className="flex flex-col items-center gap-3 rounded-3xl border bg-card/90 px-10 py-12 text-center shadow-card">
+        <div className="flex flex-col items-center gap-3 rounded-3xl border bg-card px-10 py-12 text-center shadow-card">
           <ShieldAlert aria-hidden className="size-8 text-destructive" />
           <p className="text-2xl font-bold text-foreground">403</p>
           <p className="text-muted-foreground">접근 권한이 없습니다.</p>
@@ -64,8 +64,6 @@ export default function AdminPage() {
     <PageShell width="lg">
       <SectionHeader
         as="h1"
-        eyebrow="Admin"
-        eyebrowLatin
         title="관리자"
         description={`${auth.user.name} 님`}
         action={
@@ -80,7 +78,7 @@ export default function AdminPage() {
 
       {/* Section switcher (toggle buttons, horizontally scrollable at 375px) */}
       <nav aria-label="관리 메뉴" className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0">
-        <div className="inline-flex min-w-full gap-1 rounded-full border bg-card/80 p-1 shadow-card sm:min-w-0">
+        <div className="inline-flex min-w-full gap-1 rounded-full border bg-card p-1 shadow-card sm:min-w-0">
           {TABS.map((tab) => {
             const isActive = activeTab === tab.id;
             return (

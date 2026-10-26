@@ -27,7 +27,7 @@ export function GuideNav({ sections, activeId, onSelect }: Props) {
                   "flex w-full items-start gap-3 rounded-full border px-4 py-2 text-left text-sm font-medium whitespace-nowrap transition-colors lg:rounded-2xl lg:px-4 lg:py-3.5 lg:whitespace-normal",
                   isActive
                     ? "border-primary bg-primary text-primary-foreground lg:border-primary/40 lg:bg-card lg:text-foreground lg:shadow-card"
-                    : "bg-card/70 text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                    : "bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
                 )}
               >
                 <span

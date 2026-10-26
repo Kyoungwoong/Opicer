@@ -3,18 +3,25 @@ import { SectionHeader } from "@/components/common/SectionHeader";
 
 type Props = {
   title: string;
-  description: string;
   children: React.ReactNode;
   action?: React.ReactNode;
+  /** "highlight" = soft honey background without border, for the one featured block. */
+  tone?: "default" | "highlight";
   className?: string;
 };
 
-/** Home dashboard card: English eyebrow + Korean heading + optional action. */
-export function SectionShell({ title, description, children, action, className }: Props) {
+/** Home dashboard block: heading + optional action + content. */
+export function SectionShell({ title, children, action, tone = "default", className }: Props) {
   return (
-    <section className={cn("flex flex-col gap-5 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-6", className)}>
-      <SectionHeader eyebrow={title} eyebrowLatin title={description} action={action} />
-      <div>{children}</div>
+    <section
+      className={cn(
+        "flex flex-col gap-5 rounded-3xl p-6 sm:p-8",
+        tone === "highlight" ? "bg-highlight-subtle" : "border bg-card shadow-card",
+        className
+      )}
+    >
+      <SectionHeader title={title} action={action} />
+      <div className="flex min-w-0 flex-1 flex-col">{children}</div>
     </section>
   );
 }
