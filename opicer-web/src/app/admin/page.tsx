@@ -15,13 +15,15 @@ import { DailySentenceTab } from "@/features/admin/DailySentenceTab";
 import { PromptVersionTab } from "@/features/admin/PromptVersionTab";
 import { UniversalSentenceTab } from "@/features/admin/UniversalSentenceTab";
 import { GoodAnswerTab } from "@/features/admin/GoodAnswerTab";
+import { OpicCenterReviewTab } from "@/features/admin/OpicCenterReviewTab";
 
 type Tab =
   | "questions"
   | "daily-sentences"
   | "prompts"
   | "universal-sentences"
-  | "good-answers";
+  | "good-answers"
+  | "opic-centers";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "questions", label: "질문 관리" },
@@ -29,6 +31,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "universal-sentences", label: "만능 문장" },
   { id: "good-answers", label: "샘플 답변" },
   { id: "prompts", label: "프롬프트 버전" },
+  { id: "opic-centers", label: "시험센터 후기" },
 ];
 
 export default function AdminPage() {
@@ -108,6 +111,7 @@ export default function AdminPage() {
         {activeTab === "universal-sentences" && <UniversalSentenceTab />}
         {activeTab === "good-answers" && <GoodAnswerTab />}
         {activeTab === "prompts" && <PromptVersionTab />}
+        {activeTab === "opic-centers" && <OpicCenterReviewTab />}
       </div>
     </PageShell>
   );
