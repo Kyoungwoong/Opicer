@@ -23,6 +23,8 @@ public enum ErrorCode {
 	AI_RAG_FAILED("AI_RAG_FAILED", HttpStatus.BAD_GATEWAY, "RAG retrieval failed"),
 	IDEMPOTENCY_KEY_CONFLICT("IDEMPOTENCY_KEY_CONFLICT", HttpStatus.CONFLICT, "Idempotency key already used with different request"),
 	TOPIC_SELECTION_NOT_FOUND("TOPIC_SELECTION_NOT_FOUND", HttpStatus.NOT_FOUND, "Topic selection not found"),
+	PRACTICE_SESSION_NOT_FOUND("PRACTICE_SESSION_NOT_FOUND", HttpStatus.NOT_FOUND, "Practice session not found"),
+	PRACTICE_ANSWER_NOT_FOUND("PRACTICE_ANSWER_NOT_FOUND", HttpStatus.NOT_FOUND, "Practice answer not found"),
 	CREDIT_INSUFFICIENT_BALANCE("CREDIT_INSUFFICIENT_BALANCE", HttpStatus.PAYMENT_REQUIRED, "Insufficient credits");
 
 	private final String code;
