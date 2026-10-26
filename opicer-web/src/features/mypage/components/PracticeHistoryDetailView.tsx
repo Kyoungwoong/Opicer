@@ -41,11 +41,11 @@ function BackLink() {
   );
 }
 
-function AnswerCard({ answer }: { answer: PracticeSessionAnswer }) {
+function AnswerCard({ answer, number }: { answer: PracticeSessionAnswer; number: number }) {
   return (
     <li className={CARD}>
       <div className="flex flex-col gap-1.5">
-        <Eyebrow>질문 {answer.questionOrder}</Eyebrow>
+        <Eyebrow>질문 {number}</Eyebrow>
         <p className="font-semibold leading-7">{answer.questionText}</p>
       </div>
 
@@ -167,8 +167,9 @@ export function PracticeHistoryDetailView({ sessionId, userLabel, onLogout }: Pr
             <div className={PLACEHOLDER}>저장된 답변이 없어요.</div>
           ) : (
             <ol className="flex flex-col gap-4">
-              {state.session.answers.map((answer) => (
-                <AnswerCard key={answer.questionId} answer={answer} />
+              {/* answers arrive sorted by questionOrder, which is 0-based */}
+              {state.session.answers.map((answer, index) => (
+                <AnswerCard key={answer.questionId} answer={answer} number={index + 1} />
               ))}
             </ol>
           )}
