@@ -1,5 +1,7 @@
 package com.opicer.api.practice.application;
 
+import com.opicer.api.aijob.application.AiJobCommandService;
+import com.opicer.api.aijob.domain.AiJobType;
 import com.opicer.api.practice.domain.PracticeAnswer;
 import com.opicer.api.practice.domain.PracticeSession;
 import com.opicer.api.practice.infrastructure.PracticeAnswerRepository;
@@ -15,13 +17,16 @@ public class PracticeHistoryCommandService {
 
 	private final PracticeSessionRepository practiceSessionRepository;
 	private final PracticeAnswerRepository practiceAnswerRepository;
+	private final AiJobCommandService aiJobCommandService;
 
 	public PracticeHistoryCommandService(
 		PracticeSessionRepository practiceSessionRepository,
-		PracticeAnswerRepository practiceAnswerRepository
+		PracticeAnswerRepository practiceAnswerRepository,
+		AiJobCommandService aiJobCommandService
 	) {
 		this.practiceSessionRepository = practiceSessionRepository;
 		this.practiceAnswerRepository = practiceAnswerRepository;
+		this.aiJobCommandService = aiJobCommandService;
 	}
 
 	/** Stores AI analysis and/or the improved script for one answer; null fields are left as they are. */
@@ -34,10 +39,11 @@ public class PracticeHistoryCommandService {
 		return answer;
 	}
 
-	/** Physically deletes the session and every answer derived from it. */
+	/** Physically deletes the session, every answer derived from it, and its evaluation job. */
 	@Transactional
 	public void delete(UUID userId, UUID sessionId) {
 		PracticeSession session = findOwned(userId, sessionId);
+		aiJobCommandService.delete(AiJobType.SESSION_EVALUATION, session.getId());
 		practiceAnswerRepository.deleteBySessionId(session.getId());
 		practiceSessionRepository.delete(session);
 	}

@@ -1,15 +1,21 @@
 package com.opicer.api.practice.presentation;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.practice.application.PracticeHistoryCommandService;
 import com.opicer.api.practice.application.PracticeHistoryQueryService;
 import com.opicer.api.practice.application.PracticeSessionCommandService;
+import com.opicer.api.practice.domain.AnswerEvaluationStatus;
 import com.opicer.api.practice.domain.PracticeAnswer;
 import com.opicer.api.practice.domain.PracticeSession;
+import com.opicer.api.practice.domain.SessionEvaluationStatus;
+import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
 import com.opicer.api.shared.presentation.ApiResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -68,15 +74,18 @@ public class PracticeSessionController {
 		PracticeSessionCommandService.SubmitResult result = practiceSessionCommandService.submit(
 			principal.id(),
 			request.topicSelectionId(),
+			request.targetLevel(),
 			answers.stream()
-				.map(a -> new PracticeSessionCommandService.AnswerInput(a.questionId(), a.questionText(), a.transcript()))
+				.map(a -> new PracticeSessionCommandService.AnswerInput(
+					a.questionId(), a.questionText(), a.transcript(), a.durationSeconds()))
 				.toList()
 		);
 		return ResponseEntity.ok(ApiResponse.ok("PRACTICE_SUBMITTED", new SubmitResponse(
 			result.chargeId(),
 			result.alreadyCharged(),
 			result.deductedCredits(),
-			result.sessionId()
+			result.sessionId(),
+			result.evaluationStatus()
 		)));
 	}
 
@@ -145,8 +154,10 @@ public class PracticeSessionController {
 		return null;
 	}
 
+	/** @param targetLevel IM, IH or AL; null means IM */
 	public record SubmitRequest(
 		@NotNull UUID topicSelectionId,
+		OpicLevel targetLevel,
 		@Size(max = 20) List<@Valid AnswerRequest> answers
 	) {
 	}
@@ -154,7 +165,8 @@ public class PracticeSessionController {
 	public record AnswerRequest(
 		@NotNull UUID questionId,
 		@NotBlank @Size(max = 2000) String questionText,
-		@Size(max = 10000) String transcript
+		@Size(max = 10000) String transcript,
+		@Min(1) @Max(600) Integer durationSeconds
 	) {
 	}
 
@@ -168,7 +180,8 @@ public class PracticeSessionController {
 		UUID chargeId,
 		boolean alreadyCharged,
 		int deductedCredits,
-		UUID sessionId
+		UUID sessionId,
+		SessionEvaluationStatus evaluationStatus
 	) {
 	}
 
@@ -179,13 +192,15 @@ public class PracticeSessionController {
 		Instant startedAt,
 		Instant completedAt,
 		int answerCount,
-		int analyzedCount
+		int analyzedCount,
+		SessionEvaluationStatus evaluationStatus,
+		OpicLevel estimatedLevel
 	) {
 		static SessionSummaryResponse from(PracticeHistoryQueryService.SessionSummary summary) {
 			PracticeSession s = summary.session();
 			return new SessionSummaryResponse(
 				s.getId(), s.getTopicId(), s.getTopicTitle(), s.getStartedAt(), s.getCompletedAt(),
-				summary.answerCount(), summary.analyzedCount()
+				summary.answerCount(), summary.analyzedCount(), s.getEvaluationStatus(), s.getEstimatedLevel()
 			);
 		}
 	}
@@ -196,12 +211,18 @@ public class PracticeSessionController {
 		String topicTitle,
 		Instant startedAt,
 		Instant completedAt,
+		OpicLevel targetLevel,
+		SessionEvaluationStatus evaluationStatus,
+		OpicLevel estimatedLevel,
+		@JsonRawValue String report,
+		Instant evaluatedAt,
 		List<AnswerResponse> answers
 	) {
 		static SessionDetailResponse from(PracticeHistoryQueryService.SessionDetail detail) {
 			PracticeSession s = detail.session();
 			return new SessionDetailResponse(
 				s.getId(), s.getTopicId(), s.getTopicTitle(), s.getStartedAt(), s.getCompletedAt(),
+				s.getTargetLevel(), s.getEvaluationStatus(), s.getEstimatedLevel(), s.getReport(), s.getEvaluatedAt(),
 				detail.answers().stream().map(AnswerResponse::from).toList()
 			);
 		}
@@ -213,12 +234,17 @@ public class PracticeSessionController {
 		String questionText,
 		String transcript,
 		String analysis,
-		String improvedScript
+		String improvedScript,
+		Integer durationSeconds,
+		AnswerEvaluationStatus evaluationStatus,
+		OpicLevel overallLevel,
+		@JsonRawValue String evaluation
 	) {
 		static AnswerResponse from(PracticeAnswer answer) {
 			return new AnswerResponse(
 				answer.getQuestionId(), answer.getQuestionOrder(), answer.getQuestionText(),
-				answer.getTranscript(), answer.getAnalysis(), answer.getImprovedScript()
+				answer.getTranscript(), answer.getAnalysis(), answer.getImprovedScript(),
+				answer.getDurationSeconds(), answer.getEvaluationStatus(), answer.getOverallLevel(), answer.getEvaluation()
 			);
 		}
 	}

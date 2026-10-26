@@ -1,13 +1,18 @@
 package com.opicer.api.practice.domain;
 
 import jakarta.persistence.Column;
+import com.opicer.api.shared.domain.OpicLevel;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * One answered question in a {@link PracticeSession}.
@@ -46,15 +51,62 @@ public class PracticeAnswer {
 	@Column(name = "improved_script", columnDefinition = "TEXT")
 	private String improvedScript;
 
+	/** Recording length measured by the client; null when unknown. */
+	@Column(name = "duration_seconds")
+	private Integer durationSeconds;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "evaluation_status", length = 16)
+	private AnswerEvaluationStatus evaluationStatus;
+
+	/** Structured evaluation as JSON (competency levels, corrections, target-level script, expressions). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private String evaluation;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "overall_level", length = 2)
+	private OpicLevel overallLevel;
+
 	protected PracticeAnswer() {
 	}
 
 	public PracticeAnswer(UUID sessionId, UUID questionId, int questionOrder, String questionText, String transcript) {
+		this(sessionId, questionId, questionOrder, questionText, transcript, null);
+	}
+
+	public PracticeAnswer(UUID sessionId, UUID questionId, int questionOrder, String questionText, String transcript,
+		Integer durationSeconds) {
 		this.sessionId = sessionId;
 		this.questionId = questionId;
 		this.questionOrder = questionOrder;
 		this.questionText = questionText;
 		this.transcript = transcript;
+		this.durationSeconds = durationSeconds;
+	}
+
+	public void markEvaluationPending() {
+		this.evaluationStatus = AnswerEvaluationStatus.PENDING;
+	}
+
+	/**
+	 * Stores a successful evaluation. {@code analysis}/{@code improvedScript} get a readable summary and the
+	 * target-level script, so screens that predate structured evaluation keep working.
+	 */
+	public void recordEvaluation(String evaluationJson, OpicLevel overallLevel, String analysisSummary, String targetScript) {
+		this.evaluationStatus = AnswerEvaluationStatus.DONE;
+		this.evaluation = evaluationJson;
+		this.overallLevel = overallLevel;
+		this.analysis = analysisSummary;
+		this.improvedScript = targetScript;
+	}
+
+	public void markEvaluationFailed() {
+		this.evaluationStatus = AnswerEvaluationStatus.FAILED;
+	}
+
+	public void skipEvaluation() {
+		this.evaluationStatus = AnswerEvaluationStatus.SKIPPED;
 	}
 
 	/** Null arguments leave the stored value unchanged. */
@@ -75,4 +127,8 @@ public class PracticeAnswer {
 	public String getTranscript() { return transcript; }
 	public String getAnalysis() { return analysis; }
 	public String getImprovedScript() { return improvedScript; }
+	public Integer getDurationSeconds() { return durationSeconds; }
+	public AnswerEvaluationStatus getEvaluationStatus() { return evaluationStatus; }
+	public String getEvaluation() { return evaluation; }
+	public OpicLevel getOverallLevel() { return overallLevel; }
 }

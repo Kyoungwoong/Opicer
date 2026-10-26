@@ -1,7 +1,10 @@
 package com.opicer.api.practice.domain;
 
 import jakarta.persistence.Column;
+import com.opicer.api.shared.domain.OpicLevel;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
@@ -10,6 +13,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * A completed topic practice. One per topic selection; answers live in {@link PracticeAnswer}.
@@ -44,6 +49,28 @@ public class PracticeSession {
 	@Column(name = "completed_at", nullable = false)
 	private Instant completedAt;
 
+	// Evaluation columns are nullable: sessions recorded before automatic evaluation have none.
+	@Enumerated(EnumType.STRING)
+	@Column(name = "target_level", length = 2)
+	private OpicLevel targetLevel;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "evaluation_status", length = 16)
+	private SessionEvaluationStatus evaluationStatus;
+
+	/** Estimate for practice, never an official OPIc score. */
+	@Enumerated(EnumType.STRING)
+	@Column(name = "estimated_level", length = 2)
+	private OpicLevel estimatedLevel;
+
+	/** Session report as JSON (see evaluation.domain.SessionReport). */
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(columnDefinition = "jsonb")
+	private String report;
+
+	@Column(name = "evaluated_at")
+	private Instant evaluatedAt;
+
 	protected PracticeSession() {
 	}
 
@@ -63,6 +90,33 @@ public class PracticeSession {
 		}
 	}
 
+	/** Marks the session as waiting for automatic evaluation against {@code targetLevel}. */
+	public void requestEvaluation(OpicLevel targetLevel) {
+		this.targetLevel = targetLevel;
+		this.evaluationStatus = SessionEvaluationStatus.PENDING;
+	}
+
+	public void startEvaluation() {
+		this.evaluationStatus = SessionEvaluationStatus.RUNNING;
+	}
+
+	/**
+	 * Records the outcome of evaluation.
+	 *
+	 * @param status DONE, PARTIAL or FAILED
+	 * @param estimatedLevel null when nothing could be evaluated
+	 * @param reportJson the session report as JSON, null when nothing could be evaluated
+	 */
+	public void completeEvaluation(SessionEvaluationStatus status, OpicLevel estimatedLevel, String reportJson) {
+		if (status == SessionEvaluationStatus.PENDING || status == SessionEvaluationStatus.RUNNING) {
+			throw new IllegalArgumentException("not a final evaluation status: " + status);
+		}
+		this.evaluationStatus = status;
+		this.estimatedLevel = estimatedLevel;
+		this.report = reportJson;
+		this.evaluatedAt = Instant.now();
+	}
+
 	public UUID getId() { return id; }
 	public UUID getUserId() { return userId; }
 	public UUID getTopicSelectionId() { return topicSelectionId; }
@@ -70,4 +124,9 @@ public class PracticeSession {
 	public String getTopicTitle() { return topicTitle; }
 	public Instant getStartedAt() { return startedAt; }
 	public Instant getCompletedAt() { return completedAt; }
+	public OpicLevel getTargetLevel() { return targetLevel; }
+	public SessionEvaluationStatus getEvaluationStatus() { return evaluationStatus; }
+	public OpicLevel getEstimatedLevel() { return estimatedLevel; }
+	public String getReport() { return report; }
+	public Instant getEvaluatedAt() { return evaluatedAt; }
 }
