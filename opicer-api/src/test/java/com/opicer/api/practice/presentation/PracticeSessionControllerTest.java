@@ -6,6 +6,8 @@ import com.opicer.api.config.AuthProperties;
 import com.opicer.api.practice.application.PracticeHistoryCommandService;
 import com.opicer.api.practice.application.PracticeHistoryQueryService;
 import com.opicer.api.practice.application.PracticeSessionCommandService;
+import com.opicer.api.practice.domain.PracticeAnswer;
+import com.opicer.api.practice.domain.PracticeSession;
 import com.opicer.api.practice.domain.SessionEvaluationStatus;
 import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.error.ApiException;
@@ -244,6 +246,41 @@ class PracticeSessionControllerTest {
 		mockMvc.perform(get("/api/practice/sessions/" + SESSION_ID).cookie(userCookie))
 			.andExpect(status().isNotFound())
 			.andExpect(jsonPath("$.code").value("PRACTICE_SESSION_NOT_FOUND"));
+	}
+
+	@Test
+	void getReturnsReportAndEvaluationAsJsonObjects() throws Exception {
+		PracticeSession session = new PracticeSession(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "집", null);
+		session.requestEvaluation(OpicLevel.IH);
+		session.completeEvaluation(SessionEvaluationStatus.DONE, OpicLevel.IM, "{\"tips\": [\"연결어\"]}");
+		PracticeAnswer answer = new PracticeAnswer(UUID.randomUUID(), UUID.fromString(QUESTION_ID), 0, "Q", "A", 40);
+		answer.recordEvaluation("{\"dimensions\": [{\"code\": \"TASK\", \"level\": \"IM\"}]}", OpicLevel.IM, "요약", "A!");
+		when(practiceHistoryQueryService.get(any(), any()))
+			.thenReturn(new PracticeHistoryQueryService.SessionDetail(session, List.of(answer)));
+
+		mockMvc.perform(get("/api/practice/sessions/" + SESSION_ID).cookie(userCookie))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.targetLevel").value("IH"))
+			.andExpect(jsonPath("$.data.estimatedLevel").value("IM"))
+			.andExpect(jsonPath("$.data.evaluationStatus").value("DONE"))
+			.andExpect(jsonPath("$.data.report.tips[0]").value("연결어"))
+			.andExpect(jsonPath("$.data.answers[0].evaluation.dimensions[0].level").value("IM"))
+			.andExpect(jsonPath("$.data.answers[0].durationSeconds").value(40))
+			.andExpect(jsonPath("$.data.answers[0].overallLevel").value("IM"));
+	}
+
+	@Test
+	void getLegacySessionReturnsNullEvaluationFields() throws Exception {
+		PracticeSession legacy = new PracticeSession(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "집", null);
+		when(practiceHistoryQueryService.get(any(), any()))
+			.thenReturn(new PracticeHistoryQueryService.SessionDetail(legacy,
+				List.of(new PracticeAnswer(UUID.randomUUID(), UUID.fromString(QUESTION_ID), 0, "Q", "A"))));
+
+		mockMvc.perform(get("/api/practice/sessions/" + SESSION_ID).cookie(userCookie))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.report").doesNotExist())
+			.andExpect(jsonPath("$.data.evaluationStatus").doesNotExist())
+			.andExpect(jsonPath("$.data.answers[0].evaluation").doesNotExist());
 	}
 
 	@Test

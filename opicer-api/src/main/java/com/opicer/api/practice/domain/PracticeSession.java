@@ -96,6 +96,27 @@ public class PracticeSession {
 		this.evaluationStatus = SessionEvaluationStatus.PENDING;
 	}
 
+	public void startEvaluation() {
+		this.evaluationStatus = SessionEvaluationStatus.RUNNING;
+	}
+
+	/**
+	 * Records the outcome of evaluation.
+	 *
+	 * @param status DONE, PARTIAL or FAILED
+	 * @param estimatedLevel null when nothing could be evaluated
+	 * @param reportJson the session report as JSON, null when nothing could be evaluated
+	 */
+	public void completeEvaluation(SessionEvaluationStatus status, OpicLevel estimatedLevel, String reportJson) {
+		if (status == SessionEvaluationStatus.PENDING || status == SessionEvaluationStatus.RUNNING) {
+			throw new IllegalArgumentException("not a final evaluation status: " + status);
+		}
+		this.evaluationStatus = status;
+		this.estimatedLevel = estimatedLevel;
+		this.report = reportJson;
+		this.evaluatedAt = Instant.now();
+	}
+
 	public UUID getId() { return id; }
 	public UUID getUserId() { return userId; }
 	public UUID getTopicSelectionId() { return topicSelectionId; }

@@ -89,6 +89,26 @@ public class PracticeAnswer {
 		this.evaluationStatus = AnswerEvaluationStatus.PENDING;
 	}
 
+	/**
+	 * Stores a successful evaluation. {@code analysis}/{@code improvedScript} get a readable summary and the
+	 * target-level script, so screens that predate structured evaluation keep working.
+	 */
+	public void recordEvaluation(String evaluationJson, OpicLevel overallLevel, String analysisSummary, String targetScript) {
+		this.evaluationStatus = AnswerEvaluationStatus.DONE;
+		this.evaluation = evaluationJson;
+		this.overallLevel = overallLevel;
+		this.analysis = analysisSummary;
+		this.improvedScript = targetScript;
+	}
+
+	public void markEvaluationFailed() {
+		this.evaluationStatus = AnswerEvaluationStatus.FAILED;
+	}
+
+	public void skipEvaluation() {
+		this.evaluationStatus = AnswerEvaluationStatus.SKIPPED;
+	}
+
 	/** Null arguments leave the stored value unchanged. */
 	public void recordAiResult(String analysis, String improvedScript) {
 		if (analysis != null) {

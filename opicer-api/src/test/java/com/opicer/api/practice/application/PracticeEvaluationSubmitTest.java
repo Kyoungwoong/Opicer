@@ -1,5 +1,6 @@
 package com.opicer.api.practice.application;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opicer.api.aijob.application.AiJobCommandService;
 import com.opicer.api.aijob.domain.AiJob;
 import com.opicer.api.aijob.domain.AiJobStatus;
@@ -187,6 +188,44 @@ class PracticeEvaluationSubmitTest {
 		assertThat(detail.session().getEvaluationStatus()).isNull();
 		assertThat(detail.answers().get(0).getEvaluationStatus()).isNull();
 		assertThat(detail.answers().get(0).getEvaluation()).isNull();
+	}
+
+	@Test
+	void evaluationJsonRoundTripsThroughJsonbColumns() throws Exception {
+		UUID userId = userWithCredits(0);
+		PracticeSession session = new PracticeSession(userId, UUID.randomUUID(), UUID.randomUUID(), "집", null);
+		session.requestEvaluation(OpicLevel.IH);
+		session.completeEvaluation(SessionEvaluationStatus.DONE, OpicLevel.IM,
+			"{\"estimatedLevel\": \"IM\", \"tips\": [\"연결어를 늘려 보세요\"], \"confidence\": \"LOW\"}");
+		session = sessionRepository.save(session);
+		PracticeAnswer answer = new PracticeAnswer(session.getId(), UUID.randomUUID(), 0, "Q", "I go to park.", 40);
+		answer.recordEvaluation("{\"dimensions\": [{\"code\": \"ACCURACY\", \"level\": \"IL\"}], \"schemaVersion\": 1}",
+			OpicLevel.IL, "요약", "I went to the park.");
+		answerRepository.save(answer);
+
+		// Fresh reads from the database (no shared persistence context in this test).
+		PracticeSession reloaded = sessionRepository.findById(session.getId()).orElseThrow();
+		PracticeAnswer reloadedAnswer = answerRepository.findBySessionIdOrderByQuestionOrderAsc(session.getId()).get(0);
+		ObjectMapper json = new ObjectMapper();
+
+		assertThat(reloaded.getEvaluationStatus()).isEqualTo(SessionEvaluationStatus.DONE);
+		assertThat(reloaded.getEstimatedLevel()).isEqualTo(OpicLevel.IM);
+		assertThat(reloaded.getEvaluatedAt()).isNotNull();
+		// jsonb normalises key order and spacing, so compare as JSON trees.
+		assertThat(json.readTree(reloaded.getReport())).isEqualTo(json.readTree(
+			"{\"confidence\":\"LOW\",\"estimatedLevel\":\"IM\",\"tips\":[\"연결어를 늘려 보세요\"]}"));
+		assertThat(json.readTree(reloadedAnswer.getEvaluation()).at("/dimensions/0/level").asText()).isEqualTo("IL");
+		assertThat(reloadedAnswer.getEvaluationStatus()).isEqualTo(AnswerEvaluationStatus.DONE);
+		assertThat(reloadedAnswer.getOverallLevel()).isEqualTo(OpicLevel.IL);
+		assertThat(reloadedAnswer.getImprovedScript()).isEqualTo("I went to the park.");
+	}
+
+	@Test
+	void completeEvaluationRejectsNonFinalStatuses() {
+		PracticeSession session = new PracticeSession(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "집", null);
+
+		assertThatThrownBy(() -> session.completeEvaluation(SessionEvaluationStatus.RUNNING, null, null))
+			.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	private UUID selection(UUID userId) {
