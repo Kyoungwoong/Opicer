@@ -8,7 +8,7 @@ export const adminUi = {
   section: "flex flex-col gap-6",
   card: "flex flex-col gap-4 rounded-3xl border bg-card/90 p-5 shadow-card sm:p-6",
   cardTitle: "text-lg font-semibold text-foreground",
-  subCard: "flex flex-col gap-2 rounded-2xl border bg-background/60 p-4",
+  subCard: "flex flex-col gap-2 rounded-2xl border bg-secondary p-4",
   empty: "rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground",
 
   grid2: "grid gap-4 sm:grid-cols-2",
@@ -18,9 +18,9 @@ export const adminUi = {
   fieldGroup: "flex flex-col gap-2",
   labelText: "text-sm font-medium text-foreground",
   control:
-    "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:opacity-50",
+    "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:opacity-50",
   controlMono:
-    "w-full rounded-lg border border-input bg-background px-3 py-2 font-mono text-xs outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30",
+    "w-full rounded-lg border border-input bg-card px-3 py-2 font-mono text-xs outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30",
   checkRow: "flex cursor-pointer items-center gap-2 text-sm",
   checkInline: "flex cursor-pointer items-center gap-1.5 text-sm",
   checkbox: "size-4 accent-primary",

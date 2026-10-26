@@ -7,7 +7,7 @@ export function Wordmark({ className }: { className?: string }) {
     <Link
       href="/"
       aria-label="Opicer 홈"
-      className={cn("inline-flex shrink-0 items-center rounded-md font-display text-[28px] leading-none text-primary", className)}
+      className={cn("inline-flex shrink-0 items-center rounded-md font-display text-[28px] leading-none text-brand", className)}
     >
       opicer
     </Link>

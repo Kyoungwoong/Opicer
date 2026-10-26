@@ -272,7 +272,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="주제 검색 (한국어/English)"
-            className="h-11 rounded-full bg-background pl-10"
+            className="h-11 rounded-full bg-card pl-10"
           />
         </div>
       </section>
