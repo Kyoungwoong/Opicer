@@ -46,12 +46,14 @@ public class NaverGeocoder implements Geocoder {
 				.header("x-ncp-apigw-api-key", properties.getClientSecret())
 				.retrieve()
 				.body(GeocodeResponse.class);
-			if (response == null || response.addresses() == null || response.addresses().isEmpty()) {
+			GeocodeAddress first = response == null || response.addresses() == null || response.addresses().isEmpty()
+				? null
+				: response.addresses().get(0);
+			if (first == null || first.x() == null || first.y() == null) {
 				return Result.failed("주소로 좌표를 찾지 못했어요. 도로명 주소를 확인하거나 좌표를 직접 입력하세요.");
 			}
-			GeocodeAddress first = response.addresses().get(0);
 			return Result.found(Double.parseDouble(first.y()), Double.parseDouble(first.x()));
-		} catch (RestClientException | NumberFormatException | NullPointerException e) {
+		} catch (RestClientException | NumberFormatException e) {
 			log.warn("[Geocode] failed for an address: {}", e.getMessage());
 			return Result.failed("좌표 변환 서비스에 연결하지 못했어요. 잠시 후 다시 저장하거나 좌표를 직접 입력하세요.");
 		}

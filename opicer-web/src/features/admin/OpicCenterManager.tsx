@@ -59,6 +59,8 @@ export function OpicCenterManager({ onChanged }: { onChanged: () => void }) {
   const [centers, setCenters] = useState<AdminOpicCenter[]>([]);
   const [form, setForm] = useState<Form>(emptyForm);
   const [editId, setEditId] = useState<string | null>(null);
+  // Coordinates as loaded for editing: unchanged ones must not survive an address change.
+  const [loadedCoordinates, setLoadedCoordinates] = useState({ latitude: "", longitude: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -91,13 +93,27 @@ export function OpicCenterManager({ onChanged }: { onChanged: () => void }) {
       latitude: center.latitude?.toString() ?? "",
       longitude: center.longitude?.toString() ?? "",
     });
+    setLoadedCoordinates({
+      latitude: center.latitude?.toString() ?? "",
+      longitude: center.longitude?.toString() ?? "",
+    });
     setError(null);
     setNotice(null);
+  }
+
+  /** A new address needs new coordinates, unless the admin typed coordinates themselves. */
+  function changeAddress(address: string) {
+    setForm((f) => {
+      const untouched =
+        Boolean(f.latitude) && f.latitude === loadedCoordinates.latitude && f.longitude === loadedCoordinates.longitude;
+      return untouched ? { ...f, address, latitude: "", longitude: "" } : { ...f, address };
+    });
   }
 
   function cancelEdit() {
     setEditId(null);
     setForm(emptyForm);
+    setLoadedCoordinates({ latitude: "", longitude: "" });
     setError(null);
   }
 
@@ -169,8 +185,18 @@ export function OpicCenterManager({ onChanged }: { onChanged: () => void }) {
         </div>
         <label className={adminUi.field}>
           <span className={adminUi.labelText}>도로명 주소</span>
-          <input required maxLength={500} className={adminUi.control} placeholder="예: 서울 강남구 테헤란로 123" {...field("address")} />
+          <input
+            required
+            maxLength={500}
+            className={adminUi.control}
+            placeholder="예: 서울 강남구 테헤란로 123"
+            value={form.address}
+            onChange={(e) => changeAddress(e.target.value)}
+          />
         </label>
+        {editId && loadedCoordinates.latitude && !form.latitude && (
+          <p className="text-xs text-muted-foreground">주소가 바뀌어 좌표를 비웠어요. 저장하면 새 주소로 다시 찾아요.</p>
+        )}
         <div className={adminUi.grid2}>
           <label className={adminUi.field}>
             <span className={adminUi.labelText}>전화번호</span>

@@ -68,6 +68,18 @@ class NaverGeocoderTest {
 	}
 
 	@Test
+	void anAddressWithoutCoordinatesCountsAsNoMatch() {
+		server.expect(requestTo(containsString("query=")))
+			.andRespond(withSuccess("{\"status\":\"OK\",\"addresses\":[{\"roadAddress\":\"서울\"}]}",
+				MediaType.APPLICATION_JSON));
+
+		Geocoder.Result result = geocoder.geocode("서울");
+
+		assertThat(result.isFound()).isFalse();
+		assertThat(result.failure()).contains("좌표를 찾지 못했어요");
+	}
+
+	@Test
 	void serverErrorIsAFailureNotAnException() {
 		server.expect(requestTo(containsString("query="))).andRespond(withServerError());
 
