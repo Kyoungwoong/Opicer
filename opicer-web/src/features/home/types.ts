@@ -5,17 +5,3 @@ export type UniversalSentence = {
   sentence: string;
   tags: string[];
 };
-
-export type OpicScheduleEvent = {
-  id: string;
-  date: number;
-  label: string;
-  type: "exam" | "registration";
-};
-
-export type OpicCalendar = {
-  monthLabel: string;
-  startWeekday: number;
-  daysInMonth: number;
-  events: OpicScheduleEvent[];
-};
