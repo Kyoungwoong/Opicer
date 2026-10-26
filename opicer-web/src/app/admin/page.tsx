@@ -16,7 +16,7 @@ import { PromptVersionTab } from "@/features/admin/PromptVersionTab";
 import { EvaluationGuideTab } from "@/features/admin/EvaluationGuideTab";
 import { UniversalSentenceTab } from "@/features/admin/UniversalSentenceTab";
 import { GoodAnswerTab } from "@/features/admin/GoodAnswerTab";
-import { OpicCenterReviewTab } from "@/features/admin/OpicCenterReviewTab";
+import { OpicCenterTab } from "@/features/admin/OpicCenterTab";
 
 type Tab =
   | "questions"
@@ -34,7 +34,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "good-answers", label: "샘플 답변" },
   { id: "evaluation-guides", label: "평가 가이드" },
   { id: "prompts", label: "프롬프트 버전" },
-  { id: "opic-centers", label: "시험센터 후기" },
+  { id: "opic-centers", label: "시험센터" },
 ];
 
 export default function AdminPage() {
@@ -115,7 +115,7 @@ export default function AdminPage() {
         {activeTab === "good-answers" && <GoodAnswerTab />}
         {activeTab === "evaluation-guides" && <EvaluationGuideTab />}
         {activeTab === "prompts" && <PromptVersionTab />}
-        {activeTab === "opic-centers" && <OpicCenterReviewTab />}
+        {activeTab === "opic-centers" && <OpicCenterTab />}
       </div>
     </PageShell>
   );
