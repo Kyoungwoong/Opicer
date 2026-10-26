@@ -105,7 +105,7 @@ class OpicSyncServiceTest {
 
 		assertThat(result.upserted()).isEqualTo(1);
 		assertThat(result.deactivated()).isEqualTo(1);
-		assertThat(queryService.centers(null)).extracting(OpicTestCenter::getName).containsExactly("센터 A");
+		assertThat(queryService.centers(null).stream().map(s -> s.center().getName()).toList()).containsExactly("센터 A");
 		assertThat(queryService.centers("경기")).isEmpty();
 		assertThat(centerRepository.count()).isEqualTo(2);
 	}
