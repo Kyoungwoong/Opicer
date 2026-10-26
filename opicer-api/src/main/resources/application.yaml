@@ -78,6 +78,10 @@ opicer:
   storage:
     good-answer-dir: ${OPICER_GOOD_ANSWER_DIR:./storage/good-answers}
     good-answer-url-prefix: ${OPICER_GOOD_ANSWER_URL_PREFIX:/media/good-answers}
+  # NAVER Cloud Platform Maps, for geocoding admin-entered test center addresses (optional).
+  naver-map:
+    client-id: ${NAVER_MAP_CLIENT_ID:}
+    client-secret: ${NAVER_MAP_CLIENT_SECRET:}
   credit:
     unsafe-delay-ms: ${OPICER_CREDIT_UNSAFE_DELAY_MS:0}
     idempotency-ttl-hours: ${OPICER_CREDIT_IDEMPOTENCY_TTL_HOURS:24}

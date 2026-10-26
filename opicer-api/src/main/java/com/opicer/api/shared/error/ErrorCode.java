@@ -27,6 +27,7 @@ public enum ErrorCode {
 	PRACTICE_SESSION_NOT_FOUND("PRACTICE_SESSION_NOT_FOUND", HttpStatus.NOT_FOUND, "Practice session not found"),
 	PRACTICE_ANSWER_NOT_FOUND("PRACTICE_ANSWER_NOT_FOUND", HttpStatus.NOT_FOUND, "Practice answer not found"),
 	OPIC_CENTER_NOT_FOUND("OPIC_CENTER_NOT_FOUND", HttpStatus.NOT_FOUND, "OPIc test center not found"),
+	OPIC_CENTER_DUPLICATE("OPIC_CENTER_DUPLICATE", HttpStatus.CONFLICT, "A test center with this name and address already exists"),
 	OPIC_CENTER_REVIEW_NOT_FOUND("OPIC_CENTER_REVIEW_NOT_FOUND", HttpStatus.NOT_FOUND, "OPIc test center review not found"),
 	EVALUATION_NOT_RETRYABLE("EVALUATION_NOT_RETRYABLE", HttpStatus.CONFLICT, "Evaluation can only be retried after it failed"),
 	EVALUATION_RETRY_LIMIT("EVALUATION_RETRY_LIMIT", HttpStatus.CONFLICT, "No evaluation retries left for this session"),

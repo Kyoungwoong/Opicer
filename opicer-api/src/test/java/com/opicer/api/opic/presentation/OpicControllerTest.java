@@ -60,8 +60,7 @@ class OpicControllerTest {
 
 	@Test
 	void centersIncludeReviewStats() throws Exception {
-		OpicTestCenter center = new OpicTestCenter("강남센터|서울 강남구");
-		center.apply("강남센터", "서울 강남구", null, null, null, "2호선", null, "C001", "서울", Instant.now());
+		OpicTestCenter center = new OpicTestCenter("강남센터", "서울 강남구", null, "2호선", null, "서울", Instant.now());
 		when(opicQueryService.centers(any())).thenReturn(List.of(
 			new CenterSummary(center, 3, 4.3),
 			new CenterSummary(center, 0, null)

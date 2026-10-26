@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.UUID;
 
 /** An OPIc test center. Centers are deactivated rather than deleted, so their reviews stay linked. */
@@ -52,29 +53,50 @@ public class OpicTestCenter {
 	@Column(nullable = false)
 	private boolean active;
 
+	/** Last change by an admin (the column name predates manual entry). */
 	@Column(name = "synced_at", nullable = false)
 	private Instant syncedAt;
 
 	protected OpicTestCenter() {
 	}
 
-	public OpicTestCenter(String externalKey) {
-		this.externalKey = externalKey;
+	/** A new, active center entered by an admin; coordinates are set separately with {@link #locate}. */
+	public OpicTestCenter(String name, String address, String phone, String subwayLines, String directions,
+		String regionName, Instant now) {
+		update(name, address, phone, subwayLines, directions, regionName, now);
+		this.active = true;
 	}
 
-	public void apply(String name, String address, Double latitude, Double longitude, String phone,
-		String subwayLines, String directions, String regionCode, String regionName, Instant syncedAt) {
-		this.name = name;
-		this.address = address;
+	/** Same center if the name and address match after trimming, collapsing spaces and ignoring case. */
+	public static String naturalKey(String name, String address) {
+		return normalize(name) + "|" + normalize(address);
+	}
+
+	public void update(String name, String address, String phone, String subwayLines, String directions,
+		String regionName, Instant now) {
+		this.externalKey = naturalKey(name, address);
+		this.name = name.trim();
+		this.address = address.trim();
+		this.phone = blankToNull(phone);
+		this.subwayLines = blankToNull(subwayLines);
+		this.directions = blankToNull(directions);
+		this.regionName = blankToNull(regionName);
+		this.syncedAt = now;
+	}
+
+	/** Whether {@code other} is this center's address, ignoring spacing and case. */
+	public boolean hasAddress(String other) {
+		return normalize(address).equals(normalize(other));
+	}
+
+	/** Both null clears the position (the map then skips the center). */
+	public void locate(Double latitude, Double longitude) {
 		this.latitude = latitude;
 		this.longitude = longitude;
-		this.phone = phone;
-		this.subwayLines = subwayLines;
-		this.directions = directions;
-		this.regionCode = regionCode;
-		this.regionName = regionName;
+	}
+
+	public void activate() {
 		this.active = true;
-		this.syncedAt = syncedAt;
 	}
 
 	public void deactivate() {
@@ -94,4 +116,12 @@ public class OpicTestCenter {
 	public String getRegionName() { return regionName; }
 	public boolean isActive() { return active; }
 	public Instant getSyncedAt() { return syncedAt; }
+
+	private static String normalize(String value) {
+		return value == null ? "" : value.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
+	}
+
+	private static String blankToNull(String value) {
+		return value == null || value.isBlank() ? null : value.trim();
+	}
 }

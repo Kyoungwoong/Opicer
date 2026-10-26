@@ -6,6 +6,7 @@ import { evaluationGuideApi } from "./api";
 import type { EvaluationGuide, EvaluationGuideKind } from "./types";
 import { adminUi } from "@/features/admin/ui";
 import { MarkdownPreview } from "@/features/admin/MarkdownPreview";
+import { parseAdminError } from "@/features/admin/errors";
 
 /** Mirrors EvaluationGuide.MAX_CONTENT_LENGTH on the server. */
 const MAX_CONTENT_LENGTH = 4000;
@@ -43,19 +44,13 @@ type Editor =
 
 const emptyEditor = (kind: EvaluationGuideKind): Editor => ({ mode: "new", kind, title: "", contentMd: "" });
 
-/** The admin request helper throws "<status>: <body>"; show the server's message when there is one. */
+/** The server's message, with a plain explanation for the frozen-active-version conflict. */
 function messageOf(err: unknown): string {
-  const raw = err instanceof Error ? err.message : String(err);
-  const json = raw.slice(raw.indexOf(":") + 1).trim();
-  try {
-    const body = JSON.parse(json) as { message?: string; code?: string };
-    if (body.code === "EVALUATION_GUIDE_ACTIVE") {
-      return "활성 버전은 고치거나 지울 수 없어요. 복제해서 새 버전을 만든 뒤 활성화하세요.";
-    }
-    return body.message ?? raw;
-  } catch {
-    return raw;
+  const { code, message } = parseAdminError(err);
+  if (code === "EVALUATION_GUIDE_ACTIVE") {
+    return "활성 버전은 고치거나 지울 수 없어요. 복제해서 새 버전을 만든 뒤 활성화하세요.";
   }
+  return message;
 }
 
 function formatDate(iso: string): string {

@@ -1,4 +1,6 @@
 import type {
+  AdminOpicCenter,
+  AdminOpicCenterInput,
   AdminOpicCenterReview,
   AdminOpicCenterReviewInput,
   DailySentence,
@@ -241,6 +243,16 @@ export const goodAnswerApi = {
   },
   delete: (id: string) =>
     request<void>(`good-answers/${id}`, { method: "DELETE" }),
+};
+
+export const opicCenterApi = {
+  list: () => request<AdminOpicCenter[]>("opic-centers"),
+  create: (data: AdminOpicCenterInput) =>
+    request<AdminOpicCenter>("opic-centers", { method: "POST", body: JSON.stringify(data) }),
+  update: (id: string, data: AdminOpicCenterInput) =>
+    request<AdminOpicCenter>(`opic-centers/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  activate: (id: string) => request<AdminOpicCenter>(`opic-centers/${id}/activate`, { method: "POST" }),
+  deactivate: (id: string) => request<AdminOpicCenter>(`opic-centers/${id}/deactivate`, { method: "POST" }),
 };
 
 export const opicCenterReviewApi = {

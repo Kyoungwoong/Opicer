@@ -97,6 +97,34 @@ export type GoodAnswerUploadItem = {
   sampleText: string;
 };
 
+export type AdminOpicCenter = {
+  id: string;
+  name: string;
+  address: string;
+  latitude: number | null;
+  longitude: number | null;
+  phone: string | null;
+  subwayLines: string | null;
+  directions: string | null;
+  regionName: string | null;
+  active: boolean;
+  updatedAt: string;
+  /** Set when the center was saved without coordinates. */
+  geocodeWarning: string | null;
+};
+
+/** Leave both coordinates empty to look them up from the address. */
+export type AdminOpicCenterInput = {
+  name: string;
+  address: string;
+  phone?: string;
+  subwayLines?: string;
+  directions?: string;
+  regionName?: string;
+  latitude?: number;
+  longitude?: number;
+};
+
 export type AdminOpicCenterReview = {
   id: string;
   centerId: string;
