@@ -15,6 +15,8 @@ import { fetchTopics, submitTopicSelection } from "@/features/practice/api";
 import { ROUTES } from "@/lib/routes";
 import type { TopicCategory, TopicItem } from "@/features/practice/types";
 import { Mascot } from "@/components/brand/Mascot";
+import { DEFAULT_TARGET_LEVEL, TARGET_LEVELS, isTargetLevel } from "@/features/practice/evaluation-labels";
+import type { TargetLevel } from "@/features/practice/types";
 
 type Props = {
   userLabel?: string;
@@ -32,6 +34,17 @@ const CATEGORY_META: Record<string, string> = {
 };
 
 const LEGACY_UNEXPECTED = new Set(["돌발/상황 대처", CATEGORY_UNEXPECTED]);
+
+const TARGET_LEVEL_STORAGE_KEY = "opicer.practice.targetLevel";
+
+function readStoredTargetLevel(): TargetLevel {
+  try {
+    const stored = window.localStorage.getItem(TARGET_LEVEL_STORAGE_KEY);
+    return isTargetLevel(stored) ? stored : DEFAULT_TARGET_LEVEL;
+  } catch {
+    return DEFAULT_TARGET_LEVEL;
+  }
+}
 
 const INTRO_KEYWORDS = ["자기소개", "self introduction"];
 
@@ -75,6 +88,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"select" | "ready">("select");
+  const [targetLevel, setTargetLevel] = useState<TargetLevel>(DEFAULT_TARGET_LEVEL);
 
   useEffect(() => {
     let mounted = true;
@@ -164,6 +178,7 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
     try {
       const selection = await submitTopicSelection(selectedId);
       setSelectedSelectionId(selection.id);
+      setTargetLevel(readStoredTargetLevel());
       setMode("ready");
     } catch (err) {
       setError(err instanceof Error ? err.message : "선택 저장 중 문제가 발생했습니다.");
@@ -174,7 +189,12 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
 
   const handleStartPractice = () => {
     if (!selectedId || !selectedSelectionId) return;
-    router.push(`${ROUTES.practiceSession(selectedId)}?selectionId=${selectedSelectionId}`);
+    try {
+      window.localStorage.setItem(TARGET_LEVEL_STORAGE_KEY, targetLevel);
+    } catch {
+      // Remembering the choice is a convenience only.
+    }
+    router.push(`${ROUTES.practiceSession(selectedId)}?selectionId=${selectedSelectionId}&target=${targetLevel}`);
   };
 
   const topicCount = (count: number) => `${count}개 주제`;
@@ -206,6 +226,30 @@ export function TopicPracticeView({ userLabel, onLogout }: Props) {
               </div>
             ) : null}
           </div>
+
+          <fieldset className="flex w-full max-w-sm flex-col gap-3 text-left">
+            <legend className="mb-3 text-sm font-semibold">목표 레벨</legend>
+            <div className="grid grid-cols-3 gap-2">
+              {TARGET_LEVELS.map((option) => (
+                <label key={option.level} className="cursor-pointer">
+                  <input
+                    type="radio"
+                    name="target-level"
+                    value={option.level}
+                    checked={option.level === targetLevel}
+                    onChange={() => setTargetLevel(option.level)}
+                    className="peer sr-only"
+                  />
+                  <span className="flex items-center justify-center rounded-2xl border bg-card py-3 text-lg font-extrabold transition-colors hover:bg-secondary peer-checked:border-primary peer-checked:bg-accent peer-checked:text-primary-strong peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50">
+                    {option.level}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {TARGET_LEVELS.find((option) => option.level === targetLevel)?.description}. 이 레벨을 기준으로 교정과 목표 스크립트를 만들어요.
+            </p>
+          </fieldset>
 
           <div className="flex w-full flex-col items-center gap-3">
             {error ? (

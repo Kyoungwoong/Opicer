@@ -5,6 +5,7 @@ import type {
   PracticeSessionSummary,
   PracticeSubmitResult,
   SessionEvaluationStatus,
+  TargetLevel,
   TopicItem,
   TopicSelection,
 } from "@/features/practice/types";
@@ -71,54 +72,16 @@ export async function transcribeAudio(
   return body.transcript;
 }
 
-export async function analyzeAnswer(
-  topicId: string,
-  questionText: string,
-  transcript: string,
-  questionType?: string,
-  targetLevel?: string
-): Promise<string> {
-  const res = await fetch("/api/practice/analyze", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ topicId, questionText, transcript, questionType, targetLevel }),
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new Error(body?.message ?? "Analysis failed");
-  }
-  const body = (await res.json()) as { analysis: string };
-  return body.analysis;
-}
-
-export async function improveScript(
-  topicId: string,
-  questionText: string,
-  transcript: string,
-  questionType?: string,
-  targetLevel?: string
-): Promise<string> {
-  const res = await fetch("/api/practice/improve", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ topicId, questionText, transcript, questionType, targetLevel }),
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new Error(body?.message ?? "Improvement failed");
-  }
-  const body = (await res.json()) as { improved: string };
-  return body.improved;
-}
-
+/** Charges the session once and queues its automatic evaluation against `targetLevel`. */
 export async function submitPracticeSession(
   topicSelectionId: string,
+  targetLevel: TargetLevel,
   answers: PracticeAnswerInput[] = []
 ): Promise<PracticeSubmitResult> {
   const res = await fetch("/api/practice/sessions/submit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ topicSelectionId, answers }),
+    body: JSON.stringify({ topicSelectionId, targetLevel, answers }),
   });
   if (!res.ok) {
     const body = await res.json().catch(() => null);
@@ -144,22 +107,6 @@ export async function fetchPracticeSession(sessionId: string): Promise<PracticeS
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(await errorMessage(res, "연습 기록을 불러오지 못했습니다."));
   return (await res.json()) as PracticeSessionDetail;
-}
-
-export async function savePracticeAnswerResult(
-  sessionId: string,
-  questionId: string,
-  result: { analysis?: string; improvedScript?: string }
-): Promise<void> {
-  const res = await fetch(
-    `/api/practice/sessions/${encodeURIComponent(sessionId)}/answers/${encodeURIComponent(questionId)}`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(result),
-    }
-  );
-  if (!res.ok) throw new Error(await errorMessage(res, "분석 결과 저장에 실패했습니다."));
 }
 
 /** Free retry of a FAILED or PARTIAL evaluation; the server allows a few per session (409 after that). */
