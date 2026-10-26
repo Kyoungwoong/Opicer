@@ -7,6 +7,7 @@ import { logout } from "@/lib/auth-client";
 import { useAuthState } from "@/lib/use-auth-state";
 import { LoadingScreen } from "@/components/common/LoadingScreen";
 import { PracticeSessionView } from "@/features/practice/components/PracticeSessionView";
+import { DEFAULT_TARGET_LEVEL, isTargetLevel } from "@/features/practice/evaluation-labels";
 
 export default function PracticeSessionPage() {
   const auth = useAuthState();
@@ -15,6 +16,8 @@ export default function PracticeSessionPage() {
   const searchParams = useSearchParams();
   const topicId = typeof params.topicId === "string" ? params.topicId : "";
   const topicSelectionId = searchParams.get("selectionId") ?? "";
+  const target = searchParams.get("target");
+  const targetLevel = isTargetLevel(target) ? target : DEFAULT_TARGET_LEVEL;
 
   useEffect(() => {
     if (auth.status === "unauthenticated") {
@@ -43,6 +46,7 @@ export default function PracticeSessionPage() {
     <PracticeSessionView
       topicId={topicId}
       topicSelectionId={topicSelectionId}
+      targetLevel={targetLevel}
       userLabel={auth.user.name ?? auth.user.email ?? "사용자"}
       onLogout={handleLogout}
     />

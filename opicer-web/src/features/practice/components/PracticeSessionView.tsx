@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
@@ -12,10 +13,8 @@ import {
   LoaderCircle,
   Mic,
   MicOff,
-  PenLine,
   RotateCcw,
   Send,
-  Sparkles,
   Timer,
   Volume2,
 } from "lucide-react";
@@ -26,43 +25,39 @@ import { Eyebrow, SectionHeader } from "@/components/common/SectionHeader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  analyzeAnswer,
   fetchPracticeQuestions,
-  improveScript,
-  savePracticeAnswerResult,
   submitPracticeSession,
   submitTopicSelection,
   transcribeAudio,
 } from "@/features/practice/api";
 import { ROUTES } from "@/lib/routes";
-import type { PracticeAnswer, PracticeQuestion } from "@/features/practice/types";
-import { TranscriptDiff } from "@/features/practice/components/TranscriptDiff";
+import type { PracticeAnswer, PracticeQuestion, TargetLevel } from "@/features/practice/types";
 import { MicLevelMeter } from "@/features/practice/components/MicLevelMeter";
+import { AnswerEvaluationPanel } from "@/features/practice/components/evaluation/AnswerEvaluationPanel";
+import { EvaluationStatusNotice } from "@/features/practice/components/evaluation/EvaluationStatusNotice";
+import { SessionReportCard } from "@/features/practice/components/evaluation/SessionReportCard";
+import { isEvaluationInProgress, useSessionEvaluation } from "@/features/practice/use-session-evaluation";
+import { historyPath } from "@/features/practice/history-format";
 import { Mascot } from "@/components/brand/Mascot";
 
 const PRACTICE_DURATION_SECONDS = 120;
 const REPLAY_WINDOW_SECONDS = 5;
+/** Upper bound the server accepts for an answer's recording length. */
+const MAX_DURATION_SECONDS = 600;
 
 type Mode = "loading" | "playing" | "recording" | "submitting" | "summary";
-
-type QuestionAiState = {
-  isAnalyzing: boolean;
-  analysis: string | null;
-  analyzeError: string | null;
-  isImproving: boolean;
-  improvement: string | null;
-  improveError: string | null;
-};
 
 type Props = {
   topicId: string;
   topicSelectionId: string;
+  targetLevel: TargetLevel;
   userLabel?: string;
   onLogout?: () => void;
 };
 
-export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLogout }: Props) {
+export function PracticeSessionView({ topicId, topicSelectionId, targetLevel, userLabel, onLogout }: Props) {
   const router = useRouter();
 
   // ── Core state ─────────────────────────────────────────────
@@ -72,8 +67,9 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
   const [mode, setMode] = useState<Mode>("loading");
   const [error, setError] = useState<string | null>(null);
 
-  // ── AI state per question ───────────────────────────────────
-  const [aiStates, setAiStates] = useState<Record<string, QuestionAiState>>({});
+  // Saved practice session (from submit); its evaluation is polled on the summary screen.
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const evaluation = useSessionEvaluation(sessionId);
 
   // ── Timer / replay state ────────────────────────────────────
   const [remainingSeconds, setRemainingSeconds] = useState(PRACTICE_DURATION_SECONDS);
@@ -91,6 +87,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
   const replayTimerRef = useRef<number | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const recordingStartedAtRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
   // Stable ref to goToNext — updated every render to avoid stale closures
@@ -99,15 +96,6 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
   const answersRef = useRef<PracticeAnswer[]>([]);
   // pendingSubmitRef signals that onstop should trigger transcription
   const pendingSubmitRef = useRef(false);
-  // Saved practice session id (from submit), used to persist AI results to history
-  const sessionIdRef = useRef<string | null>(null);
-
-  /** Best-effort: a failed history save must not disturb the result already on screen. */
-  const persistAiResult = (questionId: string, result: { analysis?: string; improvedScript?: string }) => {
-    const sessionId = sessionIdRef.current;
-    if (!sessionId) return;
-    savePracticeAnswerResult(sessionId, questionId, result).catch(() => {});
-  };
 
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
@@ -206,9 +194,15 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
       try {
         const result = await submitPracticeSession(
           topicSelectionId,
-          updated.map((a) => ({ questionId: a.questionId, questionText: a.questionText, transcript: a.transcript ?? null }))
+          targetLevel,
+          updated.map((a) => ({
+            questionId: a.questionId,
+            questionText: a.questionText,
+            transcript: a.transcript ?? null,
+            durationSeconds: a.durationSeconds ?? null,
+          }))
         );
-        sessionIdRef.current = result.sessionId;
+        setSessionId(result.sessionId);
       } catch (err) {
         const message = err instanceof Error ? err.message : "연습 제출 처리에 실패했습니다.";
         setError(message);
@@ -233,11 +227,13 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
         setMicStream(null);
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         const url = URL.createObjectURL(blob);
+        const elapsedSeconds = Math.round((Date.now() - recordingStartedAtRef.current) / 1000);
         const newAnswer: PracticeAnswer = {
           questionId: question.id,
           questionText: question.promptText,
           audioUrl: url,
           recordedAt: new Date().toISOString(),
+          durationSeconds: Math.min(Math.max(elapsedSeconds, 1), MAX_DURATION_SECONDS),
         };
         // Sync update answersRef first, then state
         const nextAnswers = [
@@ -255,6 +251,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
       };
       recorderRef.current = recorder;
       recorder.start();
+      recordingStartedAtRef.current = Date.now();
       setIsRecording(true);
       setMicStream(stream);
     } catch {
@@ -390,76 +387,6 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
     });
   };
 
-  // ── AI actions ───────────────────────────────────────────────
-  const getOrInitAiState = (questionId: string): QuestionAiState =>
-    aiStates[questionId] ?? {
-      isAnalyzing: false, analysis: null, analyzeError: null,
-      isImproving: false, improvement: null, improveError: null,
-    };
-
-  const findQuestionMeta = (questionId: string) =>
-    questions.find((q) => q.id === questionId);
-
-  const handleAnalyze = async (answer: PracticeAnswer) => {
-    if (!answer.transcript) return;
-    const id = answer.questionId;
-    setAiStates((prev) => ({
-      ...prev,
-      [id]: { ...getOrInitAiState(id), isAnalyzing: true, analyzeError: null },
-    }));
-    try {
-      const question = findQuestionMeta(answer.questionId);
-      const analysis = await analyzeAnswer(
-        topicId,
-        answer.questionText,
-        answer.transcript,
-        question?.type,
-        question?.targetLevels?.[0]
-      );
-      setAiStates((prev) => ({
-        ...prev,
-        [id]: { ...prev[id]!, isAnalyzing: false, analysis },
-      }));
-      persistAiResult(id, { analysis });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "분석에 실패했습니다.";
-      setAiStates((prev) => ({
-        ...prev,
-        [id]: { ...prev[id]!, isAnalyzing: false, analyzeError: message },
-      }));
-    }
-  };
-
-  const handleImprove = async (answer: PracticeAnswer) => {
-    if (!answer.transcript) return;
-    const id = answer.questionId;
-    setAiStates((prev) => ({
-      ...prev,
-      [id]: { ...getOrInitAiState(id), isImproving: true, improveError: null },
-    }));
-    try {
-      const question = findQuestionMeta(answer.questionId);
-      const improvement = await improveScript(
-        topicId,
-        answer.questionText,
-        answer.transcript,
-        question?.type,
-        question?.targetLevels?.[0]
-      );
-      setAiStates((prev) => ({
-        ...prev,
-        [id]: { ...prev[id]!, isImproving: false, improvement },
-      }));
-      persistAiResult(id, { improvedScript: improvement });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "수정에 실패했습니다.";
-      setAiStates((prev) => ({
-        ...prev,
-        [id]: { ...prev[id]!, isImproving: false, improveError: message },
-      }));
-    }
-  };
-
   // ── Cleanup on unmount ───────────────────────────────────────
   useEffect(() => {
     return () => { stopAll(); };
@@ -478,7 +405,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
       <PageShell width="md" nav={nav}>
         <div role="status" className="flex flex-col items-center justify-center gap-4 py-24">
           <LoaderCircle aria-hidden className="size-8 animate-spin text-primary-strong" />
-          <p className="text-sm text-muted-foreground">답변 분석 중…</p>
+          <p className="text-sm text-muted-foreground">답변을 텍스트로 옮기고 있어요…</p>
         </div>
       </PageShell>
     );
@@ -486,6 +413,12 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
 
   // ── Summary screen ───────────────────────────────────────────
   if (mode === "summary") {
+    const evaluatedSession = evaluation.session;
+    const serverAnswers = new Map(evaluatedSession?.answers.map((a) => [a.questionId, a]) ?? []);
+    const reportTarget = evaluatedSession?.targetLevel ?? targetLevel;
+    // A re-recorded answer moves to the end of `answers`; show them in question order.
+    const questionIndex = (questionId: string) => questions.findIndex((q) => q.id === questionId);
+    const orderedAnswers = [...answers].sort((a, b) => questionIndex(a.questionId) - questionIndex(b.questionId));
     return (
       <PageShell width="md" nav={nav}>
         {error ? (
@@ -503,13 +436,57 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
           <SectionHeader
             as="h1"
             title="연습 완료"
-            description={`${topicTitle} · ${answers.length}문항 답변 완료`}
+            description={`${topicTitle} · ${answers.length}문항 답변 완료 · 목표 ${targetLevel}`}
           />
         </section>
 
+        {evaluatedSession ? (
+          <EvaluationStatusNotice
+            session={evaluatedSession}
+            timedOut={evaluation.timedOut}
+            pollFailed={evaluation.pollFailed}
+            retrying={evaluation.retrying}
+            retryError={evaluation.retryError}
+            historyHref={historyPath(evaluatedSession.id)}
+            onRetry={evaluation.retry}
+            onCheckAgain={evaluation.checkAgain}
+          />
+        ) : sessionId && (evaluation.missing || evaluation.timedOut) ? (
+          // The detail never loaded, so EvaluationStatusNotice has nothing to render from.
+          <Alert>
+            <AlertCircle />
+            <AlertTitle>
+              {evaluation.missing ? "연습 기록을 찾을 수 없어요" : "평가 결과를 불러오지 못했어요"}
+            </AlertTitle>
+            <AlertDescription className="flex flex-col gap-3">
+              <p>
+                {evaluation.missing
+                  ? "기록이 삭제되었을 수 있어요. 마이페이지에서 기록을 확인해 주세요."
+                  : "연결 상태를 확인한 뒤 다시 시도해 주세요. 평가는 서버에서 계속 진행돼요."}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {!evaluation.missing && (
+                  <Button type="button" variant="outline" size="sm" onClick={evaluation.checkAgain} className="rounded-full px-4">
+                    <RotateCcw />
+                    다시 확인
+                  </Button>
+                )}
+                <Button asChild variant="ghost" size="sm" className="rounded-full px-4">
+                  <Link href={evaluation.missing ? ROUTES.mypage : historyPath(sessionId)}>마이페이지에서 보기</Link>
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        ) : sessionId ? (
+          <Skeleton className="h-24 rounded-3xl" />
+        ) : null}
+
+        {evaluatedSession?.report ? <SessionReportCard report={evaluatedSession.report} /> : null}
+
         <ol className="flex flex-col gap-5">
-          {answers.map((answer, idx) => {
-            const ai = getOrInitAiState(answer.questionId);
+          {orderedAnswers.map((answer, idx) => {
+            const result = serverAnswers.get(answer.questionId);
+            const transcript = answer.transcript ?? result?.transcript ?? null;
             return (
               <li key={answer.questionId} className="flex flex-col gap-4 rounded-3xl border bg-card p-5 shadow-card sm:p-6">
                 <div className="flex flex-col gap-1.5">
@@ -519,9 +496,9 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
 
                 {/* Transcript + audio */}
                 <div className="rounded-2xl border border-primary/20 bg-accent/60 p-4">
-                  <p className="text-xs font-semibold text-primary-strong">Your Answer</p>
-                  {answer.transcript ? (
-                    <p className="mt-2 text-sm leading-relaxed">{answer.transcript}</p>
+                  <p className="text-xs font-semibold text-primary-strong">내 답변 · 음성 인식 결과(추정)</p>
+                  {transcript ? (
+                    <p className="mt-2 text-sm leading-relaxed">{transcript}</p>
                   ) : answer.transcribeError ? (
                     <p className="mt-2 text-sm text-destructive">전사 실패: {answer.transcribeError}</p>
                   ) : (
@@ -534,55 +511,24 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
                   )}
                 </div>
 
-                {/* Action buttons — only if transcript exists */}
-                {answer.transcript && (
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      onClick={() => handleAnalyze(answer)}
-                      disabled={ai.isAnalyzing || ai.analysis !== null}
-                      className="h-10 rounded-full px-5"
-                    >
-                      {ai.isAnalyzing ? <LoaderCircle className="animate-spin" /> : <Sparkles />}
-                      {ai.isAnalyzing ? "분석 중…" : ai.analysis ? "분석 완료" : "분석하기"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => handleImprove(answer)}
-                      disabled={ai.isImproving || ai.improvement !== null}
-                      className="h-10 rounded-full px-5"
-                    >
-                      {ai.isImproving ? <LoaderCircle className="animate-spin" /> : <PenLine />}
-                      {ai.isImproving ? "수정 중…" : ai.improvement ? "수정 완료" : "수정하기"}
-                    </Button>
+                {result?.evaluation ? (
+                  <div className="border-t pt-5">
+                    <AnswerEvaluationPanel
+                      evaluation={result.evaluation}
+                      transcript={transcript}
+                      targetLevel={reportTarget}
+                    />
                   </div>
-                )}
-
-                {/* Analysis result */}
-                {ai.analyzeError && (
-                  <Alert variant="destructive">
-                    <AlertCircle />
-                    <AlertDescription>{ai.analyzeError}</AlertDescription>
-                  </Alert>
-                )}
-                {ai.analysis && (
-                  <div className="rounded-2xl border bg-secondary p-4 text-sm leading-relaxed whitespace-pre-wrap">
-                    <Eyebrow className="mb-2">AI 분석</Eyebrow>
-                    {ai.analysis}
-                  </div>
-                )}
-
-                {/* Improvement diff */}
-                {ai.improveError && (
-                  <Alert variant="destructive">
-                    <AlertCircle />
-                    <AlertDescription>{ai.improveError}</AlertDescription>
-                  </Alert>
-                )}
-                {ai.improvement && answer.transcript && (
-                  <TranscriptDiff original={answer.transcript} improved={ai.improvement} />
-                )}
+                ) : result?.evaluationStatus === "SKIPPED" ? (
+                  <p className="text-sm text-muted-foreground">답변이 비어 있거나 15단어보다 짧아서 평가하지 않았어요.</p>
+                ) : result?.evaluationStatus === "FAILED" ? (
+                  <p className="text-sm text-destructive">이 답변은 평가하지 못했어요.</p>
+                ) : result?.evaluationStatus === "PENDING" && isEvaluationInProgress(evaluatedSession?.evaluationStatus) ? (
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <LoaderCircle aria-hidden className="size-4 animate-spin" />
+                    평가 중…
+                  </p>
+                ) : null}
               </li>
             );
           })}
@@ -602,7 +548,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
             onClick={async () => {
               try {
                 const selection = await submitTopicSelection(topicId);
-                router.push(`${ROUTES.practiceSession(topicId)}?selectionId=${selection.id}`);
+                router.push(`${ROUTES.practiceSession(topicId)}?selectionId=${selection.id}&target=${targetLevel}`);
               } catch (err) {
                 const message = err instanceof Error ? err.message : "새 연습 세션 생성에 실패했습니다.";
                 setError(message);
