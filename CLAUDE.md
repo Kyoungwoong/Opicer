@@ -137,6 +137,7 @@ Problem Interpretation → Plan → Build → Verify → Package → Read-Only
 - Review findings must be posted as GitHub PR review comments, not only in chat.
 - Merge only after a clean review pass. If the agent may not merge, ask the user to merge.
 - Keep `plan.md` updated as durable working memory.
+- **Log every user request in `docs/worklog/YYYY-MM-DD-<slug>.md`**: the prompts verbatim, analysis, plan, what was built, verification, open items (`AGENTS.md` §3.4, format in `docs/worklog/README.md`). Never log secrets or personal data.
 - Build in small, reviewable increments. One logical unit per commit.
 - If scope expands, stop and get `plan.md` update approval first.
 
