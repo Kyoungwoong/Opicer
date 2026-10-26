@@ -66,7 +66,7 @@ class OpenAiAnswerEvaluationModelTest {
 			.andExpect(jsonPath("$.instructions").value("rubric instructions"))
 			.andExpect(jsonPath("$.input").value("answer input"))
 			.andExpect(jsonPath("$.reasoning.effort").value("medium"))
-			.andExpect(jsonPath("$.max_output_tokens").value(8000))
+			.andExpect(jsonPath("$.max_output_tokens").value(16000))
 			.andExpect(jsonPath("$.store").value(false))
 			.andExpect(jsonPath("$.text.format.type").value("json_schema"))
 			.andExpect(jsonPath("$.text.format.name").value("answer_evaluation"))

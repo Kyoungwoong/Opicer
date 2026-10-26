@@ -14,7 +14,8 @@ public class EvaluationProperties {
 	private String openaiUrl = "https://api.openai.com/v1/responses";
 	/** Reasoning effort sent to the model, e.g. low / medium / high. */
 	private String reasoningEffort = "medium";
-	private int maxOutputTokens = 8000;
+	/** Caps visible output plus reasoning tokens together. */
+	private int maxOutputTokens = 16000;
 	private int timeoutSeconds = 90;
 
 	public String getProvider() { return provider; }
