@@ -9,4 +9,6 @@ public interface OpicTestCenterRepository extends JpaRepository<OpicTestCenter, 
 	List<OpicTestCenter> findByActiveTrueOrderByRegionNameAscNameAsc();
 
 	List<OpicTestCenter> findByActiveTrueAndRegionNameOrderByNameAsc(String regionName);
+
+	boolean existsByIdAndActiveTrue(UUID id);
 }

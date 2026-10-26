@@ -25,6 +25,8 @@ public enum ErrorCode {
 	TOPIC_SELECTION_NOT_FOUND("TOPIC_SELECTION_NOT_FOUND", HttpStatus.NOT_FOUND, "Topic selection not found"),
 	PRACTICE_SESSION_NOT_FOUND("PRACTICE_SESSION_NOT_FOUND", HttpStatus.NOT_FOUND, "Practice session not found"),
 	PRACTICE_ANSWER_NOT_FOUND("PRACTICE_ANSWER_NOT_FOUND", HttpStatus.NOT_FOUND, "Practice answer not found"),
+	OPIC_CENTER_NOT_FOUND("OPIC_CENTER_NOT_FOUND", HttpStatus.NOT_FOUND, "OPIc test center not found"),
+	OPIC_CENTER_REVIEW_NOT_FOUND("OPIC_CENTER_REVIEW_NOT_FOUND", HttpStatus.NOT_FOUND, "OPIc test center review not found"),
 	OPIC_SYNC_FAILED("OPIC_SYNC_FAILED", HttpStatus.BAD_GATEWAY, "Failed to sync data from opic.or.kr"),
 	CREDIT_INSUFFICIENT_BALANCE("CREDIT_INSUFFICIENT_BALANCE", HttpStatus.PAYMENT_REQUIRED, "Insufficient credits");
 
