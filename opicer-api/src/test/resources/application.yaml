@@ -4,6 +4,11 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: ${OPICER_DB_USER:opicer}
     password: ${OPICER_DB_PASSWORD:opicer}
+    # Every cached Spring test context keeps its own pool. With Hikari's default of 10 the
+    # suite exceeds Postgres' max_connections (100) once enough contexts are cached.
+    hikari:
+      maximum-pool-size: 4
+      minimum-idle: 1
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -35,3 +40,6 @@ opicer:
     cookie-secure: false
     admin-allowlist: ""
     frontend-base-url: http://localhost:3000
+  opic-sync:
+    enabled: false
+    request-delay-ms: 0
