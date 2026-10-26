@@ -46,10 +46,19 @@ export function renderReportHtml(session: PracticeSessionDetail, generatedAt: Da
 `;
 }
 
-/** "opicer-report-20261026.html" (Seoul date of the session). */
+/** "opicer-report-20261026-1410.html" (Seoul time the session ended), so same-day sessions stay apart. */
 export function reportFileName(session: Pick<PracticeSessionDetail, "completedAt">): string {
-  const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date(session.completedAt));
-  return `opicer-report-${date.replaceAll("-", "")}.html`;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date(session.completedAt));
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
+  return `opicer-report-${part("year")}${part("month")}${part("day")}-${part("hour")}${part("minute")}.html`;
 }
 
 /** Saves the report through a temporary object URL. Browser only. */
