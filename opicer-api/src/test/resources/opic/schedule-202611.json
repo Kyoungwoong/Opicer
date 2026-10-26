@@ -1,0 +1,48 @@
+{
+  "openList": [
+    {
+      "d_openday": "2026.11.06(금)",
+      "d_subj": "OPI001",
+      "d_certopenday": 5,
+      "d_grcode": "OBC0001",
+      "d_days": "01",
+      "d_propend": "2026.10.30(금)",
+      "d_enddate": "2026-12-31",
+      "d_grseqnm": "261101 정기 평가",
+      "d_early_open_yn": "",
+      "d_propstart": "2026.09.30(수)",
+      "d_grseq": "6553",
+      "d_started": "2026.11.01(일)"
+    },
+    {
+      "d_openday": "2026.11.08(일)",
+      "d_subj": "OPI001",
+      "d_certopenday": 5,
+      "d_grcode": "OBC0001",
+      "d_days": "03",
+      "d_propend": "2026.11.01(일)",
+      "d_enddate": "2026-12-31",
+      "d_grseqnm": "261103 정기 평가",
+      "d_early_open_yn": "",
+      "d_propstart": "2026.10.02(금)",
+      "d_grseq": "6555",
+      "d_started": "2026.11.03(화)"
+    },
+    {
+      "d_openday": "2026.11.15(일)",
+      "d_subj": "WPT001",
+      "d_certopenday": 7,
+      "d_grcode": "OBC0001",
+      "d_days": "08",
+      "d_propend": "2026.11.06(금)",
+      "d_enddate": "2026-12-31",
+      "d_grseqnm": "261108 WPT 평가",
+      "d_early_open_yn": "N",
+      "d_propstart": "2026.10.07(수)",
+      "d_grseq": "6260",
+      "d_started": "2026.11.08(일)"
+    }
+  ],
+  "disableList": [],
+  "result": "OK"
+}
