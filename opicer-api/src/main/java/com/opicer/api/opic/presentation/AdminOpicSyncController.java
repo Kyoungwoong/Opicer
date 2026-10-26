@@ -30,14 +30,20 @@ public class AdminOpicSyncController {
 			throw new ApiException(ErrorCode.VALIDATION_ERROR, "target must be all, schedules or centers");
 		}
 
-		Integer scheduleCount = schedules ? opicSyncService.syncSchedules() : null;
+		OpicSyncWriter.ScheduleSyncResult scheduleResult = schedules ? opicSyncService.syncSchedules() : null;
 		OpicSyncWriter.CenterSyncResult centerResult = centers ? opicSyncService.syncCenters() : null;
 		return ResponseEntity.ok(ApiResponse.ok("OPIC_SYNCED", new SyncResponse(
-			scheduleCount,
+			scheduleResult == null ? null : scheduleResult.upserted(),
+			scheduleResult == null ? null : scheduleResult.removed(),
 			centerResult == null ? null : centerResult.upserted(),
 			centerResult == null ? null : centerResult.deactivated()
 		)));
 	}
 
-	public record SyncResponse(Integer schedulesUpserted, Integer centersUpserted, Integer centersDeactivated) {}
+	public record SyncResponse(
+		Integer schedulesUpserted,
+		Integer schedulesRemoved,
+		Integer centersUpserted,
+		Integer centersDeactivated
+	) {}
 }

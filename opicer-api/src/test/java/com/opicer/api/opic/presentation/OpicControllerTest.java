@@ -86,12 +86,13 @@ class OpicControllerTest {
 
 	@Test
 	void adminSyncRunsBothTargets() throws Exception {
-		when(opicSyncService.syncSchedules()).thenReturn(28);
+		when(opicSyncService.syncSchedules()).thenReturn(new OpicSyncWriter.ScheduleSyncResult(28, 2));
 		when(opicSyncService.syncCenters()).thenReturn(new OpicSyncWriter.CenterSyncResult(45, 1));
 
 		mockMvc.perform(post("/api/admin/opic-sync").cookie(cookie(UserRole.ADMIN)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.schedulesUpserted").value(28))
+			.andExpect(jsonPath("$.data.schedulesRemoved").value(2))
 			.andExpect(jsonPath("$.data.centersUpserted").value(45))
 			.andExpect(jsonPath("$.data.centersDeactivated").value(1));
 	}

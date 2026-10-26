@@ -10,6 +10,7 @@ import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,8 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class OpicSyncServiceTest {
+
+	private static final YearMonth NEXT_MONTH = YearMonth.now(ZoneId.of("Asia/Seoul")).plusMonths(1);
 
 	@Autowired
 	private OpicSyncService syncService;
@@ -49,18 +52,47 @@ class OpicSyncServiceTest {
 
 	@Test
 	void syncSchedulesFetchesCurrentAndNextMonthsAndUpsertsByKey() {
-		when(client.fetchSchedules(any())).thenReturn(List.of(schedule("1-OPI001", 2026, 11, 7, "261107 정기 평가")));
+		when(client.fetchSchedules(any())).thenReturn(List.of(schedule("1-OPI001", 7, "정기 평가")));
 
 		syncService.syncSchedules();
-		when(client.fetchSchedules(any())).thenReturn(List.of(schedule("1-OPI001", 2026, 11, 7, "261107 정기 평가 (변경)")));
-		syncService.syncSchedules();
+		when(client.fetchSchedules(any())).thenReturn(List.of(schedule("1-OPI001", 7, "정기 평가 (변경)")));
+		OpicSyncWriter.ScheduleSyncResult result = syncService.syncSchedules();
 
 		verify(client, times(6)).fetchSchedules(any()); // months-ahead 2 → 3 months per run
+		assertThat(result.upserted()).isEqualTo(1);
+		assertThat(result.removed()).isZero();
 		assertThat(scheduleRepository.count()).isEqualTo(1);
-		assertThat(queryService.schedules(YearMonth.of(2026, 11)))
+		assertThat(queryService.schedules(NEXT_MONTH))
 			.singleElement()
-			.satisfies(s -> assertThat(s.getRoundName()).isEqualTo("261107 정기 평가 (변경)"));
-		assertThat(queryService.schedules(YearMonth.of(2026, 12))).isEmpty();
+			.satisfies(s -> assertThat(s.getRoundName()).isEqualTo("정기 평가 (변경)"));
+		assertThat(queryService.schedules(NEXT_MONTH.plusMonths(1))).isEmpty();
+	}
+
+	@Test
+	void syncSchedulesRemovesRoundsThatDisappearedWithinFetchedMonths() {
+		when(client.fetchSchedules(any())).thenReturn(List.of(
+			schedule("1-OPI001", 7, "정기 평가"),
+			schedule("2-OPI001", 14, "정기 평가")
+		));
+		syncService.syncSchedules();
+
+		when(client.fetchSchedules(any())).thenReturn(List.of(schedule("1-OPI001", 7, "정기 평가")));
+		OpicSyncWriter.ScheduleSyncResult result = syncService.syncSchedules();
+
+		assertThat(result.removed()).isEqualTo(1);
+		assertThat(queryService.schedules(NEXT_MONTH)).extracting(s -> s.getExternalKey()).containsExactly("1-OPI001");
+	}
+
+	@Test
+	void emptyScheduleFetchRemovesNothing() {
+		when(client.fetchSchedules(any())).thenReturn(List.of(schedule("1-OPI001", 7, "정기 평가")));
+		syncService.syncSchedules();
+
+		when(client.fetchSchedules(any())).thenReturn(List.of());
+		OpicSyncWriter.ScheduleSyncResult result = syncService.syncSchedules();
+
+		assertThat(result.removed()).isZero();
+		assertThat(scheduleRepository.count()).isEqualTo(1);
 	}
 
 	@Test
@@ -99,8 +131,9 @@ class OpicSyncServiceTest {
 				e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.OPIC_SYNC_FAILED));
 	}
 
-	private static ScheduleRow schedule(String key, int year, int month, int day, String name) {
-		LocalDate exam = LocalDate.of(year, month, day);
+	/** A round on {@code day} of next month, which is always inside the fetched window. */
+	private static ScheduleRow schedule(String key, int day, String name) {
+		LocalDate exam = NEXT_MONTH.atDay(day);
 		return new ScheduleRow(key, exam, exam.minusDays(30), exam.minusDays(7), exam.plusDays(5), name, false);
 	}
 

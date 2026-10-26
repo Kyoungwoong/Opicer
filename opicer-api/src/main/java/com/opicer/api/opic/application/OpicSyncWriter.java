@@ -7,6 +7,7 @@ import com.opicer.api.opic.infrastructure.OpicSiteParser.CenterRow;
 import com.opicer.api.opic.infrastructure.OpicSiteParser.ScheduleRow;
 import com.opicer.api.opic.infrastructure.OpicTestCenterRepository;
 import java.time.Instant;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,10 +28,15 @@ public class OpicSyncWriter {
 		this.centerRepository = centerRepository;
 	}
 
-	/** Inserts new rounds and updates known ones by external key. Returns the number of rows written. */
+	/**
+	 * Upserts the fetched rounds by external key, then removes rounds that disappeared from the
+	 * source within each fetched month. A month whose fetch came back empty is left untouched
+	 * (it may be a maintenance response); months that were not fetched are never pruned.
+	 */
 	@Transactional
-	public int upsertSchedules(List<ScheduleRow> rows, Instant syncedAt) {
-		Map<String, ScheduleRow> byKey = rows.stream()
+	public ScheduleSyncResult upsertSchedules(Map<YearMonth, List<ScheduleRow>> rowsByMonth, Instant syncedAt) {
+		Map<String, ScheduleRow> byKey = rowsByMonth.values().stream()
+			.flatMap(List::stream)
 			.collect(Collectors.toMap(ScheduleRow::externalKey, Function.identity(), (a, b) -> b));
 		Map<String, OpicExamSchedule> existing = scheduleRepository.findByExternalKeyIn(byKey.keySet()).stream()
 			.collect(Collectors.toMap(OpicExamSchedule::getExternalKey, Function.identity()));
@@ -41,7 +47,21 @@ public class OpicSyncWriter {
 				row.scoreReleaseDate(), row.roundName(), row.earlyRelease(), syncedAt);
 			scheduleRepository.save(schedule);
 		}
-		return byKey.size();
+
+		int removed = 0;
+		for (Map.Entry<YearMonth, List<ScheduleRow>> month : rowsByMonth.entrySet()) {
+			if (month.getValue().isEmpty()) {
+				continue;
+			}
+			YearMonth ym = month.getKey();
+			for (OpicExamSchedule stale : scheduleRepository.findByExamDateBetweenOrderByExamDateAsc(ym.atDay(1), ym.atEndOfMonth())) {
+				if (!byKey.containsKey(stale.getExternalKey())) {
+					scheduleRepository.delete(stale);
+					removed++;
+				}
+			}
+		}
+		return new ScheduleSyncResult(byKey.size(), removed);
 	}
 
 	/**
@@ -76,6 +96,8 @@ public class OpicSyncWriter {
 		}
 		return new CenterSyncResult(byKey.size(), deactivated);
 	}
+
+	public record ScheduleSyncResult(int upserted, int removed) {}
 
 	public record CenterSyncResult(int upserted, int deactivated) {}
 }

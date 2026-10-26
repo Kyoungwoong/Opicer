@@ -8,8 +8,9 @@ import com.opicer.api.shared.error.ErrorCode;
 import java.time.Instant;
 import java.time.YearMonth;
 import java.time.ZoneId;
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,19 +34,19 @@ public class OpicSyncService {
 	}
 
 	/** Current month plus {@code monthsAhead} months. */
-	public int syncSchedules() {
+	public OpicSyncWriter.ScheduleSyncResult syncSchedules() {
 		YearMonth first = YearMonth.now(SEOUL);
-		List<ScheduleRow> rows = new ArrayList<>();
+		Map<YearMonth, List<ScheduleRow>> rowsByMonth = new LinkedHashMap<>();
 		for (int i = 0; i <= properties.getMonthsAhead(); i++) {
 			if (i > 0) {
 				pause();
 			}
 			YearMonth month = first.plusMonths(i);
-			rows.addAll(fetch(() -> client.fetchSchedules(month), "schedules " + month));
+			rowsByMonth.put(month, fetch(() -> client.fetchSchedules(month), "schedules " + month));
 		}
-		int written = writer.upsertSchedules(rows, Instant.now());
-		log.info("[OpicSync] schedules upserted={}", written);
-		return written;
+		OpicSyncWriter.ScheduleSyncResult result = writer.upsertSchedules(rowsByMonth, Instant.now());
+		log.info("[OpicSync] schedules upserted={} removed={}", result.upserted(), result.removed());
+		return result;
 	}
 
 	public OpicSyncWriter.CenterSyncResult syncCenters() {
