@@ -57,16 +57,16 @@ export function TopNav({ userLabel, onLogout, maxWidthClassName = "max-w-5xl" }:
       <Wordmark />
 
       {/* Desktop navigation */}
-      <nav aria-label="주요 메뉴" className="hidden items-center gap-1 rounded-full border bg-card/70 p-1 shadow-card backdrop-blur md:flex">
+      <nav aria-label="주요 메뉴" className="hidden items-center gap-1 md:flex">
         {NAV_ITEMS.map((item) =>
           item.disabled ? (
             <span
               key={item.title}
               aria-disabled="true"
-              className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground/60"
+              className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full px-4 py-2 text-[15px] font-semibold text-muted-foreground/60"
             >
               {item.title}
-              <Badge variant="secondary" className="px-1.5 text-[0.7rem] font-medium">
+              <Badge variant="secondary" className="border border-border px-1.5 text-xs font-medium">
                 준비중
               </Badge>
             </span>
@@ -75,7 +75,7 @@ export function TopNav({ userLabel, onLogout, maxWidthClassName = "max-w-5xl" }:
               key={item.title}
               href={item.href}
               aria-current={isActivePath(pathname, item.href) ? "page" : undefined}
-              className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+              className="rounded-full px-4 py-2 text-[15px] font-semibold text-muted-foreground transition-colors hover:text-foreground aria-[current=page]:bg-accent aria-[current=page]:text-accent-foreground"
             >
               {item.title}
             </Link>
@@ -89,7 +89,7 @@ export function TopNav({ userLabel, onLogout, maxWidthClassName = "max-w-5xl" }:
           {isSignedIn ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-9 gap-2 rounded-full px-3 text-sm">
+                <Button variant="outline" className="h-10 gap-2 rounded-full bg-card px-3 text-sm font-semibold">
                   <span className="grid size-6 place-items-center rounded-full bg-accent text-accent-foreground">
                     <UserRound className="size-3.5" />
                   </span>
@@ -135,7 +135,7 @@ export function TopNav({ userLabel, onLogout, maxWidthClassName = "max-w-5xl" }:
             <SheetHeader className="border-b p-5">
               <SheetTitle asChild>
                 <div>
-                  <Wordmark className="text-lg" />
+                  <Wordmark className="text-2xl" />
                 </div>
               </SheetTitle>
               {isSignedIn ? (

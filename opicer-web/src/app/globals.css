@@ -7,43 +7,45 @@
 /*
  * Opicer design tokens.
  * Names follow shadcn/ui so registry components work unmodified.
- * Brand: warm cream surfaces + deep teal primary + soft amber highlight.
+ * Brand (design B2): warm off-white ground, white surfaces with hairline borders,
+ * sage-green primary, honey accent used sparingly.
  */
 :root {
-  --background: #f8f5ef;
-  --foreground: #1c1b1f;
+  --background: #faf9f6;
+  --foreground: #23292a;
 
-  --card: #fffdf9;
-  --card-foreground: #1c1b1f;
+  --card: #ffffff;
+  --card-foreground: #23292a;
   --popover: #ffffff;
-  --popover-foreground: #1c1b1f;
+  --popover-foreground: #23292a;
 
-  --primary: #1b7c7a;
+  --primary: #2f6b5e;
   --primary-foreground: #ffffff;
-  --primary-strong: #0f4b49;
-  --secondary: #efe9df;
-  --secondary-foreground: #2a2926;
-  --muted: #f1ece4;
-  --muted-foreground: #5f5d66;
-  --accent: #e3f1ee;
-  --accent-foreground: #0f4b49;
-  --highlight: #f6d7a7;
-  --highlight-foreground: #6b4510;
+  --primary-strong: #1f4a41;
+  --secondary: #f6f8f6;
+  --secondary-foreground: #23292a;
+  --muted: #f3f1ec;
+  --muted-foreground: #5d6664;
+  --accent: #e8f0ec;
+  --accent-foreground: #1f4a41;
+  --highlight: #e9c46a;
+  --highlight-subtle: #fbf6ea;
+  --highlight-foreground: #7a5a1c;
 
-  --destructive: #c62828;
+  --destructive: #c0392b;
   --destructive-foreground: #ffffff;
-  --success: #1f7a4d;
-  --success-subtle: #e6f4ec;
-  --warning: #a35c00;
-  --warning-subtle: #fdf2df;
-  --info: #2459b8;
-  --info-subtle: #e7eefb;
+  --success: #2f7a4f;
+  --success-subtle: #e9f3ec;
+  --warning: #9a5b0b;
+  --warning-subtle: #fbf1e0;
+  --info: #2f5f9e;
+  --info-subtle: #eaf0f8;
 
-  --border: #e7e0d4;
-  --input: #ddd4c5;
-  --ring: #1b7c7a;
+  --border: #ece9e2;
+  --input: #dcd8d0;
+  --ring: #2f6b5e;
 
-  --radius: 0.875rem;
+  --radius: 0.75rem;
 }
 
 @theme inline {
@@ -63,6 +65,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-highlight: var(--highlight);
+  --color-highlight-subtle: var(--highlight-subtle);
   --color-highlight-foreground: var(--highlight-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
@@ -79,7 +82,7 @@
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
     system-ui, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
   --font-heading: var(--font-sans);
-  --font-display: var(--font-space-grotesk), var(--font-sans);
+  --font-display: var(--font-jua), var(--font-sans);
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 
   --radius-sm: calc(var(--radius) * 0.6);
@@ -90,8 +93,8 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  --shadow-card: 0 1px 2px rgb(28 27 31 / 0.04), 0 12px 32px -20px rgb(15 75 73 / 0.25);
-  --shadow-raised: 0 2px 6px rgb(28 27 31 / 0.05), 0 28px 56px -28px rgb(15 75 73 / 0.35);
+  --shadow-card: 0 1px 2px rgb(35 41 42 / 0.04);
+  --shadow-raised: 0 1px 2px rgb(35 41 42 / 0.04), 0 12px 32px -16px rgb(35 41 42 / 0.16);
 }
 
 @layer base {
@@ -107,10 +110,6 @@
   body {
     @apply bg-background text-foreground antialiased;
     min-height: 100dvh;
-    background-image:
-      radial-gradient(1100px 520px at 0% -10%, rgb(27 124 122 / 0.14), transparent 60%),
-      radial-gradient(800px 460px at 100% -5%, rgb(246 215 167 / 0.45), transparent 55%);
-    background-repeat: no-repeat;
     letter-spacing: -0.01em;
   }
 
@@ -137,6 +136,6 @@
   }
 
   ::selection {
-    background: rgb(27 124 122 / 0.18);
+    background: rgb(47 107 94 / 0.18);
   }
 }
