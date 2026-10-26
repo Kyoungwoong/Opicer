@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -122,26 +121,6 @@ public class PracticeSessionController {
 			SessionDetailResponse.from(practiceHistoryQueryService.get(principal.id(), sessionId))));
 	}
 
-	@PutMapping("/{sessionId}/answers/{questionId}")
-	public ResponseEntity<ApiResponse<AnswerResponse>> recordAiResult(
-		Authentication authentication,
-		@PathVariable UUID sessionId,
-		@PathVariable UUID questionId,
-		@Valid @RequestBody AiResultRequest request
-	) {
-		AuthUserPrincipal principal = principalOf(authentication);
-		if (principal == null) {
-			return ResponseEntity.status(401).build();
-		}
-		if (request.analysis() == null && request.improvedScript() == null) {
-			throw new ApiException(ErrorCode.VALIDATION_ERROR, "analysis or improvedScript is required");
-		}
-		PracticeAnswer answer = practiceHistoryCommandService.recordAiResult(
-			principal.id(), sessionId, questionId, request.analysis(), request.improvedScript()
-		);
-		return ResponseEntity.ok(ApiResponse.ok("PRACTICE_ANSWER_UPDATED", AnswerResponse.from(answer)));
-	}
-
 	/** Queues a failed or partial evaluation again (free, limited per session). 202: poll GET for the result. */
 	@PostMapping("/{sessionId}/evaluation/retry")
 	public ResponseEntity<ApiResponse<RetryResponse>> retryEvaluation(
@@ -187,12 +166,6 @@ public class PracticeSessionController {
 		@NotBlank @Size(max = 2000) String questionText,
 		@Size(max = 10000) String transcript,
 		@Min(1) @Max(600) Integer durationSeconds
-	) {
-	}
-
-	public record AiResultRequest(
-		@Size(max = 20000) String analysis,
-		@Size(max = 10000) String improvedScript
 	) {
 	}
 

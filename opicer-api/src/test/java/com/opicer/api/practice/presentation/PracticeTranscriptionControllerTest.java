@@ -3,7 +3,7 @@ package com.opicer.api.practice.presentation;
 import com.opicer.api.auth.application.JwtService;
 import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.config.AuthProperties;
-import com.opicer.api.practice.application.PracticeAiService;
+import com.opicer.api.ai.application.AiTranscriptionService;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
 import jakarta.servlet.http.Cookie;
@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -31,7 +32,7 @@ import com.opicer.api.user.domain.UserRole;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class PracticeAiControllerTest {
+class PracticeTranscriptionControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -43,7 +44,7 @@ class PracticeAiControllerTest {
 	private AuthProperties authProperties;
 
 	@MockBean
-	private PracticeAiService practiceAiService;
+	private AiTranscriptionService transcriptionService;
 
 	private Cookie userCookie;
 
@@ -63,7 +64,7 @@ class PracticeAiControllerTest {
 	// T1: POST /transcribe valid multipart + auth → 200
 	@Test
 	void transcribe_validRequest_returns200() throws Exception {
-		when(practiceAiService.transcribe(any(), anyString())).thenReturn("Hello world");
+		when(transcriptionService.transcribe(any(), anyString())).thenReturn("Hello world");
 
 		MockMultipartFile audioFile = new MockMultipartFile(
 			"audio", "audio.webm", "audio/webm", "fake-audio".getBytes());
@@ -91,7 +92,7 @@ class PracticeAiControllerTest {
 	// T3: POST /transcribe AI_NOT_CONFIGURED → 503
 	@Test
 	void transcribe_aiNotConfigured_returns503() throws Exception {
-		when(practiceAiService.transcribe(any(), anyString()))
+		when(transcriptionService.transcribe(any(), anyString()))
 			.thenThrow(new ApiException(ErrorCode.AI_NOT_CONFIGURED));
 
 		MockMultipartFile audioFile = new MockMultipartFile(
@@ -105,57 +106,24 @@ class PracticeAiControllerTest {
 			.andExpect(jsonPath("$.code").value("AI_NOT_CONFIGURED"));
 	}
 
-	// T4: POST /analyze valid JSON + auth → 200
+	// The manual analyze/improve endpoints were replaced by automatic evaluation and are gone.
 	@Test
-	void analyze_validRequest_returns200() throws Exception {
-		when(practiceAiService.analyze(any(), anyString(), anyString(), any(), any())).thenReturn("Analysis result");
-
-		mockMvc.perform(post("/api/practice/analyze")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"topicId\":\"11111111-1111-1111-1111-111111111111\",\"questionText\":\"Tell me about yourself.\",\"transcript\":\"I am a student.\"}")
+	void wrongMethodOnAnExistingPathIs405() throws Exception {
+		mockMvc.perform(get("/api/practice/transcribe")
 				.cookie(userCookie))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data.analysis").value("Analysis result"));
+			.andExpect(status().isMethodNotAllowed())
+			.andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"));
 	}
 
-	// T5: POST /analyze 인증 없음 → 401
 	@Test
-	void analyze_noAuth_returns401() throws Exception {
-		mockMvc.perform(post("/api/practice/analyze")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"topicId\":\"11111111-1111-1111-1111-111111111111\",\"questionText\":\"Tell me about yourself.\",\"transcript\":\"I am a student.\"}"))
-			.andExpect(status().isUnauthorized());
-	}
-
-	// T6: POST /analyze blank fields → 400
-	@Test
-	void analyze_blankFields_returns400() throws Exception {
-		mockMvc.perform(post("/api/practice/analyze")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"topicId\":null,\"questionText\":\"\",\"transcript\":\"\"}")
-				.cookie(userCookie))
-			.andExpect(status().isBadRequest());
-	}
-
-	// T7: POST /improve valid JSON + auth → 200
-	@Test
-	void improve_validRequest_returns200() throws Exception {
-		when(practiceAiService.improve(any(), anyString(), anyString(), any(), any())).thenReturn("Improved script");
-
-		mockMvc.perform(post("/api/practice/improve")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"topicId\":\"11111111-1111-1111-1111-111111111111\",\"questionText\":\"Tell me about yourself.\",\"transcript\":\"I am a student.\"}")
-				.cookie(userCookie))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data.improved").value("Improved script"));
-	}
-
-	// T8: POST /improve 인증 없음 → 401
-	@Test
-	void improve_noAuth_returns401() throws Exception {
-		mockMvc.perform(post("/api/practice/improve")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"topicId\":\"11111111-1111-1111-1111-111111111111\",\"questionText\":\"Tell me about yourself.\",\"transcript\":\"I am a student.\"}"))
-			.andExpect(status().isUnauthorized());
+	void removedAnalyzeAndImproveEndpointsAreNotServed() throws Exception {
+		for (String path : new String[] {"/api/practice/analyze", "/api/practice/improve"}) {
+			mockMvc.perform(post(path)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("{\"topicId\":\"11111111-1111-1111-1111-111111111111\",\"questionText\":\"Q\",\"transcript\":\"A\"}")
+					.cookie(userCookie))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.code").value("NOT_FOUND"));
+		}
 	}
 }

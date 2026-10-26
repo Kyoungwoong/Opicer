@@ -288,14 +288,13 @@ class PracticeSessionControllerTest {
 	}
 
 	@Test
-	void recordAiResultWithEmptyBodyReturns400() throws Exception {
+	void removedAnswerResultEndpointIsNotServed() throws Exception {
 		mockMvc.perform(put("/api/practice/sessions/" + SESSION_ID + "/answers/" + QUESTION_ID)
 				.cookie(userCookie)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content("{}"))
-			.andExpect(status().isBadRequest());
-
-		verify(practiceHistoryCommandService, never()).recordAiResult(any(), any(), any(), any(), any());
+				.content("{\"analysis\":\"x\"}"))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value("NOT_FOUND"));
 	}
 
 	@Test

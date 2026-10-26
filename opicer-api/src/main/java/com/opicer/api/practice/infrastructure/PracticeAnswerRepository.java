@@ -3,7 +3,6 @@ package com.opicer.api.practice.infrastructure;
 import com.opicer.api.practice.domain.PracticeAnswer;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -27,8 +26,6 @@ public interface PracticeAnswerRepository extends JpaRepository<PracticeAnswer, 
 		long getAnswerCount();
 		long getAnalyzedCount();
 	}
-
-	Optional<PracticeAnswer> findBySessionIdAndQuestionId(UUID sessionId, UUID questionId);
 
 	@Modifying
 	@Query("delete from PracticeAnswer a where a.sessionId = :sessionId")

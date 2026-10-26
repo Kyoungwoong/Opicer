@@ -109,16 +109,6 @@ public class PracticeAnswer {
 		this.evaluationStatus = AnswerEvaluationStatus.SKIPPED;
 	}
 
-	/** Null arguments leave the stored value unchanged. */
-	public void recordAiResult(String analysis, String improvedScript) {
-		if (analysis != null) {
-			this.analysis = analysis;
-		}
-		if (improvedScript != null) {
-			this.improvedScript = improvedScript;
-		}
-	}
-
 	public UUID getId() { return id; }
 	public UUID getSessionId() { return sessionId; }
 	public UUID getQuestionId() { return questionId; }

@@ -94,6 +94,11 @@ export function PromptVersionTab() {
 
   return (
     <div className={adminUi.section}>
+      <p role="note" className={adminUi.subCard}>
+        자동 평가는 이 프롬프트 템플릿을 쓰지 않아요. 평가에 반영할 기준이나 문체는 &lsquo;평가 가이드&rsquo; 탭에서
+        관리하세요.
+      </p>
+
       {/* Form */}
       <form
         onSubmit={handleSubmit}
