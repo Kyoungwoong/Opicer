@@ -38,7 +38,7 @@ export function RecentActivitySection() {
     <SectionShell
       title={t.description}
       action={
-        <Button asChild variant="ghost" className="h-9 rounded-full px-3 font-semibold text-primary">
+        <Button asChild variant="ghost" className="h-9 rounded-full px-3 font-semibold text-primary-strong">
           <Link href={ROUTES.mypage}>
             {t.viewAll}
             <ChevronRight />
@@ -75,7 +75,7 @@ export function RecentActivitySection() {
                     <span aria-hidden className={cn("size-2 rounded-full", HISTORY_STATUS_DOT[status.tone])} />
                     {formatShortDate(session.completedAt)} · {status.label}
                   </span>
-                  <span className="text-lg font-bold group-hover:text-primary">{session.topicTitle}</span>
+                  <span className="text-lg font-bold group-hover:text-primary-strong">{session.topicTitle}</span>
                   <span className="text-sm text-muted-foreground">
                     {t.questionCount.replace("{n}", String(session.answerCount))}
                   </span>

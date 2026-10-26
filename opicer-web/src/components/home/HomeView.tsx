@@ -35,7 +35,7 @@ export function HomeView({
     >
       <section className="flex flex-wrap items-center gap-8 rounded-3xl border bg-card px-6 py-8 shadow-card sm:px-12 sm:py-10">
         <div className="flex min-w-0 flex-[999_1_420px] flex-col gap-4">
-          <span className="w-fit rounded-full bg-highlight-subtle px-3 py-1.5 text-sm font-bold text-highlight-foreground">
+          <span className="w-fit rounded-full bg-accent px-3 py-1.5 text-sm font-bold text-accent-foreground">
             {greeting.badge}
           </span>
           <h1 className="text-3xl leading-tight font-extrabold whitespace-pre-line sm:text-[44px]">{headline}</h1>

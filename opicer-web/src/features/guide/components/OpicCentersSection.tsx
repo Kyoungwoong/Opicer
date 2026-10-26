@@ -21,7 +21,7 @@ function Rating({ value }: { value: number }) {
         <Star
           key={i}
           aria-hidden
-          className={cn("size-3.5", i < value ? "fill-highlight-foreground text-highlight-foreground" : "text-border")}
+          className={cn("size-3.5", i < value ? "fill-highlight text-highlight" : "text-border")}
         />
       ))}
     </span>
@@ -33,8 +33,8 @@ function RatingSummary({ center }: { center: OpicCenter }) {
     return <span className="text-xs text-muted-foreground">후기 없음</span>;
   }
   return (
-    <span className="inline-flex items-center gap-1 text-xs font-medium text-highlight-foreground">
-      <Star aria-hidden className="size-3.5 fill-current" />
+    <span className="inline-flex items-center gap-1 text-xs font-semibold text-foreground">
+      <Star aria-hidden className="size-3.5 fill-highlight text-highlight" />
       {center.averageRating.toFixed(1)}
       <span className="text-muted-foreground">({center.reviewCount})</span>
     </span>

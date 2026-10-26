@@ -13,7 +13,7 @@ export function TranscriptDiff({ original, improved }: Props) {
   return (
     <div className="rounded-2xl border bg-secondary p-4 text-sm leading-7">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-primary">개선 스크립트</p>
+        <p className="text-xs font-semibold text-primary-strong">개선 스크립트</p>
         <p className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1">
             <span aria-hidden className="rounded bg-destructive/10 px-1 text-destructive line-through">

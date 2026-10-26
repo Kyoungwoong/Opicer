@@ -18,7 +18,7 @@ function FeedbackPreview() {
     <Card className="w-full max-w-sm gap-4 rounded-2xl bg-card py-5 shadow-raised ring-border backdrop-blur">
       <CardContent className="flex flex-col gap-4 px-5">
         <div className="flex items-center justify-between">
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-strong">
             <Sparkles className="size-3.5" />
             예시 피드백
           </span>
@@ -63,7 +63,7 @@ export function LoginView() {
             <h1 className="text-3xl leading-tight font-extrabold sm:text-4xl">
               말하기 실력,
               <br />
-              <span className="text-primary">AI가 기억합니다.</span>
+              <span className="text-primary-strong">AI가 기억합니다.</span>
             </h1>
             <p className="max-w-md text-base leading-7 text-muted-foreground">
               내가 어떻게 말하는지 분석하고, 매번 더 나은 피드백을 드려요.
@@ -77,7 +77,7 @@ export function LoginView() {
                 key={label}
                 className="inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-sm font-medium text-foreground"
               >
-                <Icon aria-hidden className="size-4 text-primary" />
+                <Icon aria-hidden className="size-4 text-primary-strong" />
                 {label}
               </li>
             ))}

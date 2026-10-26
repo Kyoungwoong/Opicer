@@ -148,7 +148,7 @@ export function OpicCenterReviewTab() {
           시험 일정(이번 달부터 2개월 뒤까지)과 시험센터 목록을 다시 가져옵니다. 운영 환경에서는 멀티캠퍼스 허가 후에
           사용하세요.
         </p>
-        {syncMessage && <p className="text-sm text-primary">{syncMessage}</p>}
+        {syncMessage && <p className="text-sm text-primary-strong">{syncMessage}</p>}
         <div className={adminUi.actions}>
           <button type="button" onClick={handleSync} disabled={syncing} className={adminUi.secondaryButton}>
             {syncing ? "동기화 중..." : "지금 동기화"}

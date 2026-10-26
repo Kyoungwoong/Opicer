@@ -16,7 +16,7 @@ export function SectionShell({ title, children, action, tone = "default", classN
     <section
       className={cn(
         "flex flex-col gap-5 rounded-3xl p-6 sm:p-8",
-        tone === "highlight" ? "bg-highlight-subtle" : "border bg-card shadow-card",
+        tone === "highlight" ? "bg-accent" : "border bg-card shadow-card",
         className
       )}
     >

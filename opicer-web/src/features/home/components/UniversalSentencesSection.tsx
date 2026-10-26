@@ -62,13 +62,13 @@ export function UniversalSentencesSection() {
       tone="highlight"
       title={ko.home.universalSentences.description}
       action={
-        <span className="rounded-full bg-card px-3 py-1 text-sm font-bold text-highlight-foreground">
+        <span className="rounded-full bg-card px-3 py-1 text-sm font-bold text-accent-foreground">
           {current ? TYPE_LABELS[current.type] : "Loading"}
         </span>
       }
     >
       <div className="flex min-h-[200px] flex-1 flex-col gap-4">
-        <p className="text-sm font-semibold text-highlight-foreground">
+        <p className="text-sm font-semibold text-accent-foreground">
           {current?.title ?? ko.home.universalSentences.titleLoading}
         </p>
         <p className="text-xl leading-relaxed font-bold break-words text-foreground sm:text-2xl">
@@ -77,7 +77,7 @@ export function UniversalSentencesSection() {
 
         <div className="flex flex-wrap gap-2">
           {current?.tags?.map((tag) => (
-            <span key={tag} className="rounded-full bg-card px-2.5 py-0.5 text-xs font-medium text-highlight-foreground">
+            <span key={tag} className="rounded-full bg-card px-2.5 py-0.5 text-xs font-medium text-accent-foreground">
               #{tag}
             </span>
           ))}
