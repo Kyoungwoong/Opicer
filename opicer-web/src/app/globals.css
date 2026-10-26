@@ -7,11 +7,11 @@
 /*
  * Opicer design tokens.
  * Names follow shadcn/ui so registry components work unmodified.
- * Brand (design B2): warm off-white ground, white surfaces with hairline borders,
- * sage-green primary, honey accent used sparingly.
+ * Brand (design B2): soft sage ground, white surfaces with hairline borders,
+ * sage-green primary, honey accent used sparingly, terracotta wordmark.
  */
 :root {
-  --background: #faf9f6;
+  --background: #eef4f0;
   --foreground: #23292a;
 
   --card: #ffffff;
@@ -22,12 +22,14 @@
   --primary: #2f6b5e;
   --primary-foreground: #ffffff;
   --primary-strong: #1f4a41;
-  --secondary: #f6f8f6;
+  --secondary: #f3f7f4;
   --secondary-foreground: #23292a;
-  --muted: #f3f1ec;
+  --muted: #e7eee9;
   --muted-foreground: #5d6664;
-  --accent: #e8f0ec;
+  --accent: #dcebe2;
   --accent-foreground: #1f4a41;
+  /* Wordmark only: warm counterpoint to the green UI (4.0:1 on the page ground). */
+  --brand: #c4552e;
   --highlight: #e9c46a;
   --highlight-subtle: #fbf6ea;
   --highlight-foreground: #7a5a1c;
@@ -41,8 +43,8 @@
   --info: #2f5f9e;
   --info-subtle: #eaf0f8;
 
-  --border: #ece9e2;
-  --input: #dcd8d0;
+  --border: #dfe7e2;
+  --input: #cfd9d3;
   --ring: #2f6b5e;
 
   --radius: 0.75rem;
@@ -64,6 +66,7 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-brand: var(--brand);
   --color-highlight: var(--highlight);
   --color-highlight-subtle: var(--highlight-subtle);
   --color-highlight-foreground: var(--highlight-foreground);
