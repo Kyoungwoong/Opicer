@@ -96,6 +96,19 @@ public class SessionEvaluationProcessor implements AiJobProcessor {
 		return Outcome.COMPLETED;
 	}
 
+	/** The runner gave up: whatever is still pending failed, and the session gets whatever report it can. */
+	@Override
+	public void abandon(UUID sessionId) {
+		tx.executeWithoutResult(status -> {
+			for (PracticeAnswer answer : answerRepository.findBySessionIdOrderByQuestionOrderAsc(sessionId)) {
+				if (answer.getEvaluationStatus() == AnswerEvaluationStatus.PENDING) {
+					answer.markEvaluationFailed();
+				}
+			}
+		});
+		tx.executeWithoutResult(status -> finish(sessionId));
+	}
+
 	/** Marks the session running and snapshots what to evaluate; null when the session no longer exists. */
 	private List<PendingAnswer> start(UUID sessionId) {
 		PracticeSession session = sessionRepository.findById(sessionId).orElse(null);

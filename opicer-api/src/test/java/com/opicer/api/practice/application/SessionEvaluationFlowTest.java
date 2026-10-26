@@ -72,6 +72,9 @@ class SessionEvaluationFlowTest {
 	@Autowired
 	private JdbcTemplate jdbc;
 
+	@Autowired
+	private SessionEvaluationProcessor processor;
+
 	@MockBean
 	private AnswerEvaluationModel model;
 
@@ -172,6 +175,23 @@ class SessionEvaluationFlowTest {
 		assertThat(answers(flaky)).extracting(PracticeAnswer::getEvaluationStatus)
 			.containsExactly(AnswerEvaluationStatus.DONE, AnswerEvaluationStatus.FAILED);
 		assertThat(calls.get("flaky").get()).isEqualTo(3);
+	}
+
+	@Test
+	void abandonedSessionIsSettledInsteadOfStayingRunning() {
+		flakyFailures = 99;
+		UUID sessionId = session(OpicLevel.IM, OK, FLAKY);
+		runner.runOnce();
+		assertThat(sessionRepository.findById(sessionId).orElseThrow().getEvaluationStatus())
+			.isEqualTo(SessionEvaluationStatus.RUNNING);
+
+		processor.abandon(sessionId);
+
+		PracticeSession settled = sessionRepository.findById(sessionId).orElseThrow();
+		assertThat(settled.getEvaluationStatus()).isEqualTo(SessionEvaluationStatus.PARTIAL);
+		assertThat(settled.getReport()).isNotNull();
+		assertThat(answers(sessionId)).extracting(PracticeAnswer::getEvaluationStatus)
+			.containsExactly(AnswerEvaluationStatus.DONE, AnswerEvaluationStatus.FAILED);
 	}
 
 	@Test

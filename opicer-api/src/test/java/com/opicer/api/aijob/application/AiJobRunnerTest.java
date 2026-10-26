@@ -41,6 +41,7 @@ class AiJobRunnerTest {
 	private final List<UUID> processed = new ArrayList<>();
 	private Function<UUID, Outcome> behaviour = subject -> Outcome.COMPLETED;
 	private final List<Boolean> finalFlags = new ArrayList<>();
+	private final List<UUID> abandoned = new ArrayList<>();
 	private AiJobRunner runner;
 
 	@BeforeEach
@@ -57,6 +58,11 @@ class AiJobRunnerTest {
 				processed.add(subjectId);
 				finalFlags.add(finalAttempt);
 				return behaviour.apply(subjectId);
+			}
+
+			@Override
+			public void abandon(UUID subjectId) {
+				abandoned.add(subjectId);
 			}
 		};
 		runner = new AiJobRunner(repository, properties, List.of(processor), transactionManager);
@@ -100,6 +106,24 @@ class AiJobRunnerTest {
 		assertThat(last.getAttempts()).isEqualTo(3);
 		assertThat(last.getLastError()).isNotBlank();
 		assertThat(finalFlags).containsExactly(false, false, true);
+	}
+
+	@Test
+	void givingUpLetsTheProcessorSettleTheSubjectOnce() {
+		behaviour = subject -> {
+			throw new IllegalStateException("report write failed");
+		};
+		UUID subject = enqueue();
+
+		runner.runOnce();
+		makeDue(subject);
+		runner.runOnce();
+		assertThat(abandoned).as("not before the last attempt").isEmpty();
+		makeDue(subject);
+		runner.runOnce();
+
+		assertThat(job(subject).getStatus()).isEqualTo(AiJobStatus.FAILED);
+		assertThat(abandoned).containsExactly(subject);
 	}
 
 	@Test

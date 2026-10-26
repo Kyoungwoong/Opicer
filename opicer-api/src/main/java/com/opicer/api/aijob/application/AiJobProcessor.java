@@ -14,6 +14,13 @@ public interface AiJobProcessor {
 	 */
 	Outcome process(UUID subjectId, boolean finalAttempt);
 
+	/**
+	 * Called once when the runner gives up on the job (out of attempts, typically because {@link #process}
+	 * threw). Settle the subject so it is not left half-done; must not assume {@link #process} finished.
+	 */
+	default void abandon(UUID subjectId) {
+	}
+
 	enum Outcome {
 		/** Nothing left to do for this job. */
 		COMPLETED,

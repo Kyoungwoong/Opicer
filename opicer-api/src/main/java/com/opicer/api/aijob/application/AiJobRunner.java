@@ -88,20 +88,32 @@ public class AiJobRunner {
 				error = e.getClass().getSimpleName() + ": " + e.getMessage();
 			}
 		}
-		settle(job.getId(), outcome, error == null ? "transient failure" : error);
+		boolean gaveUp = settle(job.getId(), outcome, error == null ? "transient failure" : error);
+		if (gaveUp && processor != null) {
+			try {
+				processor.abandon(job.getSubjectId());
+			} catch (RuntimeException e) {
+				log.error("[AiJob] abandoning {} {} failed", job.getType(), job.getSubjectId(), e);
+			}
+		}
 	}
 
-	private void settle(UUID jobId, Outcome outcome, String error) {
+	/** @return true when the job was given up (FAILED) */
+	private boolean settle(UUID jobId, Outcome outcome, String error) {
 		Instant now = clock.instant();
-		tx.executeWithoutResult(status -> repository.findById(jobId).ifPresent(job -> {
+		Boolean gaveUp = tx.execute(status -> repository.findById(jobId).map(job -> {
 			if (outcome == Outcome.COMPLETED) {
 				job.succeed(now);
-			} else if (job.getAttempts() >= properties.getMaxAttempts()) {
-				job.fail(error, now);
-			} else {
-				job.retryAt(now.plus(backoff(job.getAttempts())), error, now);
+				return false;
 			}
-		}));
+			if (job.getAttempts() >= properties.getMaxAttempts()) {
+				job.fail(error, now);
+				return true;
+			}
+			job.retryAt(now.plus(backoff(job.getAttempts())), error, now);
+			return false;
+		}).orElse(false));
+		return Boolean.TRUE.equals(gaveUp);
 	}
 
 	Duration backoff(int failedAttempts) {
