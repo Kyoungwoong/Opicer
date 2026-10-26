@@ -11,41 +11,39 @@
  * sage-green primary, honey accent used sparingly, terracotta wordmark.
  */
 :root {
-  --background: #eef4f0;
-  --foreground: #23292a;
+  --background: #f5f6f8;
+  --foreground: #1c242f;
 
   --card: #ffffff;
-  --card-foreground: #23292a;
+  --card-foreground: #1c242f;
   --popover: #ffffff;
-  --popover-foreground: #23292a;
+  --popover-foreground: #1c242f;
 
-  --primary: #2f6b5e;
+  --primary: #09875f;
   --primary-foreground: #ffffff;
-  --primary-strong: #1f4a41;
-  --secondary: #f3f7f4;
-  --secondary-foreground: #23292a;
-  --muted: #e7eee9;
-  --muted-foreground: #5d6664;
-  --accent: #dcebe2;
-  --accent-foreground: #1f4a41;
+  --primary-strong: #087a58;
+  --secondary: #f2f4f7;
+  --secondary-foreground: #1c242f;
+  --muted: #eff1f5;
+  --muted-foreground: #5f6b7a;
+  --accent: #e7f6f0;
+  --accent-foreground: #087a58;
   /* Wordmark only: warm counterpoint to the green UI (4.0:1 on the page ground). */
-  --brand: #c4552e;
-  --highlight: #e9c46a;
-  --highlight-subtle: #fbf6ea;
-  --highlight-foreground: #7a5a1c;
+  --brand: #0fa97b;
+  --highlight: #ffc300;
 
   --destructive: #c0392b;
   --destructive-foreground: #ffffff;
-  --success: #2f7a4f;
-  --success-subtle: #e9f3ec;
+  --success: #0b7a52;
+  --success-subtle: #e6f5ec;
   --warning: #9a5b0b;
   --warning-subtle: #fbf1e0;
   --info: #2f5f9e;
   --info-subtle: #eaf0f8;
 
-  --border: #dfe7e2;
-  --input: #cfd9d3;
-  --ring: #2f6b5e;
+  --border: #e5e8ec;
+  --input: #dfe3e8;
+  --ring: #09875f;
 
   --radius: 0.75rem;
 }
@@ -68,8 +66,6 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-brand: var(--brand);
   --color-highlight: var(--highlight);
-  --color-highlight-subtle: var(--highlight-subtle);
-  --color-highlight-foreground: var(--highlight-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
@@ -96,8 +92,8 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  --shadow-card: 0 1px 2px rgb(35 41 42 / 0.04);
-  --shadow-raised: 0 1px 2px rgb(35 41 42 / 0.04), 0 12px 32px -16px rgb(35 41 42 / 0.16);
+  --shadow-card: 0 1px 2px rgb(28 36 47 / 0.04);
+  --shadow-raised: 0 1px 2px rgb(28 36 47 / 0.04), 0 12px 32px -16px rgb(28 36 47 / 0.12);
 }
 
 @layer base {
@@ -139,7 +135,7 @@
   }
 
   ::selection {
-    background: rgb(47 107 94 / 0.18);
+    background: rgb(15 169 123 / 0.18);
   }
 }
 

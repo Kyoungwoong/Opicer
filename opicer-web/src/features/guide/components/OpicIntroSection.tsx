@@ -99,7 +99,7 @@ function ExamFlow() {
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="font-semibold">
-            <span className="text-primary">{activeIndex + 1}단계</span> {step.title}
+            <span className="text-primary-strong">{activeIndex + 1}단계</span> {step.title}
           </p>
           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
             <Clock aria-hidden className="size-3.5" />
@@ -107,7 +107,7 @@ function ExamFlow() {
           </span>
         </div>
         <p className="text-sm leading-6">{step.description}</p>
-        <p className="flex gap-2 rounded-xl bg-highlight-subtle px-3 py-2.5 text-sm leading-6 text-highlight-foreground">
+        <p className="flex gap-2 rounded-xl bg-accent px-3 py-2.5 text-sm leading-6 text-accent-foreground">
           <Lightbulb aria-hidden className="mt-0.5 size-4 shrink-0" />
           <span>{step.tip}</span>
         </p>
@@ -196,7 +196,7 @@ function LevelFocus() {
         className={cn("flex flex-col gap-4 rounded-2xl bg-secondary p-4 sm:p-5", PANEL_ENTER)}
       >
         <p className="font-semibold">
-          <span className="text-primary">{level.label}</span> 레벨에 필요한 것
+          <span className="text-primary-strong">{level.label}</span> 레벨에 필요한 것
         </p>
         <dl className="grid gap-3 sm:grid-cols-3">
           {[
@@ -205,7 +205,7 @@ function LevelFocus() {
             { term: "답변 길이", value: level.length },
           ].map((row) => (
             <div key={row.term} className="flex flex-col gap-1 rounded-xl bg-card p-3">
-              <dt className="text-xs font-semibold text-primary">{row.term}</dt>
+              <dt className="text-xs font-semibold text-primary-strong">{row.term}</dt>
               <dd className="text-sm leading-6">{row.value}</dd>
             </div>
           ))}
@@ -216,7 +216,7 @@ function LevelFocus() {
             {level.example}
           </blockquote>
         </figure>
-        <p className="flex gap-2 rounded-xl bg-highlight-subtle px-3 py-2.5 text-sm leading-6 text-highlight-foreground">
+        <p className="flex gap-2 rounded-xl bg-accent px-3 py-2.5 text-sm leading-6 text-accent-foreground">
           <Lightbulb aria-hidden className="mt-0.5 size-4 shrink-0" />
           <span>{level.nextStep}</span>
         </p>

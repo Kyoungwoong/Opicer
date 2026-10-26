@@ -73,7 +73,7 @@ export function MicLevelMeter({ stream, className }: Props) {
             key={i}
             className={cn(
               "flex-1 rounded-sm transition-[height,background-color] duration-75 motion-reduce:transition-none",
-              i < lit ? (i >= BAR_COUNT - 2 ? "bg-highlight-foreground" : "bg-primary") : "bg-muted"
+              i < lit ? (i >= BAR_COUNT - 2 ? "bg-highlight" : "bg-primary") : "bg-muted"
             )}
             style={{ height: `${30 + (i / (BAR_COUNT - 1)) * 70}%` }}
           />

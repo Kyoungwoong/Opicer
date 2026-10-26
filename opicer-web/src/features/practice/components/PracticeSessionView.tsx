@@ -477,7 +477,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
     return (
       <PageShell width="md" nav={nav}>
         <div role="status" className="flex flex-col items-center justify-center gap-4 py-24">
-          <LoaderCircle aria-hidden className="size-8 animate-spin text-primary" />
+          <LoaderCircle aria-hidden className="size-8 animate-spin text-primary-strong" />
           <p className="text-sm text-muted-foreground">답변 분석 중…</p>
         </div>
       </PageShell>
@@ -640,7 +640,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
               </Button>
             </>
           ) : (
-            <LoaderCircle role="status" aria-label="불러오는 중" className="size-8 animate-spin text-primary" />
+            <LoaderCircle role="status" aria-label="불러오는 중" className="size-8 animate-spin text-primary-strong" />
           )}
         </div>
       </PageShell>

@@ -136,7 +136,7 @@ function HistoryList({ state }: { state: HistoryState }) {
                 <span>
                   {formatDateTime(session.completedAt)} · {session.answerCount}문항
                 </span>
-                <span className="inline-flex items-center gap-0.5 font-medium text-primary group-hover:underline">
+                <span className="inline-flex items-center gap-0.5 font-medium text-primary-strong group-hover:underline">
                   자세히 보기
                   <ChevronRight aria-hidden className="size-3.5" />
                 </span>
