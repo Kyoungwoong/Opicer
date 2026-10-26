@@ -3,12 +3,14 @@ package com.opicer.api.practice.application;
 import com.opicer.api.practice.domain.PracticeAnswer;
 import com.opicer.api.practice.domain.PracticeSession;
 import com.opicer.api.practice.infrastructure.PracticeAnswerRepository;
+import com.opicer.api.practice.infrastructure.PracticeAnswerRepository.SessionAnswerCounts;
 import com.opicer.api.practice.infrastructure.PracticeSessionRepository;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -41,15 +43,16 @@ public class PracticeHistoryQueryService {
 			return List.of();
 		}
 
-		Map<UUID, List<PracticeAnswer>> answersBySession = practiceAnswerRepository
-			.findBySessionIdIn(sessions.stream().map(PracticeSession::getId).toList())
+		Map<UUID, SessionAnswerCounts> countsBySession = practiceAnswerRepository
+			.countBySessionIds(sessions.stream().map(PracticeSession::getId).toList())
 			.stream()
-			.collect(Collectors.groupingBy(PracticeAnswer::getSessionId));
+			.collect(Collectors.toMap(SessionAnswerCounts::getSessionId, Function.identity()));
 
 		return sessions.stream().map(session -> {
-			List<PracticeAnswer> answers = answersBySession.getOrDefault(session.getId(), List.of());
-			int analyzed = (int) answers.stream().filter(a -> a.getAnalysis() != null).count();
-			return new SessionSummary(session, answers.size(), analyzed);
+			SessionAnswerCounts counts = countsBySession.get(session.getId());
+			return counts == null
+				? new SessionSummary(session, 0, 0)
+				: new SessionSummary(session, (int) counts.getAnswerCount(), (int) counts.getAnalyzedCount());
 		}).toList();
 	}
 

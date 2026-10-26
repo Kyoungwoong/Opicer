@@ -13,7 +13,20 @@ import org.springframework.data.repository.query.Param;
 public interface PracticeAnswerRepository extends JpaRepository<PracticeAnswer, UUID> {
 	List<PracticeAnswer> findBySessionIdOrderByQuestionOrderAsc(UUID sessionId);
 
-	List<PracticeAnswer> findBySessionIdIn(Collection<UUID> sessionIds);
+	/** Per-session answer counts without loading answer text. */
+	@Query("""
+		select a.sessionId as sessionId, count(a) as answerCount, count(a.analysis) as analyzedCount
+		from PracticeAnswer a
+		where a.sessionId in :sessionIds
+		group by a.sessionId
+		""")
+	List<SessionAnswerCounts> countBySessionIds(@Param("sessionIds") Collection<UUID> sessionIds);
+
+	interface SessionAnswerCounts {
+		UUID getSessionId();
+		long getAnswerCount();
+		long getAnalyzedCount();
+	}
 
 	Optional<PracticeAnswer> findBySessionIdAndQuestionId(UUID sessionId, UUID questionId);
 
