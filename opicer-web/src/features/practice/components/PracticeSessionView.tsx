@@ -28,6 +28,7 @@ import {
   analyzeAnswer,
   fetchPracticeQuestions,
   improveScript,
+  savePracticeAnswerResult,
   submitPracticeSession,
   submitTopicSelection,
   transcribeAudio,
@@ -90,6 +91,15 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
   const answersRef = useRef<PracticeAnswer[]>([]);
   // pendingSubmitRef signals that onstop should trigger transcription
   const pendingSubmitRef = useRef(false);
+  // Saved practice session id (from submit), used to persist AI results to history
+  const sessionIdRef = useRef<string | null>(null);
+
+  /** Best-effort: a failed history save must not disturb the result already on screen. */
+  const persistAiResult = (questionId: string, result: { analysis?: string; improvedScript?: string }) => {
+    const sessionId = sessionIdRef.current;
+    if (!sessionId) return;
+    savePracticeAnswerResult(sessionId, questionId, result).catch(() => {});
+  };
 
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
@@ -186,7 +196,11 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
       })
     ).then(async (updated) => {
       try {
-        await submitPracticeSession(topicSelectionId);
+        const result = await submitPracticeSession(
+          topicSelectionId,
+          updated.map((a) => ({ questionId: a.questionId, questionText: a.questionText, transcript: a.transcript ?? null }))
+        );
+        sessionIdRef.current = result.sessionId;
       } catch (err) {
         const message = err instanceof Error ? err.message : "연습 제출 처리에 실패했습니다.";
         setError(message);
@@ -396,6 +410,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
         ...prev,
         [id]: { ...prev[id]!, isAnalyzing: false, analysis },
       }));
+      persistAiResult(id, { analysis });
     } catch (err) {
       const message = err instanceof Error ? err.message : "분석에 실패했습니다.";
       setAiStates((prev) => ({
@@ -425,6 +440,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, userLabel, onLo
         ...prev,
         [id]: { ...prev[id]!, isImproving: false, improvement },
       }));
+      persistAiResult(id, { improvedScript: improvement });
     } catch (err) {
       const message = err instanceof Error ? err.message : "수정에 실패했습니다.";
       setAiStates((prev) => ({
