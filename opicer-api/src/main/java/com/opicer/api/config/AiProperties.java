@@ -6,7 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AiProperties {
 
 	private String openaiApiKey = "";
-	private String anthropicApiKey = "";
 	private String openaiEmbeddingModel = "text-embedding-3-small";
 	private int openaiEmbeddingDimension = 1536;
 
@@ -16,14 +15,6 @@ public class AiProperties {
 
 	public void setOpenaiApiKey(String openaiApiKey) {
 		this.openaiApiKey = openaiApiKey;
-	}
-
-	public String getAnthropicApiKey() {
-		return anthropicApiKey;
-	}
-
-	public void setAnthropicApiKey(String anthropicApiKey) {
-		this.anthropicApiKey = anthropicApiKey;
 	}
 
 	public String getOpenaiEmbeddingModel() {

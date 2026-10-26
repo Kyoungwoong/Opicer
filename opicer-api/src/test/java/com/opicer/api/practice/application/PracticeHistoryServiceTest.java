@@ -1,11 +1,13 @@
 package com.opicer.api.practice.application;
 
 import com.opicer.api.credit.application.CreditBalanceCommandService;
+import com.opicer.api.practice.domain.PracticeAnswer;
 import com.opicer.api.practice.domain.TopicSelection;
 import com.opicer.api.practice.infrastructure.PracticeAnswerRepository;
 import com.opicer.api.practice.infrastructure.PracticeCreditChargeRepository;
 import com.opicer.api.practice.infrastructure.PracticeSessionRepository;
 import com.opicer.api.practice.infrastructure.TopicSelectionRepository;
+import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
 import com.opicer.api.user.domain.AuthProvider;
@@ -105,8 +107,9 @@ class PracticeHistoryServiceTest {
 		UUID newer = submit(owner, 1).sessionId();
 		submit(other, 1);
 
-		practiceHistoryCommandService.recordAiResult(owner, older,
-			practiceHistoryQueryService.get(owner, older).answers().get(0).getQuestionId(), "analysis", null);
+		PracticeAnswer evaluated = practiceHistoryQueryService.get(owner, older).answers().get(0);
+		evaluated.recordEvaluation("{}", OpicLevel.IM, "analysis", "script");
+		practiceAnswerRepository.save(evaluated);
 
 		List<PracticeHistoryQueryService.SessionSummary> list = practiceHistoryQueryService.list(owner, 10);
 		assertThat(list).extracting(s -> s.session().getId()).containsExactly(newer, older);
@@ -127,20 +130,6 @@ class PracticeHistoryServiceTest {
 		assertThatThrownBy(() -> practiceHistoryCommandService.delete(attacker, sessionId))
 			.isInstanceOf(ApiException.class);
 		assertThat(practiceSessionRepository.existsById(sessionId)).isTrue();
-	}
-
-	@Test
-	void recordAiResultKeepsFieldsThatAreNotSent() {
-		UUID userId = userWithCredits(10);
-		UUID sessionId = submit(userId, 1).sessionId();
-		UUID questionId = practiceHistoryQueryService.get(userId, sessionId).answers().get(0).getQuestionId();
-
-		practiceHistoryCommandService.recordAiResult(userId, sessionId, questionId, "analysis", null);
-		practiceHistoryCommandService.recordAiResult(userId, sessionId, questionId, null, "improved");
-
-		var answer = practiceHistoryQueryService.get(userId, sessionId).answers().get(0);
-		assertThat(answer.getAnalysis()).isEqualTo("analysis");
-		assertThat(answer.getImprovedScript()).isEqualTo("improved");
 	}
 
 	@Test

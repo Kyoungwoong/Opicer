@@ -2,7 +2,6 @@ package com.opicer.api.practice.application;
 
 import com.opicer.api.aijob.application.AiJobCommandService;
 import com.opicer.api.aijob.domain.AiJobType;
-import com.opicer.api.practice.domain.PracticeAnswer;
 import com.opicer.api.practice.domain.PracticeSession;
 import com.opicer.api.practice.infrastructure.PracticeAnswerRepository;
 import com.opicer.api.practice.infrastructure.PracticeSessionRepository;
@@ -27,16 +26,6 @@ public class PracticeHistoryCommandService {
 		this.practiceSessionRepository = practiceSessionRepository;
 		this.practiceAnswerRepository = practiceAnswerRepository;
 		this.aiJobCommandService = aiJobCommandService;
-	}
-
-	/** Stores AI analysis and/or the improved script for one answer; null fields are left as they are. */
-	@Transactional
-	public PracticeAnswer recordAiResult(UUID userId, UUID sessionId, UUID questionId, String analysis, String improvedScript) {
-		PracticeSession session = findOwned(userId, sessionId);
-		PracticeAnswer answer = practiceAnswerRepository.findBySessionIdAndQuestionId(session.getId(), questionId)
-			.orElseThrow(() -> new ApiException(ErrorCode.PRACTICE_ANSWER_NOT_FOUND));
-		answer.recordAiResult(analysis, improvedScript);
-		return answer;
 	}
 
 	/** Physically deletes the session, every answer derived from it, and its evaluation job. */
