@@ -8,6 +8,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
 import com.opicer.api.auth.infrastructure.JwtAuthenticationFilter;
@@ -41,6 +42,7 @@ public class SecurityConfig {
 			.requestMatchers("/h2-console/**", "/actuator/health", "/api/health").permitAll()
 			.requestMatchers("/oauth2/**", "/login/**").permitAll()
 			.requestMatchers("/api/auth/login/**", "/api/auth/logout").permitAll()
+			.requestMatchers(HttpMethod.GET, "/api/opic/**").permitAll()
 			.requestMatchers("/api/admin/**").hasRole("ADMIN")
 			.requestMatchers("/api/auth/me").authenticated()
 			.requestMatchers("/api/**").authenticated()
