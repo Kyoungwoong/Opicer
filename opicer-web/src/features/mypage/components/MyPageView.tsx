@@ -50,7 +50,7 @@ function CategoryList({
 }: {
   activeType: PracticeHistoryType;
   onChange: (type: PracticeHistoryType) => void;
-  topicCount: number | null;
+  topicCount: string | null;
 }) {
   return (
     <nav aria-label="연습 종류" className="-mx-4 px-4 lg:mx-0 lg:rounded-3xl lg:border lg:bg-card lg:p-5 lg:shadow-card">
@@ -163,7 +163,11 @@ export function MyPageView({ userLabel, onLogout }: Props) {
     };
   }, []);
 
-  const topicCount = history.status === "ready" ? history.sessions.length : null;
+  // The list is capped at HISTORY_LIMIT, so a full page means "at least that many".
+  const topicCount =
+    history.status === "ready"
+      ? `${history.sessions.length}${history.sessions.length >= HISTORY_LIMIT ? "+" : ""}`
+      : null;
 
   return (
     <PageShell nav={<TopNav userLabel={userLabel} onLogout={onLogout} maxWidthClassName="max-w-6xl" />}>
