@@ -33,7 +33,6 @@ public enum ErrorCode {
 	EVALUATION_GUIDE_NOT_FOUND("EVALUATION_GUIDE_NOT_FOUND", HttpStatus.NOT_FOUND, "Evaluation guide not found"),
 	EVALUATION_GUIDE_ACTIVE("EVALUATION_GUIDE_ACTIVE", HttpStatus.CONFLICT,
 		"An active guide cannot be edited or deleted; create a new version instead"),
-	OPIC_SYNC_FAILED("OPIC_SYNC_FAILED", HttpStatus.BAD_GATEWAY, "Failed to sync data from opic.or.kr"),
 	CREDIT_INSUFFICIENT_BALANCE("CREDIT_INSUFFICIENT_BALANCE", HttpStatus.PAYMENT_REQUIRED, "Insufficient credits");
 
 	private final String code;

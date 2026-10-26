@@ -1,12 +1,9 @@
 package com.opicer.api.opic.application;
 
-import com.opicer.api.opic.domain.OpicExamSchedule;
 import com.opicer.api.opic.domain.OpicTestCenter;
 import com.opicer.api.opic.infrastructure.OpicCenterReviewRepository;
 import com.opicer.api.opic.infrastructure.OpicCenterReviewRepository.ReviewStats;
-import com.opicer.api.opic.infrastructure.OpicExamScheduleRepository;
 import com.opicer.api.opic.infrastructure.OpicTestCenterRepository;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,22 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class OpicQueryService {
 
-	private final OpicExamScheduleRepository scheduleRepository;
 	private final OpicTestCenterRepository centerRepository;
 	private final OpicCenterReviewRepository reviewRepository;
 
 	public OpicQueryService(
-		OpicExamScheduleRepository scheduleRepository,
 		OpicTestCenterRepository centerRepository,
 		OpicCenterReviewRepository reviewRepository
 	) {
-		this.scheduleRepository = scheduleRepository;
 		this.centerRepository = centerRepository;
 		this.reviewRepository = reviewRepository;
-	}
-
-	public List<OpicExamSchedule> schedules(YearMonth month) {
-		return scheduleRepository.findByExamDateBetweenOrderByExamDateAsc(month.atDay(1), month.atEndOfMonth());
 	}
 
 	/** Active centers with their visible-review stats; {@code region} (e.g. "서울") narrows the list when given. */

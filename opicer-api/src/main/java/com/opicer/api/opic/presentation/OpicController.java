@@ -4,16 +4,9 @@ import com.opicer.api.opic.application.OpicCenterReviewQueryService;
 import com.opicer.api.opic.application.OpicQueryService;
 import com.opicer.api.opic.application.OpicQueryService.CenterSummary;
 import com.opicer.api.opic.domain.OpicCenterReview;
-import com.opicer.api.opic.domain.OpicExamSchedule;
 import com.opicer.api.opic.domain.OpicTestCenter;
-import com.opicer.api.shared.error.ApiException;
-import com.opicer.api.shared.error.ErrorCode;
 import com.opicer.api.shared.presentation.ApiResponse;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.ZoneId;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
@@ -23,12 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Public, read-only OPIc facts synced from opic.or.kr. */
+/** Public, read-only OPIc test centers (entered by admins) and their reviews. */
 @RestController
 @RequestMapping("/api/opic")
 public class OpicController {
-
-	public static final String SOURCE = "opic.or.kr";
 
 	private final OpicQueryService opicQueryService;
 	private final OpicCenterReviewQueryService reviewQueryService;
@@ -36,14 +27,6 @@ public class OpicController {
 	public OpicController(OpicQueryService opicQueryService, OpicCenterReviewQueryService reviewQueryService) {
 		this.opicQueryService = opicQueryService;
 		this.reviewQueryService = reviewQueryService;
-	}
-
-	/** {@code month} is YYYY-MM; defaults to the current month in Asia/Seoul. */
-	@GetMapping("/schedules")
-	public ResponseEntity<ApiResponse<ScheduleMonthResponse>> schedules(@RequestParam(required = false) String month) {
-		YearMonth target = parseMonth(month);
-		List<ScheduleResponse> items = opicQueryService.schedules(target).stream().map(ScheduleResponse::from).toList();
-		return ResponseEntity.ok(ApiResponse.ok("OPIC_SCHEDULES", new ScheduleMonthResponse(target.toString(), SOURCE, items)));
 	}
 
 	@GetMapping("/centers")
@@ -57,33 +40,6 @@ public class OpicController {
 	public ResponseEntity<ApiResponse<List<ReviewResponse>>> reviews(@PathVariable UUID centerId) {
 		return ResponseEntity.ok(ApiResponse.ok("OPIC_CENTER_REVIEWS",
 			reviewQueryService.visibleReviews(centerId).stream().map(ReviewResponse::from).toList()));
-	}
-
-	private static YearMonth parseMonth(String month) {
-		if (month == null || month.isBlank()) {
-			return YearMonth.now(ZoneId.of("Asia/Seoul"));
-		}
-		try {
-			return YearMonth.parse(month.trim());
-		} catch (DateTimeParseException e) {
-			throw new ApiException(ErrorCode.VALIDATION_ERROR, "month must be YYYY-MM");
-		}
-	}
-
-	public record ScheduleMonthResponse(String month, String source, List<ScheduleResponse> schedules) {}
-
-	public record ScheduleResponse(
-		LocalDate examDate,
-		LocalDate registrationStart,
-		LocalDate registrationEnd,
-		LocalDate scoreReleaseDate,
-		String roundName,
-		boolean earlyRelease
-	) {
-		static ScheduleResponse from(OpicExamSchedule s) {
-			return new ScheduleResponse(s.getExamDate(), s.getRegistrationStart(), s.getRegistrationEnd(),
-				s.getScoreReleaseDate(), s.getRoundName(), s.isEarlyRelease());
-		}
 	}
 
 	public record CenterResponse(
