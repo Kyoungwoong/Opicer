@@ -1,5 +1,6 @@
 package com.opicer.api.practice.application;
 
+import com.opicer.api.ai.application.AiTranscriptionService;
 import com.opicer.api.config.AiProperties;
 import com.opicer.api.goodanswer.application.GoodAnswerSampleQueryService;
 import com.opicer.api.goodanswer.application.ReferenceSample;
@@ -19,7 +20,7 @@ class PracticeAiServiceRagTest {
 
 	private final GoodAnswerSampleQueryService queryService = mock(GoodAnswerSampleQueryService.class);
 	private final PracticeAiService service = new PracticeAiService(
-		new AiProperties(), mock(PromptVersionQueryService.class), queryService);
+		new AiProperties(), mock(PromptVersionQueryService.class), queryService, mock(AiTranscriptionService.class));
 	private final UUID topicId = UUID.randomUUID();
 
 	@Test

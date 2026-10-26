@@ -1,6 +1,7 @@
 package com.opicer.api.practice.application;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.opicer.api.ai.application.AiTranscriptionService;
 import com.opicer.api.config.AiProperties;
 import com.opicer.api.prompt.application.PromptVersionQueryService;
 import com.opicer.api.prompt.domain.PromptUseCase;
@@ -10,16 +11,12 @@ import com.opicer.api.goodanswer.application.ReferenceSample;
 import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
-import java.io.InputStream;
 import java.util.StringJoiner;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestClient;
@@ -46,44 +43,25 @@ public class PracticeAiService {
 	private final AiProperties aiProperties;
 	private final PromptVersionQueryService promptVersionQueryService;
 	private final GoodAnswerSampleQueryService goodAnswerSampleQueryService;
+	private final AiTranscriptionService transcriptionService;
 	private final RestClient restClient;
 
 	public PracticeAiService(
 		AiProperties aiProperties,
 		PromptVersionQueryService promptVersionQueryService,
-		GoodAnswerSampleQueryService goodAnswerSampleQueryService
+		GoodAnswerSampleQueryService goodAnswerSampleQueryService,
+		AiTranscriptionService transcriptionService
 	) {
 		this.aiProperties = aiProperties;
 		this.promptVersionQueryService = promptVersionQueryService;
 		this.goodAnswerSampleQueryService = goodAnswerSampleQueryService;
+		this.transcriptionService = transcriptionService;
 		this.restClient = RestClient.create();
 	}
 
+	/** Delegates to the configured speech-to-text provider; the question text is passed as a hint. */
 	public String transcribe(MultipartFile audio, String questionText) {
-		String apiKey = aiProperties.getOpenaiApiKey();
-		if (apiKey == null || apiKey.isBlank()) {
-			throw new ApiException(ErrorCode.AI_NOT_CONFIGURED);
-		}
-		try {
-			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-			body.add("file", new MultipartInputStreamFileResource(audio.getInputStream(), "audio.webm"));
-			body.add("model", "whisper-1");
-			body.add("response_format", "text");
-
-			return restClient.post()
-				.uri("https://api.openai.com/v1/audio/transcriptions")
-				.header("Authorization", "Bearer " + apiKey)
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(body)
-				.retrieve()
-				.body(String.class);
-		} catch (RestClientException e) {
-			log.error("[Whisper] API call failed: {}", e.getMessage(), e);
-			throw new ApiException(ErrorCode.AI_TRANSCRIPTION_FAILED, e.getMessage());
-		} catch (Exception e) {
-			log.error("[Whisper] Unexpected error: {}", e.getMessage(), e);
-			throw new ApiException(ErrorCode.AI_TRANSCRIPTION_FAILED, e.getMessage());
-		}
+		return transcriptionService.transcribe(audio, questionText);
 	}
 
 	public String analyze(
@@ -205,24 +183,4 @@ public class PracticeAiService {
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	private record ContentBlock(String type, String text) {}
-
-	private static class MultipartInputStreamFileResource extends InputStreamResource {
-
-		private final String filename;
-
-		MultipartInputStreamFileResource(InputStream in, String filename) {
-			super(in);
-			this.filename = filename;
-		}
-
-		@Override
-		public String getFilename() {
-			return filename;
-		}
-
-		@Override
-		public long contentLength() {
-			return -1;
-		}
-	}
 }
