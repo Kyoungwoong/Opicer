@@ -66,6 +66,12 @@ Priority order:
 - MUST: Make **small, feature-scoped commits**. If a change can be split, it must be split.
 - MUST: Use commit message format `<type>(<scope>): <subject>` as defined in `git-workflow`.
 - MUST: Use relevant skills before working, and follow their instructions.
+- MUST: **Log every user request in `docs/worklog/`** (format: `docs/worklog/README.md`).
+    - One file per piece of work: `docs/worklog/YYYY-MM-DD-<short-slug>.md`. Append to the day's file when the work continues.
+    - Record the user's prompts **verbatim** (original language), then the analysis, the decisions and plan (link `plan.md` / plan files), what was built (PRs, commits), verification evidence, and open items.
+    - Write the entry when the request arrives, and update it at Close Out (§3.5 step 10).
+    - Never paste secrets, API keys, credentials, or personal data. Redact them as `[REDACTED]`.
+    - `plan.md` stays the working memory and is git-ignored. `docs/worklog/` is the committed history.
 
 ### 3.5 Delivery Cycle (Every Unit of Work)
 Every unit of work, whether feature, fix, refactor, docs or chore, goes through this exact loop.
@@ -116,6 +122,7 @@ Each step is listed with the FSM state from §4 that it belongs to.
     - After the merge, switch to `main` and pull.
     - Delete the merged branch locally and on the remote.
     - Update `plan.md`: progress and Iteration Log.
+    - Update the request's `docs/worklog/` entry: result, PR links, verification, open items (§3.4).
     - The next unit of work starts again at **step 1** with a new analysis and a new plan OK.
 
 ---
