@@ -49,6 +49,17 @@
 
 > 응 PR-3 진행해줘
 
+> 응 PR-4 진행해줘
+
+> 왜 갑자기 Claude API를 쓰는거야? 그냥 OpenAI API 사용해주지.
+
+> 아니 잠만 원래 OpenAI로 되어있지 않았어? 너가 Claude로 바꾼거야?
+
+- 확인 결과(git): 기존 분석·수정 기능은 `fd16877`(2026-02-26)부터 Claude(`claude-opus-4-6`)를 썼다. OpenAI는 STT와 임베딩에만 쓰였다. 이번 세션에서 공급자를 바꾼 적은 없다.
+- 결정(선택지 답): 평가 AI는 **OpenAI**, 기본 모델은 **`gpt-5.6-sol`**(사용자 입력. 모델 페이지에는 `gpt-6.1-sol`로 나와 있어 확인 요청).
+
+> 이거 하면서 PR-4 같이 진행해줘
+
 ## 분석 (구현 전 상태)
 - **벡터**
   - `good_answer_sample.embedding vector(1536)` 하나뿐이다(OpenAI text-embedding-3-small, 단위 벡터).
@@ -102,9 +113,10 @@
 | #114 | `CompetencyDimension`, `CorrectionCategory`, `SpeechSignalsCalculator`(MATTR), `LevelAggregator`/`SessionReport`. 리뷰 R1: 숫자를 단어로 세고, 소수점에서 문장을 끊지 않음 | `./gradlew test` 134개 통과 |
 | #116 (이슈 #115) | 이 기록 규칙(AGENTS.md §3.4, CLAUDE.md §7)과 worklog 디렉토리 | 문서 |
 | #118 (이슈 #117) | STT 교체 구조: `SpeechToText` 포트, `MockSpeechToText`(기본, 질문별 결정적 IL~AL 답변), `OpenAiWhisperSpeechToText`, 중복 Whisper 코드 통합. 리뷰 R1: 운영 프로필 기본값은 openai. 후속 #119(임베딩 목) | `./gradlew test` 145개 통과 |
+| #121 (이슈 #120) | ai_job 테이블(멱등 등록), 세션·답변 평가 상태 컬럼(jsonb 리포트와 평가), 제출 시 목표 레벨(IM/IH/AL, 기본 IM)과 녹음 길이를 받아 평가 작업 등록, 삭제 연동. 리뷰 R1: jsonb 왕복 테스트 | `./gradlew test` 159개 통과 |
 
 ## 남은 일 / 후속
-- 다음: PR-3(모델·계약, ai_job) → PR-4(평가기, 추천 표현) → 관리자 md 평가 가이드 → PR-5 → PR-6/7(템플릿 리포트 화면) → PR-8
+- 다음: PR-4(평가기, 추천 표현) → 관리자 md 평가 가이드 → PR-5 → PR-6/7(템플릿 리포트 화면) → PR-8
 - 확인 필요
   - anthropic-java SDK를 도입할지(PR-4)
   - 전부 실패한 평가를 환불할지

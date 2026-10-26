@@ -55,6 +55,13 @@ opicer:
       # mock = canned transcripts, no network (default for now). openai = Whisper (needs OPENAI_API_KEY).
       provider: ${OPICER_STT_PROVIDER:mock}
       openai-model: ${OPICER_STT_OPENAI_MODEL:whisper-1}
+    evaluation:
+      # Answer evaluation (structured output). Provider is swappable; openai uses OPENAI_API_KEY.
+      provider: ${OPICER_EVAL_PROVIDER:openai}
+      openai-model: ${OPICER_EVAL_MODEL:gpt-5.6-sol}
+      reasoning-effort: ${OPICER_EVAL_REASONING_EFFORT:medium}
+      max-output-tokens: ${OPICER_EVAL_MAX_OUTPUT_TOKENS:16000}
+      timeout-seconds: ${OPICER_EVAL_TIMEOUT_SECONDS:90}
   rag:
     # docs/adr/0001-vector-similarity.md
     candidates: ${OPICER_RAG_CANDIDATES:12}
