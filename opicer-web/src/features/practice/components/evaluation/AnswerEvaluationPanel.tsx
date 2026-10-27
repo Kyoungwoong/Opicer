@@ -42,26 +42,26 @@ export function AnswerEvaluationPanel({ evaluation, transcript, targetLevel, var
       )}
 
       {full && dimensions.length > 0 && (
-      <div className={SECTION}>
-        <Eyebrow>역량별 평가</Eyebrow>
-        <ul className="grid gap-3 sm:grid-cols-2">
-          {dimensions.map((dimension) => (
-            <li key={dimension.code} className="flex flex-col gap-1.5 rounded-2xl border p-4">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-semibold">{DIMENSION_LABELS[dimension.code]}</span>
-                <span className="text-sm font-bold tabular-nums text-primary-strong">{dimension.level}</span>
-              </div>
-              <p className="text-sm leading-relaxed text-muted-foreground">{dimension.commentKo}</p>
-              {dimension.evidence && (
-                <p className="flex gap-1.5 text-xs leading-relaxed text-muted-foreground">
-                  <MessageSquareQuote aria-hidden className="mt-0.5 size-3.5 shrink-0" />
-                  <span className="italic">&ldquo;{dimension.evidence}&rdquo;</span>
-                </p>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+        <div className={SECTION}>
+          <Eyebrow>역량별 평가</Eyebrow>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {dimensions.map((dimension) => (
+              <li key={dimension.code} className="flex flex-col gap-1.5 rounded-2xl border p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-semibold">{DIMENSION_LABELS[dimension.code]}</span>
+                  <span className="text-sm font-bold tabular-nums text-primary-strong">{dimension.level}</span>
+                </div>
+                <p className="text-sm leading-relaxed text-muted-foreground">{dimension.commentKo}</p>
+                {dimension.evidence && (
+                  <p className="flex gap-1.5 text-xs leading-relaxed text-muted-foreground">
+                    <MessageSquareQuote aria-hidden className="mt-0.5 size-3.5 shrink-0" />
+                    <span className="italic">&ldquo;{dimension.evidence}&rdquo;</span>
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {full && strengths.length > 0 && (
