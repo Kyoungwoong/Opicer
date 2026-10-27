@@ -10,6 +10,8 @@ type Props = {
   /** The learner's transcript, diffed against the target-level script. */
   transcript: string | null;
   targetLevel: OpicLevel | null;
+  /** "coach" (topic practice) shows only fixes, the target script and expressions — no levels. */
+  variant?: "full" | "coach";
 };
 
 const SECTION = "flex flex-col gap-2.5";
@@ -22,19 +24,24 @@ function signalsLine(signals: AnswerEvaluation["signals"]): string {
 }
 
 /** One answer's evaluation in a fixed layout; all text comes from the stored evaluation document. */
-export function AnswerEvaluationPanel({ evaluation, transcript, targetLevel }: Props) {
-  const dimensions = [...evaluation.dimensions].sort(
+export function AnswerEvaluationPanel({ evaluation, transcript, targetLevel, variant = "full" }: Props) {
+  const full = variant === "full";
+  const dimensions = [...(evaluation.dimensions ?? [])].sort(
     (a, b) => DIMENSION_ORDER.indexOf(a.code) - DIMENSION_ORDER.indexOf(b.code)
   );
+  const strengths = evaluation.strengths ?? [];
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge className="h-6 px-2.5 text-sm font-bold">{evaluation.overallLevel}</Badge>
-        <span className="text-sm font-semibold">이 답변의 예상 레벨(참고용)</span>
-        <span className="text-xs text-muted-foreground">{signalsLine(evaluation.signals)}</span>
-      </div>
+      {full && evaluation.overallLevel && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge className="h-6 px-2.5 text-sm font-bold">{evaluation.overallLevel}</Badge>
+          <span className="text-sm font-semibold">이 답변의 예상 레벨(참고용)</span>
+          <span className="text-xs text-muted-foreground">{signalsLine(evaluation.signals)}</span>
+        </div>
+      )}
 
+      {full && dimensions.length > 0 && (
       <div className={SECTION}>
         <Eyebrow>역량별 평가</Eyebrow>
         <ul className="grid gap-3 sm:grid-cols-2">
@@ -55,12 +62,13 @@ export function AnswerEvaluationPanel({ evaluation, transcript, targetLevel }: P
           ))}
         </ul>
       </div>
+      )}
 
-      {evaluation.strengths.length > 0 && (
+      {full && strengths.length > 0 && (
         <div className={SECTION}>
           <Eyebrow>잘한 점</Eyebrow>
           <ul className="flex flex-col gap-1.5">
-            {evaluation.strengths.map((strength, index) => (
+            {strengths.map((strength, index) => (
               <li key={index} className="flex gap-2 text-sm leading-relaxed">
                 <CheckCircle2 aria-hidden className="mt-0.5 size-4 shrink-0 text-success" />
                 {strength}
@@ -99,11 +107,11 @@ export function AnswerEvaluationPanel({ evaluation, transcript, targetLevel }: P
           <TranscriptDiff
             original={transcript}
             improved={evaluation.targetScript}
-            title={targetLevel ? `${targetLevel} 목표 스크립트` : "목표 스크립트"}
+            title={full ? (targetLevel ? `${targetLevel} 목표 스크립트` : "목표 스크립트") : "추천 답변"}
           />
         ) : (
           <div className={SECTION}>
-            <Eyebrow>목표 스크립트</Eyebrow>
+            <Eyebrow>{full ? "목표 스크립트" : "추천 답변"}</Eyebrow>
             <p className="rounded-2xl bg-secondary p-4 text-sm leading-7 whitespace-pre-wrap">
               {evaluation.targetScript}
             </p>

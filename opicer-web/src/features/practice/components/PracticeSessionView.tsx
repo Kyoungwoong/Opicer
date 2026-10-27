@@ -37,7 +37,6 @@ import type { PracticeAnswer, PracticeQuestion, TargetLevel } from "@/features/p
 import { MicLevelMeter } from "@/features/practice/components/MicLevelMeter";
 import { AnswerEvaluationPanel } from "@/features/practice/components/evaluation/AnswerEvaluationPanel";
 import { EvaluationStatusNotice } from "@/features/practice/components/evaluation/EvaluationStatusNotice";
-import { SessionReportCard } from "@/features/practice/components/evaluation/SessionReportCard";
 import { isEvaluationInProgress, useSessionEvaluation } from "@/features/practice/use-session-evaluation";
 import { historyPath } from "@/features/practice/history-format";
 import { Mascot } from "@/components/brand/Mascot";
@@ -481,7 +480,6 @@ export function PracticeSessionView({ topicId, topicSelectionId, targetLevel, us
           <Skeleton className="h-24 rounded-3xl" />
         ) : null}
 
-        {evaluatedSession?.report ? <SessionReportCard report={evaluatedSession.report} /> : null}
 
         <ol className="flex flex-col gap-5">
           {orderedAnswers.map((answer, idx) => {
@@ -517,6 +515,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, targetLevel, us
                       evaluation={result.evaluation}
                       transcript={transcript}
                       targetLevel={reportTarget}
+                      variant="coach"
                     />
                   </div>
                 ) : result?.evaluationStatus === "SKIPPED" ? (

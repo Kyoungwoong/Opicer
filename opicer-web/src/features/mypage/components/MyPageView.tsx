@@ -126,17 +126,7 @@ function HistoryList({ state }: { state: HistoryState }) {
               className="group flex w-full flex-col gap-3 rounded-2xl border bg-secondary px-4 py-4 transition-colors hover:border-primary/40 hover:bg-card"
             >
               <span className="flex items-start justify-between gap-4">
-                <span className="flex min-w-0 items-center gap-2">
-                  <span className="min-w-0 text-sm font-semibold text-foreground">{session.topicTitle}</span>
-                  {session.estimatedLevel && (
-                    <span
-                      title="예상 레벨(참고용) · 공식 OPIc 점수가 아닙니다"
-                      className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs font-bold text-primary-strong"
-                    >
-                      예상 {session.estimatedLevel}
-                    </span>
-                  )}
-                </span>
+                <span className="min-w-0 text-sm font-semibold text-foreground">{session.topicTitle}</span>
                 <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
                   <span aria-hidden className={cn("size-2 rounded-full", HISTORY_STATUS_DOT[status.tone])} />
                   {status.label}

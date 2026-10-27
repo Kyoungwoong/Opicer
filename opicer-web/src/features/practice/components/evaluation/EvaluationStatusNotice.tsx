@@ -128,7 +128,7 @@ export function EvaluationStatusNotice({
         <Info />
         <AlertTitle>일부 답변을 평가하지 못했어요</AlertTitle>
         <AlertDescription className="flex flex-col gap-3">
-          <p>아래 리포트는 평가한 답변만으로 만들었어요. 못 한 답변만 추가 크레딧 없이 다시 평가할 수 있어요.</p>
+          <p>평가한 답변의 결과는 아래에 있어요. 못 한 답변만 추가 크레딧 없이 다시 평가할 수 있어요.</p>
           <div>{retryButton}</div>
           {retryErrorLine}
         </AlertDescription>
