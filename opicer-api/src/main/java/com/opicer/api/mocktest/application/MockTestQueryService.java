@@ -1,15 +1,15 @@
 package com.opicer.api.mocktest.application;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opicer.api.mocktest.domain.MockTest;
 import com.opicer.api.mocktest.domain.MockTestItem;
 import com.opicer.api.mocktest.domain.MockTestStatus;
 import com.opicer.api.mocktest.infrastructure.MockTestItemRepository;
 import com.opicer.api.mocktest.infrastructure.MockTestRepository;
+import com.opicer.api.shared.domain.OpicLevel;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opicer.api.shared.domain.OpicLevel;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,13 +61,9 @@ public class MockTestQueryService {
 		if (test.getSubmittedAt() == null || test.getEstimatedLevel() == null) {
 			return List.of();
 		}
-		List<MockTest> earlier = tests.findByUserIdAndStatusAndSubmittedAtBeforeOrderBySubmittedAtDesc(userId,
-			MockTestStatus.SUBMITTED, test.getSubmittedAt(), PageRequest.of(0, TREND_SIZE * 2));
-		List<TrendPoint> points = new ArrayList<>(earlier.stream()
-			.filter(t -> t.getEstimatedLevel() != null)
-			.limit(TREND_SIZE)
-			.map(MockTestQueryService::point)
-			.toList());
+		List<MockTest> earlier = tests.findByUserIdAndStatusAndEstimatedLevelIsNotNullAndSubmittedAtBeforeOrderBySubmittedAtDesc(
+			userId, MockTestStatus.SUBMITTED, test.getSubmittedAt(), PageRequest.of(0, TREND_SIZE));
+		List<TrendPoint> points = new ArrayList<>(earlier.stream().map(MockTestQueryService::point).toList());
 		Collections.reverse(points);
 		points.add(point(test));
 		return points;

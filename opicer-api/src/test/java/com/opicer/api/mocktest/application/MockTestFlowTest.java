@@ -238,9 +238,12 @@ class MockTestFlowTest {
 
 	@Test
 	void trendShowsEarlierEvaluatedTestsOfTheSameUserOldestFirst() {
-		UUID userId = userWithCredits(30);
+		UUID userId = userWithCredits(80);
 		UUID first = evaluatedTest(userId, OpicLevel.IL, "{\"dimensionLevels\":{\"TASK\":\"IL\"}}");
-		submittedTest(userId);
+		// More unevaluated tests than one page must not push the evaluated one out of the trend.
+		for (int i = 0; i < 10; i++) {
+			submittedTest(userId);
+		}
 		UUID second = evaluatedTest(userId, OpicLevel.IM, null);
 		UUID current = evaluatedTest(userId, OpicLevel.IH, "{\"dimensionLevels\":{\"TASK\":\"IH\"}}");
 		UUID later = evaluatedTest(userId, OpicLevel.AL, null);
