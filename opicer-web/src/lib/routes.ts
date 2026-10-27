@@ -6,6 +6,8 @@ export const ROUTES = {
   credit: "/credit",
   practice: "/practice",
   practiceSession: (topicId: string) => `/practice/${topicId}` as const,
+  mock: "/mock",
+  mockResult: (mockTestId: string) => `/mypage/mock/${mockTestId}` as const,
   auth: {
     loginKakao: "/api/auth/login/kakao",
     me: "/api/auth/me",
