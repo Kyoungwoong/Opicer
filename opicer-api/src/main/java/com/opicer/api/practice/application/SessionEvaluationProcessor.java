@@ -2,11 +2,10 @@ package com.opicer.api.practice.application;
 
 import com.opicer.api.aijob.application.AiJobProcessor;
 import com.opicer.api.aijob.domain.AiJobType;
-import com.opicer.api.config.WorkerProperties;
 import com.opicer.api.evaluation.application.AnswerEvaluationResult;
-import com.opicer.api.evaluation.application.AnswerEvaluator;
+import com.opicer.api.evaluation.application.AnswerBatchEvaluator;
+import com.opicer.api.evaluation.application.AnswerBatchEvaluator.Pending;
 import com.opicer.api.evaluation.application.AnswerEvaluator.AnswerToEvaluate;
-import com.opicer.api.evaluation.application.EvaluationFailure;
 import com.opicer.api.evaluation.application.EvaluationGuideNote;
 import com.opicer.api.evaluation.domain.EvaluationMode;
 import com.opicer.api.evaluationguide.application.EvaluationGuideQueryService;
@@ -19,16 +18,10 @@ import com.opicer.api.practice.infrastructure.PracticeSessionRepository;
 import com.opicer.api.question.domain.Question;
 import com.opicer.api.question.infrastructure.QuestionRepository;
 import com.opicer.api.shared.domain.OpicLevel;
-import jakarta.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -42,36 +35,22 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Component
 public class SessionEvaluationProcessor implements AiJobProcessor {
 
-	private static final Logger log = LoggerFactory.getLogger(SessionEvaluationProcessor.class);
-
 	private final PracticeSessionRepository sessionRepository;
 	private final PracticeAnswerRepository answerRepository;
 	private final QuestionRepository questionRepository;
-	private final AnswerEvaluator evaluator;
+	private final AnswerBatchEvaluator batch;
 	private final EvaluationGuideQueryService guides;
 	private final TransactionTemplate tx;
-	private final ExecutorService executor;
 
 	public SessionEvaluationProcessor(PracticeSessionRepository sessionRepository,
-		PracticeAnswerRepository answerRepository, QuestionRepository questionRepository, AnswerEvaluator evaluator,
-		EvaluationGuideQueryService guides, PlatformTransactionManager transactionManager,
-		WorkerProperties workerProperties) {
+		PracticeAnswerRepository answerRepository, QuestionRepository questionRepository, AnswerBatchEvaluator batch,
+		EvaluationGuideQueryService guides, PlatformTransactionManager transactionManager) {
 		this.sessionRepository = sessionRepository;
 		this.answerRepository = answerRepository;
 		this.questionRepository = questionRepository;
-		this.evaluator = evaluator;
+		this.batch = batch;
 		this.guides = guides;
 		this.tx = new TransactionTemplate(transactionManager);
-		this.executor = Executors.newFixedThreadPool(Math.max(1, workerProperties.getConcurrency()), r -> {
-			Thread thread = new Thread(r, "answer-evaluation");
-			thread.setDaemon(true);
-			return thread;
-		});
-	}
-
-	@PreDestroy
-	void shutdown() {
-		executor.shutdownNow();
 	}
 
 	@Override
@@ -86,10 +65,25 @@ public class SessionEvaluationProcessor implements AiJobProcessor {
 			return Outcome.COMPLETED; // session deleted meanwhile: nothing to do
 		}
 
-		List<CompletableFuture<Boolean>> runs = snapshot.pending().stream()
-			.map(answer -> CompletableFuture.supplyAsync(() -> evaluate(answer, snapshot.guides(), finalAttempt), executor))
-			.toList();
-		boolean transientFailure = runs.stream().map(CompletableFuture::join).anyMatch(stillPending -> stillPending);
+		boolean transientFailure = batch.evaluate(snapshot.pending(), snapshot.guides(), EvaluationMode.COACH,
+			finalAttempt, new AnswerBatchEvaluator.Results() {
+				@Override
+				public void evaluated(UUID answerId, AnswerEvaluationResult result) {
+					save(answerId, answer -> {
+						if (result.skipped()) {
+							answer.skipEvaluation();
+						} else {
+							answer.recordEvaluation(result.evaluationJson(), result.overallLevel(), result.summaryKo(),
+								result.targetScript());
+						}
+					});
+				}
+
+				@Override
+				public void failed(UUID answerId) {
+					save(answerId, PracticeAnswer::markEvaluationFailed);
+				}
+			});
 		if (transientFailure && !finalAttempt) {
 			return Outcome.RETRY;
 		}
@@ -123,13 +117,13 @@ public class SessionEvaluationProcessor implements AiJobProcessor {
 		OpicLevel target = session.getTargetLevel() == null
 			? PracticeSessionCommandService.DEFAULT_TARGET_LEVEL
 			: session.getTargetLevel();
-		List<PendingAnswer> pending = new ArrayList<>();
+		List<Pending> pending = new ArrayList<>();
 		for (PracticeAnswer answer : answerRepository.findBySessionIdOrderByQuestionOrderAsc(sessionId)) {
 			if (answer.getEvaluationStatus() != AnswerEvaluationStatus.PENDING) {
 				continue;
 			}
 			Question question = questionRepository.findById(answer.getQuestionId()).orElse(null);
-			pending.add(new PendingAnswer(answer.getId(), new AnswerToEvaluate(
+			pending.add(new Pending(answer.getId(), new AnswerToEvaluate(
 				session.getTopicId(),
 				answer.getQuestionText(),
 				question == null || question.getType() == null ? null : question.getType().name(),
@@ -141,36 +135,6 @@ public class SessionEvaluationProcessor implements AiJobProcessor {
 			)));
 		}
 		return new Snapshot(pending, guides.activeNotes());
-	}
-
-	/** @return true when the answer is still pending because of a transient failure */
-	private boolean evaluate(PendingAnswer pending, List<EvaluationGuideNote> guides, boolean finalAttempt) {
-		try {
-			AnswerEvaluationResult result = evaluator.evaluate(pending.answer(), guides, EvaluationMode.COACH);
-			save(pending.answerId(), answer -> {
-				if (result.skipped()) {
-					answer.skipEvaluation();
-				} else {
-					answer.recordEvaluation(result.evaluationJson(), result.overallLevel(), result.summaryKo(),
-						result.targetScript());
-				}
-			});
-			return false;
-		} catch (EvaluationFailure failure) {
-			log.warn("[Eval] answer {} failed: {} (retryable={})", pending.answerId(), failure.reason(), failure.retryable());
-			if (failure.retryable() && !finalAttempt) {
-				return true;
-			}
-			save(pending.answerId(), PracticeAnswer::markEvaluationFailed);
-			return false;
-		} catch (RuntimeException e) {
-			log.error("[Eval] answer {} failed unexpectedly", pending.answerId(), e);
-			if (!finalAttempt) {
-				return true;
-			}
-			save(pending.answerId(), PracticeAnswer::markEvaluationFailed);
-			return false;
-		}
 	}
 
 	private void save(UUID answerId, Consumer<PracticeAnswer> change) {
@@ -201,7 +165,5 @@ public class SessionEvaluationProcessor implements AiJobProcessor {
 		session.completeEvaluation(status, null, null);
 	}
 
-	private record PendingAnswer(UUID answerId, AnswerToEvaluate answer) {}
-
-	private record Snapshot(List<PendingAnswer> pending, List<EvaluationGuideNote> guides) {}
+	private record Snapshot(List<Pending> pending, List<EvaluationGuideNote> guides) {}
 }
