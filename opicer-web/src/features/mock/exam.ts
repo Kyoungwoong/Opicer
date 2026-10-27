@@ -20,6 +20,16 @@ export const SELF_ASSESSMENT_OPTIONS: { value: SelfAssessment; description: stri
   { value: 6, description: "낯선 주제나 사회 문제도 내 의견을 논리적으로 길게 말할 수 있어요." },
 ];
 
+/** Same wording as the server's insights. */
+export const QUESTION_TYPE_LABELS: Record<string, string> = {
+  DESCRIPTION: "묘사·일상",
+  PAST_EXPERIENCE: "과거 경험",
+  COMPARE_CONTRAST: "비교·변화",
+  OPINION: "의견",
+  ROLE_PLAY: "롤플레이",
+  UNEXPECTED_SITUATION: "문제 해결",
+};
+
 export const DIFFICULTY_OPTIONS: { value: DifficultyAdjustment; label: string; description: string }[] = [
   { value: "EASIER", label: "더 쉽게", description: "남은 질문을 한 단계 쉽게 받아요." },
   { value: "SAME", label: "비슷하게", description: "지금과 비슷한 난이도로 이어 가요." },
