@@ -243,8 +243,11 @@ Async: DB Job table with `dedupeKey` (recordingId + jobType), idempotent process
 
 ## 13. What Is Out of Scope (MVP)
 
-- Mock Test, STT pipeline, TTS, LLM analysis
-- pgvector / RAG / UserSpeechProfile / CreditLedger
+> Since approved in `plan.md`: STT (provider-swappable), LLM answer evaluation, pgvector RAG and the
+> Mock Test (실전연습, `docs/opic/mock-test-spec.md`) are in scope. Everything below stays out.
+
+- Server-side TTS (questions use uploaded audio or browser speech synthesis)
+- UserSpeechProfile / CreditLedger
 - OAuth2 (structure prepared, not wired)
 - Mobile native apps
 - Official OPIC scoring claims

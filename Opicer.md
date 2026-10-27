@@ -95,13 +95,19 @@ You act as:
     - Structural hint (optional)
     - Key expressions (cards)
 
-### 5.3 Mock Test Flow
-1. Survey
-2. Question delivery (Ava TTS)
-3. Recording
-4. Submission
-5. Analysis & Report
-6. Script Improvement
+### 5.3 Mock Test Flow (detail: `docs/opic/mock-test-spec.md`)
+1. Background Survey (Part 1–4, at least 12 items in Part 4)
+2. Self Assessment (1–6)
+3. Microphone check with a sample question (not evaluated)
+4. Part 1: questions 1–7 (self-introduction, two survey-topic combos)
+5. Difficulty re-selection (easier / same / harder)
+6. Part 2: questions 8–15 (unexpected combo, role-play combo, advanced questions)
+7. Submission → transcription → holistic evaluation
+8. Report (estimated level, for reference only) and feedback: question-type diagnosis, speaking habits,
+   time management, progress trend and recommended practice
+
+Topic practice (5.2) gives coaching only — corrections, recommended expressions and a target script —
+and leaves the level report to the Mock Test.
 
 **Important UX Rules**
 - Question replay limited
