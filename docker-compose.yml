@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: opicer-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: opicer
+      POSTGRES_USER: ${OPICER_DB_USER:-opicer}
+      POSTGRES_PASSWORD: ${OPICER_DB_PASSWORD:-opicer}
+    ports:
+      - "5432:5432"
+    volumes:
+      - opicer-pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d opicer"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  opicer-pgdata:

@@ -1,1 +1,6 @@
+plugins {
+	// Downloads JDK 17 for the toolchain when the machine does not have it (macOS or Windows).
+	id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
 rootProject.name = 'opicer-api'

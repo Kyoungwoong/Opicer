@@ -56,6 +56,7 @@ out/
 # env
 .env
 .env.*
+!.env.example
 
 # H2 file database
 data/
