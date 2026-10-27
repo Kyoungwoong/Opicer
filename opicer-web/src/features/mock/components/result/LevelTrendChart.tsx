@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { LEVEL_ORDER } from "@/features/practice/evaluation-labels";
 import { formatShortDate } from "@/features/practice/history-format";
 import type { OpicLevel } from "@/features/practice/types";
 import type { MockTrendPoint } from "@/features/mock/types";
 
-const WIDTH = 560;
+/** Used until the container has been measured. */
+const DEFAULT_WIDTH = 560;
 const HEIGHT = 200;
 const PAD = { top: 16, right: 24, bottom: 32, left: 40 };
 
@@ -19,7 +20,17 @@ type Props = { points: MockTrendPoint[]; currentId: string };
  */
 export function LevelTrendChart({ points, currentId }: Props) {
   const [active, setActive] = useState<number | null>(null);
-  const plotW = WIDTH - PAD.left - PAD.right;
+  // One SVG unit is one CSS pixel, so labels and strokes keep their size at every width.
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(DEFAULT_WIDTH);
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(([entry]) => setWidth(Math.max(240, Math.round(entry.contentRect.width))));
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, []);
+  const plotW = width - PAD.left - PAD.right;
   const plotH = HEIGHT - PAD.top - PAD.bottom;
   const x = (i: number) => PAD.left + (points.length === 1 ? plotW / 2 : (plotW * i) / (points.length - 1));
   const y = (level: OpicLevel) => PAD.top + plotH - (plotH * LEVEL_ORDER.indexOf(level)) / (LEVEL_ORDER.length - 1);
@@ -28,10 +39,12 @@ export function LevelTrendChart({ points, currentId }: Props) {
 
   return (
     <figure className="flex flex-col gap-2">
-      <div className="relative">
+      <div ref={frameRef} className="relative">
         <svg
-          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-          className="h-auto w-full overflow-visible"
+          width={width}
+          height={HEIGHT}
+          viewBox={`0 0 ${width} ${HEIGHT}`}
+          className="block max-w-full overflow-visible"
           role="img"
           aria-label={`예상 레벨 추이: ${points.map((p) => p.estimatedLevel).join(", ")}`}
         >
@@ -39,7 +52,7 @@ export function LevelTrendChart({ points, currentId }: Props) {
             <g key={level}>
               <line
                 x1={PAD.left}
-                x2={WIDTH - PAD.right}
+                x2={width - PAD.right}
                 y1={y(level)}
                 y2={y(level)}
                 className="stroke-border"
@@ -93,7 +106,7 @@ export function LevelTrendChart({ points, currentId }: Props) {
         {shown && active != null ? (
           <div
             className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-[calc(100%+12px)] rounded-xl border bg-popover px-3 py-2 text-xs shadow-card"
-            style={{ left: `${(x(active) / WIDTH) * 100}%`, top: `${(y(shown.estimatedLevel) / HEIGHT) * 100}%` }}
+            style={{ left: x(active), top: y(shown.estimatedLevel) }}
           >
             <p className="font-semibold text-foreground">
               {formatShortDate(shown.submittedAt)} · {shown.estimatedLevel}

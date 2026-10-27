@@ -75,7 +75,7 @@ export function HabitsCard({ insights }: { insights: MockTestInsights }) {
   const connectorTotal = habits.connectors.reduce((sum, c) => sum + c.count, 0);
   return (
     <section className={CARD}>
-      <CardTitle icon={MessageSquareText} title="말하기 습관" description="15문항의 답변 전체에서 반복된 패턴이에요." />
+      <CardTitle icon={MessageSquareText} title="말하기 습관" description="모든 답변에서 반복된 패턴이에요." />
       <dl className="grid grid-cols-2 gap-3">
         <div className="rounded-2xl bg-secondary px-4 py-3">
           <dt className="text-xs text-muted-foreground">평균 문장 길이</dt>
