@@ -92,6 +92,11 @@ public class SurveyTopicLinkService {
 		return links.findLinkedTopicIds();
 	}
 
+	@Transactional(readOnly = true)
+	public boolean isLinked(UUID topicId) {
+		return links.existsByTopicId(topicId);
+	}
+
 	private List<String> activeTitles(List<String> itemIds) {
 		Map<String, List<Topic>> linked = linkedTopics(itemIds);
 		Set<String> titles = new LinkedHashSet<>();

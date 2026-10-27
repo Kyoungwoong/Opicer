@@ -77,8 +77,7 @@ public class AdminTopicController {
 				request.active() != null ? request.active() : true
 			)
 			.<ResponseEntity<Object>>map(updated -> ResponseEntity.ok(
-				ApiResponse.ok("TOPIC_UPDATED",
-					TopicResponse.from(updated, surveyTopicLinkService.linkedTopicIds().contains(updated.getId())))))
+				ApiResponse.ok("TOPIC_UPDATED", TopicResponse.from(updated, surveyTopicLinkService.isLinked(updated.getId())))))
 			.orElseThrow(() -> new ApiException(ErrorCode.TOPIC_NOT_FOUND, "Topic not found: " + id));
 	}
 
