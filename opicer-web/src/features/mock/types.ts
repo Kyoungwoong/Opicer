@@ -1,4 +1,13 @@
-import type { SessionEvaluationStatus, TargetLevel } from "@/features/practice/types";
+import type {
+  AnswerEvaluation,
+  AnswerEvaluationStatus,
+  CompetencyDimension,
+  CorrectionCategory,
+  OpicLevel,
+  SessionEvaluationStatus,
+  SessionReport,
+  TargetLevel,
+} from "@/features/practice/types";
 
 export type SurveyItem = { id: string; label: string; topics: string[] };
 
@@ -38,4 +47,82 @@ export type MockSubmitResult = {
   alreadyCharged: boolean;
   deductedCredits: number;
   evaluationStatus: SessionEvaluationStatus | null;
+};
+
+/** A submitted test in the history list. */
+export type MockTestSummary = {
+  id: string;
+  startedAt: string;
+  submittedAt: string;
+  selfAssessment: SelfAssessment;
+  adjustment: DifficultyAdjustment | null;
+  targetLevel: OpicLevel | null;
+  itemCount: number;
+  evaluationStatus: SessionEvaluationStatus | null;
+  estimatedLevel: OpicLevel | null;
+};
+
+export type MockTestItemDetail = {
+  id: string;
+  order: number;
+  part: number;
+  questionText: string;
+  questionType: string | null;
+  topicTitle: string | null;
+  /** STT output: an estimate, not ground truth. */
+  transcript: string | null;
+  durationSeconds: number | null;
+  evaluationStatus: AnswerEvaluationStatus | null;
+  overallLevel: OpicLevel | null;
+  evaluation: AnswerEvaluation | null;
+};
+
+export type WordCount = { word: string; count: number };
+
+/** Feedback beyond the report (schemaVersion 1), computed by the server from transcripts, durations and evaluations. */
+export type MockTestInsights = {
+  schemaVersion: number;
+  questionTypes: { type: string; label: string; answers: number; level: OpicLevel; topIssue: CorrectionCategory | null }[];
+  strongestTypes: string[];
+  weakestTypes: string[];
+  habits: {
+    repeatedWords: WordCount[];
+    connectors: WordCount[];
+    dominantConnector: string | null;
+    dominantConnectorPercent: number | null;
+    averageSentenceLength: number;
+    lexicalDiversity: number;
+    notes: string[];
+  };
+  time: {
+    usedSeconds: number;
+    limitSeconds: number;
+    part1Seconds: number;
+    part2Seconds: number;
+    items: { order: number; part: number; seconds: number | null }[];
+    shortAnswers: number[];
+    longAnswers: number[];
+    unanswered: number[];
+    notes: string[];
+  };
+  recommendations: { type: string; label: string; topics: { id: string; title: string }[] }[];
+};
+
+/** One evaluated test in the level trend, oldest first. */
+export type MockTrendPoint = {
+  id: string;
+  submittedAt: string;
+  estimatedLevel: OpicLevel;
+  dimensionLevels: Partial<Record<CompetencyDimension, OpicLevel>>;
+};
+
+export type MockTestDetail = Omit<MockTestSummary, "itemCount"> & {
+  status: "IN_PROGRESS" | "SUBMITTED";
+  survey: SurveySelections | null;
+  examSeconds: number | null;
+  report: SessionReport | null;
+  insights: MockTestInsights | null;
+  evaluatedAt: string | null;
+  items: MockTestItemDetail[];
+  trend: MockTrendPoint[];
 };

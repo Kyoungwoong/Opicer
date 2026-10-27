@@ -1,8 +1,11 @@
+import type { SessionEvaluationStatus } from "@/features/practice/types";
 import type {
   DifficultyAdjustment,
   MockAnswerInput,
   MockItem,
   MockSubmitResult,
+  MockTestDetail,
+  MockTestSummary,
   StartMockTestInput,
   StartedMockTest,
   SurveyCatalog,
@@ -49,4 +52,33 @@ export function adjustMockTest(id: string, difficulty: DifficultyAdjustment): Pr
 /** Charges the test once (a repeated call is not charged again) and queues its evaluation. */
 export function submitMockTest(id: string, answers: MockAnswerInput[], examSeconds: number): Promise<MockSubmitResult> {
   return postJson(`/api/mock-tests/${encodeURIComponent(id)}/submit`, { answers, examSeconds }, "제출하지 못했어요.");
+}
+
+export async function fetchMockTests(limit = 20): Promise<MockTestSummary[]> {
+  const res = await fetch(`/api/mock-tests?limit=${limit}`, { cache: "no-store" });
+  if (!res.ok) throw await failure(res, "실전연습 기록을 불러오지 못했어요.");
+  return (await res.json()) as MockTestSummary[];
+}
+
+/** Returns null when the test does not exist or belongs to someone else (404). */
+export async function fetchMockTest(id: string): Promise<MockTestDetail | null> {
+  const res = await fetch(`/api/mock-tests/${encodeURIComponent(id)}`, { cache: "no-store" });
+  if (res.status === 404) return null;
+  if (!res.ok) throw await failure(res, "실전연습 결과를 불러오지 못했어요.");
+  return (await res.json()) as MockTestDetail;
+}
+
+/** Free retry of a FAILED or PARTIAL evaluation; the server allows a few per test (409 after that). */
+export async function retryMockEvaluation(id: string): Promise<SessionEvaluationStatus> {
+  const body = await postJson<{ evaluationStatus: SessionEvaluationStatus }>(
+    `/api/mock-tests/${encodeURIComponent(id)}/evaluation/retry`,
+    {},
+    "평가를 다시 요청하지 못했어요."
+  );
+  return body.evaluationStatus;
+}
+
+export async function deleteMockTest(id: string): Promise<void> {
+  const res = await fetch(`/api/mock-tests/${encodeURIComponent(id)}`, { method: "DELETE" });
+  if (!res.ok) throw await failure(res, "기록을 삭제하지 못했어요.");
 }
