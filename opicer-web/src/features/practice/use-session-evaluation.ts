@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { fetchPracticeSession, retryPracticeEvaluation } from "@/features/practice/api";
-import type { PracticeSessionDetail, SessionEvaluationStatus } from "@/features/practice/types";
+import type { SessionEvaluationStatus } from "@/features/practice/types";
 
 const POLL_INTERVAL_MS = 3000;
 /** Past this the page stops polling and points to the history page, where the result lands anyway. */
@@ -16,12 +16,22 @@ export function isEvaluationRetryable(status: SessionEvaluationStatus | null | u
   return status === "FAILED" || status === "PARTIAL";
 }
 
-/**
- * Polls a submitted session until its evaluation settles (DONE / PARTIAL / FAILED, or no evaluation at all).
- * Pass null until the session id is known.
- */
+/** Polls a submitted practice session; see {@link useEvaluationPolling}. */
 export function useSessionEvaluation(sessionId: string | null) {
-  const [session, setSession] = useState<PracticeSessionDetail | null>(null);
+  return useEvaluationPolling(sessionId, fetchPracticeSession, retryPracticeEvaluation);
+}
+
+/**
+ * Polls anything that is evaluated in the background (a practice session, a mock test) until its evaluation
+ * settles (DONE / PARTIAL / FAILED, or no evaluation at all). Pass null until the id is known. `load` resolves
+ * null for a 404; both functions should be stable (module-level).
+ */
+export function useEvaluationPolling<T extends { evaluationStatus: SessionEvaluationStatus | null }>(
+  sessionId: string | null,
+  load: (id: string) => Promise<T | null>,
+  requestRetry: (id: string) => Promise<SessionEvaluationStatus>
+) {
+  const [session, setSession] = useState<T | null>(null);
   // The session is gone (404): deleted, or never saved.
   const [missing, setMissing] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
@@ -39,7 +49,7 @@ export function useSessionEvaluation(sessionId: string | null) {
 
     const tick = async () => {
       try {
-        const detail = await fetchPracticeSession(sessionId);
+        const detail = await load(sessionId);
         if (!alive) return;
         setPollFailed(false);
         setMissing(detail === null);
@@ -62,7 +72,7 @@ export function useSessionEvaluation(sessionId: string | null) {
       alive = false;
       window.clearTimeout(timer);
     };
-  }, [sessionId, run]);
+  }, [sessionId, run, load]);
 
   const checkAgain = useCallback(() => {
     setTimedOut(false);
@@ -74,7 +84,7 @@ export function useSessionEvaluation(sessionId: string | null) {
     setRetrying(true);
     setRetryError(null);
     try {
-      const evaluationStatus = await retryPracticeEvaluation(sessionId);
+      const evaluationStatus = await requestRetry(sessionId);
       setSession((prev) => (prev ? { ...prev, evaluationStatus } : prev));
       setTimedOut(false);
       setRun((n) => n + 1);
@@ -83,7 +93,7 @@ export function useSessionEvaluation(sessionId: string | null) {
     } finally {
       setRetrying(false);
     }
-  }, [sessionId]);
+  }, [sessionId, requestRetry]);
 
   return { session, missing, timedOut, pollFailed, retrying, retryError, checkAgain, retry };
 }
