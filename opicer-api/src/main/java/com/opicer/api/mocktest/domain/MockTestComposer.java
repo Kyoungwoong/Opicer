@@ -20,7 +20,7 @@ import java.util.function.ToIntFunction;
 /**
  * Picks the 15 questions of a mock test (docs/opic/mock-test-spec.md §5) from the question bank:
  * part 1 is a self-introduction and two survey-topic combos, part 2 an unexpected-topic combo, a role-play combo
- * and two advanced questions. Questions near the difficulty band come first; when the bank runs short, any unused
+ * and an advanced pair (compare, then an issue, from one set). Questions near the difficulty band come first; when the bank runs short, any unused
  * question fills the slot. Randomness comes from the injected {@link Random}, so tests are deterministic.
  */
 public final class MockTestComposer {
@@ -115,11 +115,17 @@ public final class MockTestComposer {
 			}
 		}
 
-		List<Candidate> advanced = pool.questions().stream()
-			.filter(c -> c.topic().startsWith(ADVANCED_PREFIX))
-			.toList();
-		for (int i = 0; i < ADVANCED_SIZE; i++) {
-			pickBest(unused(advanced, taken), band, taken, c -> 0).ifPresent(picked::add);
+		List<Candidate> pair = advancedPair(pool, taken, band);
+		if (!pair.isEmpty()) {
+			picked.addAll(pair);
+			taken.addAll(pair);
+		} else {
+			List<Candidate> advanced = pool.questions().stream()
+				.filter(c -> c.topic().startsWith(ADVANCED_PREFIX))
+				.toList();
+			for (int i = 0; i < ADVANCED_SIZE; i++) {
+				pickBest(unused(advanced, taken), band, taken, c -> 0).ifPresent(picked::add);
+			}
 		}
 
 		List<Candidate> all = new ArrayList<>(earlier);
@@ -150,6 +156,27 @@ public final class MockTestComposer {
 			.forEach(chosen::add);
 		chosen.sort(Comparator.comparingInt(c -> typeRank(c.type())));
 		return chosen;
+	}
+
+	/**
+	 * Questions 14–15: within one advanced set, a compare question followed directly (in bank order) by an opinion
+	 * question, both unused; the pair closest to the band wins, ties broken at random. Empty when no set has one.
+	 */
+	private List<Candidate> advancedPair(Pool pool, List<Candidate> taken, OpicLevel band) {
+		List<List<Candidate>> pairs = new ArrayList<>();
+		for (String topic : pool.topicsStartingWith(ADVANCED_PREFIX)) {
+			List<Candidate> set = pool.ofTopic(topic).stream().sorted(Comparator.comparingInt(Candidate::order)).toList();
+			for (int i = 0; i + 1 < set.size(); i++) {
+				List<Candidate> pair = List.of(set.get(i), set.get(i + 1));
+				if (pair.get(0).type() == QuestionType.COMPARE_CONTRAST && pair.get(1).type() == QuestionType.OPINION
+					&& unused(pair, taken).size() == ADVANCED_SIZE) {
+					pairs.add(pair);
+				}
+			}
+		}
+		return shuffled(pairs).stream()
+			.min(Comparator.comparingInt(pair -> pair.stream().mapToInt(c -> bandDistance(c, band)).sum()))
+			.orElse(List.of());
 	}
 
 	/** Tops up with any unused question (never self-introduction), closest to the band first. */
