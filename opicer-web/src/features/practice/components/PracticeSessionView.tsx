@@ -35,6 +35,8 @@ import {
 import { ROUTES } from "@/lib/routes";
 import type { PracticeAnswer, PracticeQuestion, TargetLevel } from "@/features/practice/types";
 import { MicLevelMeter } from "@/features/practice/components/MicLevelMeter";
+import { useQuestionAudio } from "@/features/practice/hooks/use-question-audio";
+import { useAnswerRecorder } from "@/features/practice/hooks/use-answer-recorder";
 import { AnswerEvaluationPanel } from "@/features/practice/components/evaluation/AnswerEvaluationPanel";
 import { EvaluationStatusNotice } from "@/features/practice/components/evaluation/EvaluationStatusNotice";
 import { isEvaluationInProgress, useSessionEvaluation } from "@/features/practice/use-session-evaluation";
@@ -43,8 +45,6 @@ import { Mascot } from "@/components/brand/Mascot";
 
 const PRACTICE_DURATION_SECONDS = 120;
 const REPLAY_WINDOW_SECONDS = 5;
-/** Upper bound the server accepts for an answer's recording length. */
-const MAX_DURATION_SECONDS = 600;
 
 type Mode = "loading" | "playing" | "recording" | "submitting" | "summary";
 
@@ -74,21 +74,16 @@ export function PracticeSessionView({ topicId, topicSelectionId, targetLevel, us
   const [remainingSeconds, setRemainingSeconds] = useState(PRACTICE_DURATION_SECONDS);
   const [replayWindow, setReplayWindow] = useState(0);
   const [hasReplayed, setHasReplayed] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
   const [timeExpired, setTimeExpired] = useState(false);
-  // Live mic stream while recording, for the input level meter only.
-  const [micStream, setMicStream] = useState<MediaStream | null>(null);
+  const questionAudio = useQuestionAudio(setError);
+  const recorder = useAnswerRecorder();
+  const { isRecording, micStream } = recorder;
   // Like the real test, the question is audio-first; the text stays hidden unless asked for.
   const [showQuestionText, setShowQuestionText] = useState(false);
 
   // ── Refs (always fresh, no stale closure risk) ──────────────
   const timerRef = useRef<number | null>(null);
   const replayTimerRef = useRef<number | null>(null);
-  const recorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const recordingStartedAtRef = useRef(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
   // Stable ref to goToNext — updated every render to avoid stale closures
   const goToNextRef = useRef<() => void>(() => {});
   // answersRef mirrors answers state for sync access inside async callbacks
@@ -98,15 +93,6 @@ export function PracticeSessionView({ topicId, topicSelectionId, targetLevel, us
 
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
-
-  // ── Voice preload ───────────────────────────────────────────
-  useEffect(() => {
-    if (!("speechSynthesis" in window)) return;
-    const load = () => { voicesRef.current = window.speechSynthesis.getVoices(); };
-    load();
-    window.speechSynthesis.addEventListener("voiceschanged", load);
-    return () => window.speechSynthesis.removeEventListener("voiceschanged", load);
-  }, []);
 
   // ── Fetch questions ─────────────────────────────────────────
   useEffect(() => {
@@ -126,29 +112,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, targetLevel, us
   }, [topicId]);
 
   // ── Helpers ─────────────────────────────────────────────────
-  const getEnglishFemaleVoice = (): SpeechSynthesisVoice | null => {
-    const voices = voicesRef.current.length
-      ? voicesRef.current
-      : window.speechSynthesis.getVoices();
-    const enVoices = voices.filter((v) => v.lang.startsWith("en"));
-    const femaleNames = [
-      "Samantha", "Karen", "Ava", "Victoria", "Susan", "Allison",
-      "Google US English", "Google UK English Female",
-    ];
-    return (
-      enVoices.find((v) => femaleNames.some((n) => v.name.includes(n))) ??
-      enVoices[0] ??
-      null
-    );
-  };
-
-  const stopRecording = () => {
-    if (recorderRef.current && recorderRef.current.state !== "inactive") {
-      recorderRef.current.stop();
-    }
-    recorderRef.current = null;
-    setIsRecording(false);
-  };
+  const stopRecording = recorder.stop;
 
   const clearMainTimer = () => {
     if (timerRef.current) {
@@ -168,11 +132,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, targetLevel, us
     stopRecording();
     clearMainTimer();
     clearReplayTimer();
-    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.onended = null;
-    }
+    questionAudio.stop();
   };
 
   // ── Transcribe all answers and switch to summary ─────────────
@@ -213,47 +173,29 @@ export function PracticeSessionView({ topicId, topicSelectionId, targetLevel, us
   };
 
   const startRecording = async (question: PracticeQuestion) => {
-    if (recorderRef.current && recorderRef.current.state !== "inactive") return;
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      chunksRef.current = [];
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
+    const started = await recorder.start((clip) => {
+      const newAnswer: PracticeAnswer = {
+        questionId: question.id,
+        questionText: question.promptText,
+        audioUrl: clip.audioUrl,
+        recordedAt: clip.recordedAt,
+        durationSeconds: clip.durationSeconds,
       };
-      recorder.onstop = () => {
-        stream.getTracks().forEach((t) => t.stop());
-        setMicStream(null);
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        const url = URL.createObjectURL(blob);
-        const elapsedSeconds = Math.round((Date.now() - recordingStartedAtRef.current) / 1000);
-        const newAnswer: PracticeAnswer = {
-          questionId: question.id,
-          questionText: question.promptText,
-          audioUrl: url,
-          recordedAt: new Date().toISOString(),
-          durationSeconds: Math.min(Math.max(elapsedSeconds, 1), MAX_DURATION_SECONDS),
-        };
-        // Sync update answersRef first, then state
-        const nextAnswers = [
-          ...answersRef.current.filter((a) => a.questionId !== question.id),
-          newAnswer,
-        ];
-        answersRef.current = nextAnswers;
-        setAnswers(nextAnswers);
+      // Sync update answersRef first, then state
+      const nextAnswers = [
+        ...answersRef.current.filter((a) => a.questionId !== question.id),
+        newAnswer,
+      ];
+      answersRef.current = nextAnswers;
+      setAnswers(nextAnswers);
 
-        // If submit was requested while recording was active, now safe to transcribe
-        if (pendingSubmitRef.current) {
-          pendingSubmitRef.current = false;
-          doTranscribeAndSummary(nextAnswers);
-        }
-      };
-      recorderRef.current = recorder;
-      recorder.start();
-      recordingStartedAtRef.current = Date.now();
-      setIsRecording(true);
-      setMicStream(stream);
-    } catch {
+      // If submit was requested while recording was active, now safe to transcribe
+      if (pendingSubmitRef.current) {
+        pendingSubmitRef.current = false;
+        doTranscribeAndSummary(nextAnswers);
+      }
+    });
+    if (!started) {
       setError("마이크 접근이 필요합니다. 브라우저에서 마이크 권한을 허용해주세요.");
     }
   };
@@ -289,23 +231,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, targetLevel, us
     }, 1000);
   };
 
-  const playQuestionAudio = (question: PracticeQuestion, onEnded: () => void) => {
-    if (question.promptAudioUrl) {
-      if (!audioRef.current) audioRef.current = new Audio(question.promptAudioUrl);
-      else audioRef.current.src = question.promptAudioUrl;
-      audioRef.current.onended = onEnded;
-      audioRef.current.play().catch(() => setError("오디오 재생에 실패했습니다."));
-    } else if ("speechSynthesis" in window) {
-      const utterance = new SpeechSynthesisUtterance(question.promptText);
-      utterance.lang = "en-US";
-      utterance.rate = 0.9;
-      const voice = getEnglishFemaleVoice();
-      if (voice) utterance.voice = voice;
-      utterance.onend = onEnded;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-    }
-  };
+  const playQuestionAudio = questionAudio.play;
 
   const goToNext = () => {
     setHasReplayed(false);
@@ -313,7 +239,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, targetLevel, us
     setRemainingSeconds(PRACTICE_DURATION_SECONDS);
     setTimeExpired(false);
     if (isLastQuestion) {
-      if (recorderRef.current && recorderRef.current.state !== "inactive") {
+      if (recorder.isActive()) {
         // Recording is active → flag it; onstop will call doTranscribeAndSummary
         pendingSubmitRef.current = true;
         stopAll();
@@ -339,7 +265,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, targetLevel, us
       stopRecording();
       goToNextRef.current();
     }
-  }, [timeExpired]);
+  }, [timeExpired, stopRecording]);
 
   // ── Auto-play when question changes ─────────────────────────
   useEffect(() => {
@@ -359,10 +285,7 @@ export function PracticeSessionView({ topicId, topicSelectionId, targetLevel, us
       startReplayWindow();
     });
 
-    return () => {
-      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-      if (audioRef.current) { audioRef.current.pause(); audioRef.current.onended = null; }
-    };
+    return () => questionAudio.stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, mode === "playing" ? "playing" : null, questions.length]);
 
