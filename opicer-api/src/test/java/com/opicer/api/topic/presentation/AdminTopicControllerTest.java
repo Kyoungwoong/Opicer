@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opicer.api.auth.application.JwtService;
 import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.config.AuthProperties;
-import com.opicer.api.mocktest.domain.SurveyCatalog;
+import com.opicer.api.mocktest.application.SurveyTopicLinkService;
+import com.opicer.api.mocktest.domain.MockTestComposer;
+import com.opicer.api.mocktest.infrastructure.SurveyTopicLinkRepository;
 import com.opicer.api.topic.domain.Topic;
 import com.opicer.api.practice.domain.TopicSelection;
 import com.opicer.api.practice.infrastructure.TopicSelectionRepository;
@@ -20,6 +22,7 @@ import com.opicer.api.user.domain.UserRole;
 import com.opicer.api.user.infrastructure.UserRepository;
 import jakarta.servlet.http.Cookie;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +39,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Topic rules end to end on real Postgres: titles, categories, renames and delete protection. */
+/** Topic rules end to end on real Postgres: titles, categories, renames, the title lock and delete protection. */
 @SpringBootTest
 @AutoConfigureMockMvc
 class AdminTopicControllerTest {
@@ -63,6 +66,12 @@ class AdminTopicControllerTest {
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private SurveyTopicLinkService surveyTopicLinkService;
+
+	@Autowired
+	private SurveyTopicLinkRepository surveyTopicLinkRepository;
 
 	private final ObjectMapper json = new ObjectMapper();
 
@@ -118,20 +127,62 @@ class AdminTopicControllerTest {
 	}
 
 	@Test
-	void aTopicTheMockTestFindsByTitleCannotBeRenamedButCanBeEdited() throws Exception {
-		Topic home = topicRepository.findByTitle(SurveyCatalog.HOME).orElseGet(() -> topicRepository.save(
-			new Topic(SurveyCatalog.HOME, "Home", Topic.CATEGORY_SURVEY, 1, 1, List.of(), true)));
+	void aSurveyLinkedTopicCanBeRenamedAndKeepsItsLink() throws Exception {
+		String before = unique("박물관");
+		String after = unique("미술관");
+		UUID id = create(before, "설문조사");
+		surveyTopicLinkService.replace("leisure.museum", List.of(id));
+
+		mockMvc.perform(put(BASE + "/" + id).cookie(cookie(UserRole.ADMIN)).contentType(MediaType.APPLICATION_JSON)
+				.content(body(after, "설문조사")))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.mockLinked").value(true))
+			.andExpect(jsonPath("$.data.titleLocked").value(false));
+
+		assertThat(surveyTopicLinkService.topicsOf(Map.of("LEISURE", List.of("leisure.museum")))).containsExactly(after);
+	}
+
+	@Test
+	void theSelfIntroductionCannotBeRenamedButCanBeEdited() throws Exception {
+		Topic selfIntro = topicRepository.findByTitle(MockTestComposer.SELF_INTRO_TOPIC).orElseGet(() -> topicRepository.save(
+			new Topic(MockTestComposer.SELF_INTRO_TOPIC, "Self Introduction", Topic.CATEGORY_SELF_INTRO, 0, 1, List.of(), true)));
 
 		mockMvc.perform(get(BASE).cookie(cookie(UserRole.ADMIN)))
-			.andExpect(jsonPath("$.data[?(@.title == '" + SurveyCatalog.HOME + "')].mockLinked").value(true));
-		mockMvc.perform(put(BASE + "/" + home.getId()).cookie(cookie(UserRole.ADMIN)).contentType(MediaType.APPLICATION_JSON)
-				.content(body(SurveyCatalog.HOME + " 2", "설문조사")))
+			.andExpect(jsonPath("$.data[?(@.id == '" + selfIntro.getId() + "')].titleLocked").value(true));
+		mockMvc.perform(put(BASE + "/" + selfIntro.getId()).cookie(cookie(UserRole.ADMIN)).contentType(MediaType.APPLICATION_JSON)
+				.content(body(MockTestComposer.SELF_INTRO_TOPIC + " 2", "자기소개")))
 			.andExpect(status().isConflict())
 			.andExpect(jsonPath("$.code").value("TOPIC_TITLE_LOCKED"));
-		mockMvc.perform(put(BASE + "/" + home.getId()).cookie(cookie(UserRole.ADMIN)).contentType(MediaType.APPLICATION_JSON)
-				.content(body(SurveyCatalog.HOME, "설문조사")))
+		mockMvc.perform(put(BASE + "/" + selfIntro.getId()).cookie(cookie(UserRole.ADMIN)).contentType(MediaType.APPLICATION_JSON)
+				.content(body(MockTestComposer.SELF_INTRO_TOPIC, "자기소개")))
 			.andExpect(status().isOk());
-		assertThat(topicRepository.findById(home.getId()).orElseThrow().getTitle()).isEqualTo(SurveyCatalog.HOME);
+		assertThat(topicRepository.findById(selfIntro.getId()).orElseThrow().getTitle())
+			.isEqualTo(MockTestComposer.SELF_INTRO_TOPIC);
+	}
+
+	@Test
+	void aTopicLeavingTheSurveyCategoryDropsItsLinks() throws Exception {
+		String title = unique("SNS");
+		UUID id = create(title, "설문조사");
+		surveyTopicLinkService.replace("leisure.sns", List.of(id));
+
+		mockMvc.perform(put(BASE + "/" + id).cookie(cookie(UserRole.ADMIN)).contentType(MediaType.APPLICATION_JSON)
+				.content(body(title, "돌발질문")))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.mockLinked").value(false));
+
+		assertThat(surveyTopicLinkRepository.existsByTopicId(id)).isFalse();
+		assertThat(surveyTopicLinkService.topicsOf(Map.of("LEISURE", List.of("leisure.sns")))).doesNotContain(title);
+	}
+
+	@Test
+	void deletingASurveyLinkedTopicDropsItsLinks() throws Exception {
+		UUID id = create(unique("해변"), "설문조사");
+		surveyTopicLinkService.replace("leisure.beach", List.of(id));
+
+		mockMvc.perform(delete(BASE + "/" + id).cookie(cookie(UserRole.ADMIN))).andExpect(status().isOk());
+
+		assertThat(surveyTopicLinkRepository.existsByTopicId(id)).isFalse();
 	}
 
 	@Test

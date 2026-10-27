@@ -34,6 +34,7 @@ public enum ErrorCode {
 	MOCK_TEST_NOT_IN_PROGRESS("MOCK_TEST_NOT_IN_PROGRESS", HttpStatus.CONFLICT, "This mock test was already submitted"),
 	MOCK_TEST_ALREADY_ADJUSTED("MOCK_TEST_ALREADY_ADJUSTED", HttpStatus.CONFLICT, "The difficulty was already re-selected"),
 	MOCK_TEST_NO_QUESTIONS("MOCK_TEST_NO_QUESTIONS", HttpStatus.SERVICE_UNAVAILABLE, "The question bank has no questions for a mock test"),
+	SURVEY_ITEM_NOT_FOUND("SURVEY_ITEM_NOT_FOUND", HttpStatus.NOT_FOUND, "Survey item not found"),
 	OPIC_CENTER_NOT_FOUND("OPIC_CENTER_NOT_FOUND", HttpStatus.NOT_FOUND, "OPIc test center not found"),
 	OPIC_CENTER_DUPLICATE("OPIC_CENTER_DUPLICATE", HttpStatus.CONFLICT, "A test center with this name and address already exists"),
 	OPIC_CENTER_REVIEW_NOT_FOUND("OPIC_CENTER_REVIEW_NOT_FOUND", HttpStatus.NOT_FOUND, "OPIc test center review not found"),

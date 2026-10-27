@@ -70,22 +70,14 @@ class SurveyCatalogTest {
 		survey.put("HOBBY", null);
 
 		assertThat(SurveyCatalog.problems(survey)).anyMatch(p -> p.startsWith("4-2") && p.contains("1개 이상"));
-		assertThat(SurveyCatalog.topicsOf(survey)).doesNotContain("음악 감상");
 	}
 
 	@Test
-	void selectionsMapToPracticeTopicsWithoutRepeats() {
-		assertThat(SurveyCatalog.topicsOf(validSurvey())).containsExactly(
-			"집/주거환경", "이웃/동네", "영화 감상", "TV 시청", "쇼핑", "음악 감상", "독서", "조깅/걷기", "수영",
-			"국내 여행", "해외 여행");
-	}
-
-	@Test
-	void everyTopicTheCatalogPointsToIsOneOfTheSeededTopics() {
+	void everyDefaultTopicIsOneOfTheSeededTopics() {
 		List<String> seeded = List.of("집/주거환경", "이웃/동네", "음악 감상", "영화 감상", "TV 시청", "독서", "요리",
 			"쇼핑", "공연/콘서트 관람", "캠핑", "헬스/운동", "수영", "자전거 타기", "조깅/걷기", "국내 여행", "해외 여행", "출장");
 
 		SurveyCatalog.PARTS.forEach(part -> part.items().forEach(item ->
-			assertThat(seeded).as(item.id()).containsAll(item.topics())));
+			assertThat(seeded).as(item.id()).containsAll(item.defaultTopics())));
 	}
 }

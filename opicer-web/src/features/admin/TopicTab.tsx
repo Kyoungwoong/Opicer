@@ -226,14 +226,14 @@ export function TopicTab() {
               required
               maxLength={255}
               value={form.title}
-              disabled={editing?.mockLinked}
+              disabled={editing?.titleLocked}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               className={adminUi.control}
               placeholder="예: 박물관 관람"
             />
-            {editing?.mockLinked ? (
+            {editing?.titleLocked ? (
               <span className="text-xs text-muted-foreground">
-                실전연습 설문·첫 문항과 이름으로 연결돼 있어 이름은 바꿀 수 없어요.
+                실전연습 첫 문항을 이 이름으로 찾기 때문에 이름은 바꿀 수 없어요.
               </span>
             ) : null}
           </label>

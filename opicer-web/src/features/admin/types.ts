@@ -26,13 +26,24 @@ export type AdminTopic = {
   topicOrder: number;
   badges: { label: string; count: number | null }[];
   active: boolean;
-  /** The mock test finds this topic by title (survey item or self-introduction), so it cannot be renamed. */
+  /** The mock test uses this topic: a survey item links to it, or it is the self-introduction. */
   mockLinked: boolean;
+  /** The mock test finds this topic by title (the self-introduction), so it cannot be renamed. */
+  titleLocked: boolean;
   createdAt: string;
   updatedAt: string;
 };
 
-export type AdminTopicInput = Omit<AdminTopic, "id" | "mockLinked" | "createdAt" | "updatedAt">;
+export type AdminTopicInput = Omit<AdminTopic, "id" | "mockLinked" | "titleLocked" | "createdAt" | "updatedAt">;
+
+/** One Background Survey item and the practice topics it points to (by id, so renames follow). */
+export type SurveyLinkItem = {
+  id: string;
+  label: string;
+  topics: { id: string; title: string; active: boolean }[];
+};
+
+export type SurveyLinkPart = { code: string; title: string; items: SurveyLinkItem[] };
 
 export type Question = {
   id: string;

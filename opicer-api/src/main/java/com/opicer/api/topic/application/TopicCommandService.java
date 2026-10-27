@@ -2,7 +2,7 @@ package com.opicer.api.topic.application;
 
 import com.opicer.api.goodanswer.infrastructure.GoodAnswerSampleRepository;
 import com.opicer.api.mocktest.domain.MockTestComposer;
-import com.opicer.api.mocktest.domain.SurveyCatalog;
+import com.opicer.api.mocktest.infrastructure.SurveyTopicLinkRepository;
 import com.opicer.api.practice.infrastructure.PracticeSessionRepository;
 import com.opicer.api.practice.infrastructure.TopicSelectionRepository;
 import com.opicer.api.question.infrastructure.QuestionRepository;
@@ -25,15 +25,17 @@ public class TopicCommandService {
 	private final TopicSelectionRepository topicSelectionRepository;
 	private final PracticeSessionRepository practiceSessionRepository;
 	private final GoodAnswerSampleRepository goodAnswerSampleRepository;
+	private final SurveyTopicLinkRepository surveyTopicLinkRepository;
 
 	public TopicCommandService(TopicRepository topicRepository, QuestionRepository questionRepository,
 		TopicSelectionRepository topicSelectionRepository, PracticeSessionRepository practiceSessionRepository,
-		GoodAnswerSampleRepository goodAnswerSampleRepository) {
+		GoodAnswerSampleRepository goodAnswerSampleRepository, SurveyTopicLinkRepository surveyTopicLinkRepository) {
 		this.topicRepository = topicRepository;
 		this.questionRepository = questionRepository;
 		this.topicSelectionRepository = topicSelectionRepository;
 		this.practiceSessionRepository = practiceSessionRepository;
 		this.goodAnswerSampleRepository = goodAnswerSampleRepository;
+		this.surveyTopicLinkRepository = surveyTopicLinkRepository;
 	}
 
 	@Transactional
@@ -44,7 +46,10 @@ public class TopicCommandService {
 		return topicRepository.save(topic);
 	}
 
-	/** A new title carries the topic's questions along, since questions point at their topic by title. */
+	/**
+	 * A new title carries the topic's questions along, since questions point at their topic by title. A topic leaving
+	 * the 설문조사 category loses its survey links, which only survey topics may have.
+	 */
 	@Transactional
 	public Optional<Topic> update(UUID id, String title, String englishTitle, String category, int categoryOrder,
 		int topicOrder, List<TopicBadge> badges, boolean active) {
@@ -52,27 +57,35 @@ public class TopicCommandService {
 			.map(existing -> {
 				String normalized = validated(title, category, id);
 				String previous = existing.getTitle();
-				if (!previous.equals(normalized) && isMockLinked(previous)) {
+				boolean leavesSurvey = Topic.CATEGORY_SURVEY.equals(existing.getCategory())
+					&& !Topic.CATEGORY_SURVEY.equals(category);
+				if (!previous.equals(normalized) && isTitleLocked(previous)) {
 					throw new ApiException(ErrorCode.TOPIC_TITLE_LOCKED,
-						"실전연습의 설문 항목이나 첫 문항과 이름으로 연결된 주제라 이름을 바꿀 수 없어요. 이름 외의 항목은 수정할 수 있어요.");
+						"실전연습 첫 문항을 이 이름으로 찾기 때문에 이름을 바꿀 수 없어요. 이름 외의 항목은 수정할 수 있어요.");
 				}
 				existing.update(normalized, englishTitle, category, categoryOrder, topicOrder, badges, active);
 				if (!previous.equals(normalized)) {
 					questionRepository.renameTopic(previous, normalized);
+				}
+				if (leavesSurvey) {
+					surveyTopicLinkRepository.deleteByTopicId(id);
 				}
 				return topicRepository.save(existing);
 			});
 	}
 
 	/**
-	 * The mock test finds these topics by title in code (survey items in {@link SurveyCatalog} and the
-	 * self-introduction), so renaming one would quietly cut it off until that link moves to the admin screen.
+	 * The mock test's first question and the startup seed find the self-introduction by title, so renaming it would
+	 * quietly cut it off. Survey items link by id and follow a rename.
 	 */
-	public static boolean isMockLinked(String title) {
-		return MockTestComposer.SELF_INTRO_TOPIC.equals(title) || SurveyCatalog.linkedTopics().contains(title);
+	public static boolean isTitleLocked(String title) {
+		return MockTestComposer.SELF_INTRO_TOPIC.equals(title);
 	}
 
-	/** Only an unused topic can go; one with questions or practice history is deactivated instead. */
+	/**
+	 * Only an unused topic can go; one with questions or practice history is deactivated instead. Its survey links
+	 * go with it: without questions the topic gave the mock test nothing to ask.
+	 */
 	@Transactional
 	public boolean delete(UUID id) {
 		Topic topic = topicRepository.findById(id).orElse(null);
@@ -86,6 +99,7 @@ public class TopicCommandService {
 			throw new ApiException(ErrorCode.TOPIC_IN_USE,
 				"문항이나 연습 기록, 샘플 답변이 있는 주제라 삭제할 수 없어요. 비활성화해 주세요.");
 		}
+		surveyTopicLinkRepository.deleteByTopicId(id);
 		topicRepository.delete(topic);
 		return true;
 	}

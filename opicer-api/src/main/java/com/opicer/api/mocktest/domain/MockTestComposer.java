@@ -51,15 +51,20 @@ public final class MockTestComposer {
 		return OpicLevel.values()[clamped];
 	}
 
-	/** Questions 1–7. */
-	public List<Candidate> part1(Pool pool, List<String> surveyTopics, OpicLevel band) {
+	/**
+	 * Questions 1–7.
+	 *
+	 * @param fallbackTopics tried for the combos after the survey topics, before any other survey-category topic;
+	 *     the topics the chosen residence links to (home and neighbourhood by default)
+	 */
+	public List<Candidate> part1(Pool pool, List<String> surveyTopics, List<String> fallbackTopics, OpicLevel band) {
 		List<Candidate> picked = new ArrayList<>();
 		Set<String> usedTopics = new HashSet<>();
 		pickBest(pool.ofTopic(SELF_INTRO_TOPIC), band, picked, preferType(QuestionType.DESCRIPTION));
 		usedTopics.add(SELF_INTRO_TOPIC);
 
 		List<String> topics = new ArrayList<>(shuffled(surveyTopics));
-		topics.addAll(shuffled(List.of(SurveyCatalog.HOME, SurveyCatalog.NEIGHBORHOOD)));
+		topics.addAll(shuffled(fallbackTopics));
 		topics.addAll(shuffled(pool.surveyCategoryTopics()));
 		int combos = 0;
 		for (String topic : new LinkedHashSet<>(topics)) {

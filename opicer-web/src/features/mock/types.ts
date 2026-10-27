@@ -9,7 +9,7 @@ import type {
   TargetLevel,
 } from "@/features/practice/types";
 
-export type SurveyItem = { id: string; label: string; topics: string[] };
+export type SurveyItem = { id: string; label: string };
 
 /** `min` to `max` items may be chosen; `max` 1 means a single choice. */
 export type SurveyPart = { code: string; title: string; min: number; max: number; items: SurveyItem[] };

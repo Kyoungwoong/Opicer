@@ -45,8 +45,8 @@ export type Readiness = { tone: "ok" | "warn" | "off"; text: string };
 
 /**
  * How the mock test can use a topic, following `MockTestComposer`: a survey or unexpected topic needs two unused
- * questions for a combo and asks describe → experience → compare when it has them; the first question comes only
- * from the topic titled 자기소개.
+ * questions for a combo and asks describe → experience → compare when it has them; a survey topic is picked for
+ * part 1 when a chosen survey item links to it; the first question comes only from the topic titled 자기소개.
  */
 export function readiness(topic: AdminTopic, counts: Partial<Record<QuestionType, number>>): Readiness {
   const total = Object.values(counts).reduce((sum, n) => sum + (n ?? 0), 0);
@@ -57,6 +57,9 @@ export function readiness(topic: AdminTopic, counts: Partial<Record<QuestionType
   }
   if (total === 0) return { tone: "warn", text: "활성 문항이 없어 연습할 수 없어요" };
   if (total < 2) return { tone: "warn", text: "실전에 쓰려면 활성 문항이 2개 이상 필요해요" };
+  if (topic.category === "설문조사" && !topic.mockLinked) {
+    return { tone: "warn", text: "설문 항목에 연결되지 않았어요. '설문 연결' 탭에서 이어 주세요" };
+  }
   if (counts.DESCRIPTION && counts.PAST_EXPERIENCE && counts.COMPARE_CONTRAST) {
     return { tone: "ok", text: "실전 콤보 준비 완료(묘사·과거 경험·비교)" };
   }

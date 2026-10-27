@@ -12,6 +12,7 @@ import { SectionHeader } from "@/components/common/SectionHeader";
 import { Button } from "@/components/ui/button";
 import { QuestionTab } from "@/features/admin/QuestionTab";
 import { TopicTab } from "@/features/admin/TopicTab";
+import { SurveyLinkTab } from "@/features/admin/SurveyLinkTab";
 import { DailySentenceTab } from "@/features/admin/DailySentenceTab";
 import { PromptVersionTab } from "@/features/admin/PromptVersionTab";
 import { EvaluationGuideTab } from "@/features/admin/EvaluationGuideTab";
@@ -21,6 +22,7 @@ import { OpicCenterTab } from "@/features/admin/OpicCenterTab";
 
 type Tab =
   | "topics"
+  | "survey-links"
   | "questions"
   | "daily-sentences"
   | "prompts"
@@ -31,6 +33,7 @@ type Tab =
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "topics", label: "주제 관리" },
+  { id: "survey-links", label: "설문 연결" },
   { id: "questions", label: "질문 관리" },
   { id: "daily-sentences", label: "오늘의 문장" },
   { id: "universal-sentences", label: "만능 문장" },
@@ -113,6 +116,7 @@ export default function AdminPage() {
       {/* Tab Content */}
       <div>
         {activeTab === "topics" && <TopicTab />}
+        {activeTab === "survey-links" && <SurveyLinkTab />}
         {activeTab === "questions" && <QuestionTab />}
         {activeTab === "daily-sentences" && <DailySentenceTab />}
         {activeTab === "universal-sentences" && <UniversalSentenceTab />}

@@ -1,6 +1,8 @@
 import type {
   AdminTopic,
   AdminTopicInput,
+  SurveyLinkItem,
+  SurveyLinkPart,
   AdminOpicCenter,
   AdminOpicCenterInput,
   AdminOpicCenterReview,
@@ -70,6 +72,17 @@ export const topicApi = {
   update: (id: string, data: AdminTopicInput) =>
     request<AdminTopic>(`topics/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   delete: (id: string) => request<void>(`topics/${id}`, { method: "DELETE" }),
+};
+
+// ── Survey links ──────────────────────────────────────────
+
+export const surveyLinkApi = {
+  list: () => request<SurveyLinkPart[]>("survey-links"),
+  replace: (itemId: string, topicIds: string[]) =>
+    request<SurveyLinkItem>(`survey-links/${encodeURIComponent(itemId)}`, {
+      method: "PUT",
+      body: JSON.stringify({ topicIds }),
+    }),
 };
 
 // ── Questions ─────────────────────────────────────────────
