@@ -89,12 +89,45 @@ class MockTestComposerTest {
 		assertThat(part2.subList(3, 6)).extracting(Candidate::order).isSorted();
 		assertThat(part2.subList(3, 6)).extracting(Candidate::type).containsExactly(ROLE_PLAY, ROLE_PLAY, PAST_EXPERIENCE);
 		assertThat(part2.subList(6, 8)).allMatch(c -> c.topic().startsWith("고난도:"));
-		// Band IH prefers the IH and AL advanced questions over the IL ones.
+		// The set has no compare → opinion pair, so they are picked one by one; band IH prefers IH and AL over IL.
 		assertThat(part2.subList(6, 8)).extracting(c -> c.levels().iterator().next())
 			.containsExactlyInAnyOrder(OpicLevel.IH, OpicLevel.AL);
 		List<Candidate> all = new ArrayList<>(part1);
 		all.addAll(part2);
 		assertDistinct(all);
+	}
+
+	@Test
+	void questionsFourteenAndFifteenAreACompareThenOpinionPairFromOneSet() {
+		Pool pool = fullPool();
+		add("고난도: 재활용", COMPARE_CONTRAST, OpicLevel.IL);
+		add("고난도: 재활용", OPINION, OpicLevel.IL);
+		add("고난도: 주거", COMPARE_CONTRAST, OpicLevel.IH);
+		add("고난도: 주거", OPINION, OpicLevel.AL);
+		MockTestComposer composer = new MockTestComposer(new Random(7));
+		List<Candidate> part1 = composer.part1(pool, List.of("음악 감상"), HOME_AND_NEIGHBORHOOD, OpicLevel.IM);
+
+		List<Candidate> part2 = composer.part2(pool, List.of("음악 감상"), part1, OpicLevel.IH);
+
+		// The pair nearer the IH band wins.
+		assertThat(part2.subList(6, 8)).extracting(Candidate::topic).containsOnly("고난도: 주거");
+		assertThat(part2.subList(6, 8)).extracting(Candidate::type).containsExactly(COMPARE_CONTRAST, OPINION);
+	}
+
+	@Test
+	void aPairWithAQuestionAlreadyAskedIsSkipped() {
+		Pool pool = fullPool();
+		add("고난도: 재활용", COMPARE_CONTRAST, OpicLevel.IL);
+		add("고난도: 재활용", OPINION, OpicLevel.IL);
+		add("고난도: 주거", COMPARE_CONTRAST, OpicLevel.IH);
+		add("고난도: 주거", OPINION, OpicLevel.AL);
+		Candidate housingCompare = bank.get(bank.size() - 2);
+
+		List<Candidate> part2 = new MockTestComposer(new Random(7))
+			.part2(pool, List.of(), List.of(housingCompare), OpicLevel.IH);
+
+		assertThat(part2.subList(6, 8)).extracting(Candidate::topic).containsOnly("고난도: 재활용");
+		assertThat(part2.subList(6, 8)).extracting(Candidate::type).containsExactly(COMPARE_CONTRAST, OPINION);
 	}
 
 	@Test

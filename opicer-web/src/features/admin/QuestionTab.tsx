@@ -256,7 +256,8 @@ export function QuestionTab() {
           </p>
         ) : chosenGroup === "advanced" ? (
           <p className={adminUi.subCard}>
-            고난도 문항은 실전 마지막 두 문항(14·15번)으로 나와요. 의견이나 비교 유형에 IH·AL 같은 높은 목표 레벨을 주세요.
+            고난도 세트는 실전 마지막 두 문항(14·15번)으로 나와요. 한 세트에 ① 과거·현재 비교(비교 유형) → ② 관련 이슈나
+            의견(의견 유형)을 이 순서로 등록해야 짝으로 나와요. IH·AL 같은 높은 목표 레벨을 주세요.
           </p>
         ) : chosenGroup === "unlinked" ? (
           <p className={adminUi.error}>

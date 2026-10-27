@@ -107,6 +107,8 @@ class MockTestFlowTest {
 		ensureTopic("음악 감상", "설문조사");
 		ensureTopic("영화 감상", "설문조사");
 		ensureTopic("물건 분실", "돌발질문");
+		ensureSet("롤플레이: 테스트", QuestionType.ROLE_PLAY, QuestionType.ROLE_PLAY, QuestionType.PAST_EXPERIENCE);
+		ensureSet("고난도: 테스트", QuestionType.COMPARE_CONTRAST, QuestionType.OPINION);
 		when(model.provider()).thenReturn("fake");
 		when(model.model()).thenReturn("fake-model");
 		when(model.evaluate(any())).thenAnswer(invocation -> {
@@ -156,6 +158,10 @@ class MockTestFlowTest {
 		assertThat(part2.items()).extracting(MockTestItem::getItemOrder).containsExactly(8, 9, 10, 11, 12, 13, 14, 15);
 		assertThat(part2.items().get(3).getTopicTitle()).startsWith("롤플레이:");
 		assertThat(part2.items().subList(6, 8)).allMatch(i -> i.getTopicTitle().startsWith("고난도:"));
+		assertThat(part2.items().subList(6, 8)).extracting(MockTestItem::getTopicTitle)
+			.containsOnly(part2.items().get(6).getTopicTitle());
+		assertThat(part2.items().subList(6, 8)).extracting(MockTestItem::getQuestionType)
+			.containsExactly("COMPARE_CONTRAST", "OPINION");
 		List<UUID> questionIds = itemRepository.findByMockTestIdOrderByItemOrderAsc(id).stream()
 			.map(MockTestItem::getQuestionId).toList();
 		assertThat(questionIds).doesNotHaveDuplicates().hasSize(15);
@@ -324,6 +330,16 @@ class MockTestFlowTest {
 			for (QuestionType type : List.of(QuestionType.DESCRIPTION, QuestionType.PAST_EXPERIENCE, QuestionType.COMPARE_CONTRAST)) {
 				questionRepository.saveAndFlush(new Question(title, type, title + " " + type, null, null,
 					List.of(OpicLevel.IM), List.of()));
+			}
+		}
+	}
+
+	/** A role-play or advanced set; the bank has no seed for these, so each test run brings its own. */
+	private void ensureSet(String title, QuestionType... types) {
+		if (questionRepository.findByActiveTrueAndTopicOrderByCreatedAtAscIdAsc(title).isEmpty()) {
+			for (int i = 0; i < types.length; i++) {
+				questionRepository.saveAndFlush(new Question(title, types[i], title + " " + (i + 1) + " " + types[i], null, null,
+					List.of(OpicLevel.IM, OpicLevel.IH), List.of()));
 			}
 		}
 	}

@@ -10,6 +10,7 @@ import {
   QUESTION_TYPE_LABELS,
   ROLE_PLAY_PREFIX,
   TOPIC_CATEGORIES,
+  hasAdvancedPair,
   readiness,
   setName,
   typeCounts,
@@ -353,7 +354,8 @@ export function TopicTab() {
       <section className={adminUi.card}>
         <h3 className={adminUi.cardTitle}>실전 전용 세트</h3>
         <p className="text-sm text-muted-foreground">
-          주제가 아니라 질문 관리에서 이름으로 묶어요. 롤플레이 세트는 3문항이 등록한 순서대로 나와요.
+          주제가 아니라 질문 관리에서 이름으로 묶어요. 롤플레이 세트는 3문항이 등록한 순서대로 나와요. 고난도 세트는
+          비교 문항 바로 다음에 의견 문항을 등록해야 14·15번 짝으로 나와요.
         </p>
         <div className={adminUi.grid2}>
           {(
@@ -373,11 +375,15 @@ export function TopicTab() {
                   {names.map((name) => {
                     const counts = typeCounts(questions, name);
                     const total = Object.values(counts).reduce((s, n) => s + (n ?? 0), 0);
+                    const problem =
+                      prefix === ROLE_PLAY_PREFIX
+                        ? total < 3 ? "3문항 필요" : null
+                        : hasAdvancedPair(questions, name) ? null : "비교 → 의견 짝 필요";
                     return (
                       <li key={name} className="flex flex-wrap items-center justify-between gap-2">
                         <span>{setName(name, prefix)}</span>
-                        <span className={prefix === ROLE_PLAY_PREFIX && total < 3 ? "text-xs text-destructive" : "text-xs text-muted-foreground"}>
-                          활성 {total}문항{prefix === ROLE_PLAY_PREFIX && total < 3 ? " · 3문항 필요" : ""}
+                        <span className={problem ? "text-xs text-destructive" : "text-xs text-muted-foreground"}>
+                          활성 {total}문항{problem ? ` · ${problem}` : ""}
                         </span>
                       </li>
                     );
