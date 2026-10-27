@@ -127,7 +127,7 @@ public final class SurveyCatalog {
 		Map<String, List<String>> given = selections == null ? Map.of() : selections;
 		int part4Total = 0;
 		for (SurveyPart part : PARTS) {
-			List<String> chosen = given.getOrDefault(part.code(), List.of());
+			List<String> chosen = chosen(given, part.code());
 			Set<String> unique = new HashSet<>(chosen);
 			if (unique.size() != chosen.size()) {
 				problems.add(part.title() + ": 같은 항목을 두 번 골랐어요.");
@@ -161,11 +161,17 @@ public final class SurveyCatalog {
 	public static List<String> topicsOf(Map<String, List<String>> selections) {
 		Set<String> topics = new LinkedHashSet<>();
 		for (SurveyPart part : PARTS) {
-			for (String id : selections.getOrDefault(part.code(), List.of())) {
+			for (String id : chosen(selections, part.code())) {
 				Optional.ofNullable(ITEMS.get(id)).ifPresent(item -> topics.addAll(item.topics()));
 			}
 		}
 		return List.copyOf(topics);
+	}
+
+	/** A part sent as {@code null} counts as nothing chosen. */
+	private static List<String> chosen(Map<String, List<String>> selections, String code) {
+		List<String> chosen = selections.get(code);
+		return chosen == null ? List.of() : chosen;
 	}
 
 	private static Map<String, SurveyItem> index() {

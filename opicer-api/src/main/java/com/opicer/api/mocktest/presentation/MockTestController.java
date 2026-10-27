@@ -15,6 +15,8 @@ import com.opicer.api.mocktest.domain.SurveyCatalog;
 import com.opicer.api.practice.domain.AnswerEvaluationStatus;
 import com.opicer.api.practice.domain.SessionEvaluationStatus;
 import com.opicer.api.shared.domain.OpicLevel;
+import com.opicer.api.shared.error.ApiException;
+import com.opicer.api.shared.error.ErrorCode;
 import com.opicer.api.shared.presentation.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -109,9 +111,12 @@ public class MockTestController {
 		return ResponseEntity.noContent().build();
 	}
 
-	/** /api/** requires authentication, so the principal is always present here. */
+	/** 401 for any authentication that is not an Opicer sign-in, like the practice endpoints. */
 	private static UUID userId(Authentication authentication) {
-		return ((AuthUserPrincipal) authentication.getPrincipal()).id();
+		if (authentication != null && authentication.getPrincipal() instanceof AuthUserPrincipal principal) {
+			return principal.id();
+		}
+		throw new ApiException(ErrorCode.UNAUTHORIZED);
 	}
 
 	private static List<ItemResponse> items(List<MockTestItem> items) {
