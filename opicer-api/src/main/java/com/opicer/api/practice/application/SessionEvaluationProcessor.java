@@ -6,13 +6,9 @@ import com.opicer.api.config.WorkerProperties;
 import com.opicer.api.evaluation.application.AnswerEvaluationResult;
 import com.opicer.api.evaluation.application.AnswerEvaluator;
 import com.opicer.api.evaluation.application.AnswerEvaluator.AnswerToEvaluate;
-import com.opicer.api.evaluation.application.EvaluationDocuments;
 import com.opicer.api.evaluation.application.EvaluationFailure;
 import com.opicer.api.evaluation.application.EvaluationGuideNote;
-import com.opicer.api.evaluation.domain.AnswerAssessment;
-import com.opicer.api.evaluation.domain.LevelAggregator;
-import com.opicer.api.evaluation.domain.LevelPolicy;
-import com.opicer.api.evaluation.domain.SessionReport;
+import com.opicer.api.evaluation.domain.EvaluationMode;
 import com.opicer.api.evaluationguide.application.EvaluationGuideQueryService;
 import com.opicer.api.practice.domain.AnswerEvaluationStatus;
 import com.opicer.api.practice.domain.PracticeAnswer;
@@ -38,7 +34,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Evaluates every pending answer of a practice session, then writes the session report.
+ * Coaches every pending answer of a topic-practice session (corrections, expressions, target script; no levels),
+ * then settles the session's status.
  * Database work happens in short transactions; model calls run outside them, a few in parallel. Each answer is
  * saved as soon as it finishes, so a retry re-evaluates only the answers that failed transiently.
  */
@@ -54,7 +51,6 @@ public class SessionEvaluationProcessor implements AiJobProcessor {
 	private final EvaluationGuideQueryService guides;
 	private final TransactionTemplate tx;
 	private final ExecutorService executor;
-	private final LevelAggregator aggregator = new LevelAggregator(LevelPolicy.DEFAULT);
 
 	public SessionEvaluationProcessor(PracticeSessionRepository sessionRepository,
 		PracticeAnswerRepository answerRepository, QuestionRepository questionRepository, AnswerEvaluator evaluator,
@@ -150,7 +146,7 @@ public class SessionEvaluationProcessor implements AiJobProcessor {
 	/** @return true when the answer is still pending because of a transient failure */
 	private boolean evaluate(PendingAnswer pending, List<EvaluationGuideNote> guides, boolean finalAttempt) {
 		try {
-			AnswerEvaluationResult result = evaluator.evaluate(pending.answer(), guides);
+			AnswerEvaluationResult result = evaluator.evaluate(pending.answer(), guides, EvaluationMode.COACH);
 			save(pending.answerId(), answer -> {
 				if (result.skipped()) {
 					answer.skipEvaluation();
@@ -181,34 +177,28 @@ public class SessionEvaluationProcessor implements AiJobProcessor {
 		tx.executeWithoutResult(status -> answerRepository.findById(answerId).ifPresent(change));
 	}
 
-	/** Aggregates every evaluated answer (from this and earlier attempts) into the session report. */
+	/**
+	 * Topic practice is coaching only: the session gets a final status but no report or level. Counts answers from
+	 * this and earlier attempts.
+	 */
 	private void finish(UUID sessionId) {
 		PracticeSession session = sessionRepository.findById(sessionId).orElse(null);
 		if (session == null) {
 			return;
 		}
-		List<AnswerAssessment> assessments = new ArrayList<>();
-		int skipped = 0;
+		int done = 0;
 		int failed = 0;
 		for (PracticeAnswer answer : answerRepository.findBySessionIdOrderByQuestionOrderAsc(sessionId)) {
-			if (answer.getEvaluationStatus() == AnswerEvaluationStatus.DONE && answer.getEvaluation() != null) {
-				assessments.add(EvaluationDocuments.assessment(answer.getEvaluation()));
-			} else if (answer.getEvaluationStatus() == AnswerEvaluationStatus.SKIPPED) {
-				skipped++;
+			if (answer.getEvaluationStatus() == AnswerEvaluationStatus.DONE) {
+				done++;
 			} else if (answer.getEvaluationStatus() == AnswerEvaluationStatus.FAILED) {
 				failed++;
 			}
 		}
-		if (assessments.isEmpty()) {
-			session.completeEvaluation(SessionEvaluationStatus.FAILED, null, null);
-			return;
-		}
-		OpicLevel target = session.getTargetLevel() == null
-			? PracticeSessionCommandService.DEFAULT_TARGET_LEVEL
-			: session.getTargetLevel();
-		SessionReport report = aggregator.aggregate(assessments, target);
-		session.completeEvaluation(failed > 0 ? SessionEvaluationStatus.PARTIAL : SessionEvaluationStatus.DONE,
-			report.estimatedLevel(), EvaluationDocuments.report(report, skipped, failed));
+		SessionEvaluationStatus status = done == 0
+			? SessionEvaluationStatus.FAILED
+			: failed > 0 ? SessionEvaluationStatus.PARTIAL : SessionEvaluationStatus.DONE;
+		session.completeEvaluation(status, null, null);
 	}
 
 	private record PendingAnswer(UUID answerId, AnswerToEvaluate answer) {}

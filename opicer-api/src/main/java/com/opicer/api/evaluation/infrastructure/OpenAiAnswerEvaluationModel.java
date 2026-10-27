@@ -14,6 +14,7 @@ import com.opicer.api.evaluation.application.EvaluationOutput;
 import com.opicer.api.evaluation.application.EvaluationPrompt;
 import com.opicer.api.evaluation.domain.CompetencyDimension;
 import com.opicer.api.evaluation.domain.CorrectionCategory;
+import com.opicer.api.evaluation.domain.EvaluationMode;
 import com.opicer.api.shared.domain.OpicLevel;
 import java.time.Duration;
 import java.util.Arrays;
@@ -42,8 +43,11 @@ public class OpenAiAnswerEvaluationModel implements AnswerEvaluationModel {
 
 	private static final Logger log = LoggerFactory.getLogger(OpenAiAnswerEvaluationModel.class);
 	static final String SCHEMA_NAME = "answer_evaluation";
+	static final String COACH_SCHEMA_NAME = "answer_coaching";
 	/** JSON schema of {@link EvaluationOutput}; enum values come from the domain enums so they never drift. */
-	static final ObjectNode SCHEMA = schema();
+	static final ObjectNode SCHEMA = schema(EvaluationMode.FULL);
+	/** The coaching subset: no competency ratings and no strengths. */
+	static final ObjectNode COACH_SCHEMA = schema(EvaluationMode.COACH);
 
 	private final AiProperties aiProperties;
 	private final EvaluationProperties properties;
@@ -92,9 +96,10 @@ public class OpenAiAnswerEvaluationModel implements AnswerEvaluationModel {
 		body.putObject("reasoning").put("effort", properties.getReasoningEffort());
 		ObjectNode format = body.putObject("text").putObject("format");
 		format.put("type", "json_schema");
-		format.put("name", SCHEMA_NAME);
+		boolean coach = prompt.mode() == EvaluationMode.COACH;
+		format.put("name", coach ? COACH_SCHEMA_NAME : SCHEMA_NAME);
 		format.put("strict", true);
-		format.set("schema", SCHEMA);
+		format.set("schema", coach ? COACH_SCHEMA : SCHEMA);
 		// Stored responses would keep learner transcripts on the provider side; we do not need them.
 		body.put("store", false);
 		return body;
@@ -181,7 +186,7 @@ public class OpenAiAnswerEvaluationModel implements AnswerEvaluationModel {
 	}
 
 	/** Strict-mode schema: every object lists all its properties as required and forbids extra ones. */
-	private static ObjectNode schema() {
+	private static ObjectNode schema(EvaluationMode mode) {
 		ObjectNode dimension = object(
 			"code", enumOf(names(CompetencyDimension.values())),
 			"level", enumOf(names(OpicLevel.values())),
@@ -195,6 +200,12 @@ public class OpenAiAnswerEvaluationModel implements AnswerEvaluationModel {
 		ObjectNode expression = object(
 			"expression", string(),
 			"meaningKo", string());
+		if (mode == EvaluationMode.COACH) {
+			return object(
+				"corrections", array(correction),
+				"targetScript", string(),
+				"keyExpressions", array(expression));
+		}
 		return object(
 			"dimensions", array(dimension),
 			"strengths", array(string()),

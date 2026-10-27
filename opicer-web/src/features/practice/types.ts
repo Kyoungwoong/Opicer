@@ -74,9 +74,13 @@ export type SessionReport = {
   schemaVersion: number;
 };
 
-/** Per-answer evaluation (schemaVersion 1). */
+/**
+ * Per-answer evaluation (schemaVersion 1). COACH documents (topic practice) have no level, ratings or strengths;
+ * documents written before modes existed have no `mode` and are FULL.
+ */
 export type AnswerEvaluation = {
-  overallLevel: OpicLevel;
+  mode?: "FULL" | "COACH";
+  overallLevel?: OpicLevel;
   /** Reference numbers measured from the STT transcript, not a score. */
   signals: {
     wordCount: number;
@@ -86,8 +90,8 @@ export type AnswerEvaluation = {
     lexicalDiversity: number;
     fillerCount: number;
   };
-  dimensions: { code: CompetencyDimension; level: OpicLevel; evidence: string; commentKo: string }[];
-  strengths: string[];
+  dimensions?: { code: CompetencyDimension; level: OpicLevel; evidence: string; commentKo: string }[];
+  strengths?: string[];
   corrections: { original: string; corrected: string; reasonKo: string; category: CorrectionCategory }[];
   targetScript: string;
   keyExpressions: { expression: string; meaningKo: string }[];

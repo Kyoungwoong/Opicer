@@ -8,13 +8,21 @@ import {
 } from "@/features/practice/evaluation-labels";
 import type { PracticeSessionAnswer, PracticeSessionDetail, SessionReport } from "@/features/practice/types";
 
+/** "coach": topic practice (fixes, expressions, suggested answer). "full": adds the level report and ratings. */
+export type ReportVariant = "coach" | "full";
+
 /**
- * Self-contained HTML report for saving or printing. A fixed template filled from the stored report and
+ * Self-contained HTML page for saving or printing. A fixed template filled from the stored report and
  * evaluations — no server call and no model tokens. Every interpolated value goes through `esc`.
  */
-export function renderReportHtml(session: PracticeSessionDetail, generatedAt: Date = new Date()): string {
-  const title = `${session.topicTitle} 연습 리포트`;
-  const report = session.report;
+export function renderReportHtml(
+  session: PracticeSessionDetail,
+  generatedAt: Date = new Date(),
+  variant: ReportVariant = "coach"
+): string {
+  const full = variant === "full";
+  const title = `${session.topicTitle} ${full ? "연습 리포트" : "연습 피드백"}`;
+  const report = full ? session.report : null;
   const answers = [...session.answers].sort((a, b) => a.questionOrder - b.questionOrder);
 
   return `<!doctype html>
@@ -28,16 +36,20 @@ export function renderReportHtml(session: PracticeSessionDetail, generatedAt: Da
 <body>
 <main>
   <header>
-    <p class="eyebrow">Opicer 연습 리포트</p>
+    <p class="eyebrow">${full ? "Opicer 연습 리포트" : "Opicer 연습 피드백"}</p>
     <h1>${esc(session.topicTitle)}</h1>
     <p class="muted">${esc(formatDate(session.completedAt))} · ${answers.length}문항${
       session.targetLevel ? ` · 목표 ${esc(session.targetLevel)}` : ""
     }</p>
   </header>
-  ${report ? reportSection(report) : `<p class="note">이 연습에는 자동 평가 리포트가 없어요.</p>`}
-  ${answers.map((answer, index) => answerSection(answer, index + 1, session.targetLevel)).join("\n")}
+  ${full ? (report ? reportSection(report) : `<p class="note">이 연습에는 자동 평가 리포트가 없어요.</p>`) : ""}
+  ${answers.map((answer, index) => answerSection(answer, index + 1, session.targetLevel, variant)).join("\n")}
   <footer>
-    <p>${esc(report?.disclaimer || LEVEL_DISCLAIMER)}. 음성 인식 결과(추정)를 바탕으로 한 연습용 결과예요.</p>
+    <p>${
+      full
+        ? `${esc(report?.disclaimer || LEVEL_DISCLAIMER)}. 음성 인식 결과(추정)를 바탕으로 한 연습용 결과예요.`
+        : "음성 인식 결과(추정)를 바탕으로 한 연습용 피드백이에요."
+    }</p>
     <p>${esc(formatDate(generatedAt.toISOString()))}에 저장함 · 녹음 파일은 포함되지 않아요.</p>
   </footer>
 </main>
@@ -61,9 +73,9 @@ export function reportFileName(session: Pick<PracticeSessionDetail, "completedAt
   return `opicer-report-${part("year")}${part("month")}${part("day")}-${part("hour")}${part("minute")}.html`;
 }
 
-/** Saves the report through a temporary object URL. Browser only. */
-export function downloadReportHtml(session: PracticeSessionDetail): void {
-  const blob = new Blob([renderReportHtml(session)], { type: "text/html;charset=utf-8" });
+/** Saves the page through a temporary object URL. Browser only. */
+export function downloadReportHtml(session: PracticeSessionDetail, variant: ReportVariant = "coach"): void {
+  const blob = new Blob([renderReportHtml(session, new Date(), variant)], { type: "text/html;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -107,7 +119,13 @@ function reportSection(report: SessionReport): string {
   </section>`;
 }
 
-function answerSection(answer: PracticeSessionAnswer, number: number, targetLevel: string | null): string {
+function answerSection(
+  answer: PracticeSessionAnswer,
+  number: number,
+  targetLevel: string | null,
+  variant: ReportVariant
+): string {
+  const full = variant === "full";
   const evaluation = answer.evaluation;
   const transcript = answer.transcript
     ? `<p class="transcript">${esc(answer.transcript)}</p>`
@@ -115,11 +133,11 @@ function answerSection(answer: PracticeSessionAnswer, number: number, targetLeve
 
   let body: string;
   if (evaluation) {
-    const dimensions = [...evaluation.dimensions]
+    const dimensions = [...(evaluation.dimensions ?? [])]
       .sort((a, b) => DIMENSION_ORDER.indexOf(a.code) - DIMENSION_ORDER.indexOf(b.code))
       .map((d) => `<li><strong>${esc(DIMENSION_LABELS[d.code])} ${esc(d.level)}</strong> — ${esc(d.commentKo)}</li>`)
       .join("");
-    const strengths = evaluation.strengths.map((s) => `<li>${esc(s)}</li>`).join("");
+    const strengths = (evaluation.strengths ?? []).map((s) => `<li>${esc(s)}</li>`).join("");
     const corrections = evaluation.corrections
       .map(
         (c) => `<li><span class="tag">${esc(CATEGORY_LABELS[c.category])}</span> ${fix(c.original, c.corrected)}
@@ -129,17 +147,18 @@ function answerSection(answer: PracticeSessionAnswer, number: number, targetLeve
     const expressions = evaluation.keyExpressions
       .map((k) => `<li><strong>${esc(k.expression)}</strong> <span class="muted">${esc(k.meaningKo)}</span></li>`)
       .join("");
-    body = `<p class="muted">이 답변의 예상 레벨(참고용) <strong>${esc(evaluation.overallLevel)}</strong> · ${
-      evaluation.signals.wordCount
-    }단어 · ${evaluation.signals.sentenceCount}문장</p>
-      <h4>역량별 평가</h4><ul>${dimensions}</ul>
-      ${strengths ? `<h4>잘한 점</h4><ul>${strengths}</ul>` : ""}
+    const scriptHeading = full ? `${targetLevel ? `${esc(targetLevel)} ` : ""}목표 스크립트` : "추천 답변";
+    body = `${
+      full && evaluation.overallLevel
+        ? `<p class="muted">이 답변의 예상 레벨(참고용) <strong>${esc(evaluation.overallLevel)}</strong> · ${
+            evaluation.signals.wordCount
+          }단어 · ${evaluation.signals.sentenceCount}문장</p>`
+        : ""
+    }
+      ${full && dimensions ? `<h4>역량별 평가</h4><ul>${dimensions}</ul>` : ""}
+      ${full && strengths ? `<h4>잘한 점</h4><ul>${strengths}</ul>` : ""}
       ${corrections ? `<h4>고쳐 보면 좋은 부분</h4><ul>${corrections}</ul>` : ""}
-      ${
-        evaluation.targetScript
-          ? `<h4>${targetLevel ? `${esc(targetLevel)} ` : ""}목표 스크립트</h4><p class="script">${esc(evaluation.targetScript)}</p>`
-          : ""
-      }
+      ${evaluation.targetScript ? `<h4>${scriptHeading}</h4><p class="script">${esc(evaluation.targetScript)}</p>` : ""}
       ${expressions ? `<h4>추천 표현</h4><ul>${expressions}</ul>` : ""}`;
   } else {
     // Sessions from before automatic evaluation keep their free-text results.

@@ -20,19 +20,21 @@ public final class EvaluationSummaryRenderer {
 
 	public static String render(EvaluationOutput evaluation, OpicLevel overallLevel) {
 		StringJoiner text = new StringJoiner("\n");
-		text.add("예상 레벨: " + overallLevel + " (" + SessionReport.DISCLAIMER + ")");
-		text.add("");
+		if (overallLevel != null) {
+			text.add("예상 레벨: " + overallLevel + " (" + SessionReport.DISCLAIMER + ")");
+			text.add("");
+		}
 		for (DimensionRating rating : evaluation.dimensions()) {
 			text.add("• " + rating.code().labelKo() + " " + rating.level()
 				+ (rating.commentKo().isEmpty() ? "" : " — " + rating.commentKo()));
 		}
 		if (!evaluation.strengths().isEmpty()) {
-			text.add("");
+			addGap(text);
 			text.add("잘한 점");
 			evaluation.strengths().forEach(s -> text.add("• " + s));
 		}
 		if (!evaluation.corrections().isEmpty()) {
-			text.add("");
+			addGap(text);
 			text.add("고칠 점");
 			evaluation.corrections().stream().limit(MAX_LISTED_CORRECTIONS).forEach(c -> text.add(correction(c)));
 			int rest = evaluation.corrections().size() - MAX_LISTED_CORRECTIONS;
@@ -41,7 +43,7 @@ public final class EvaluationSummaryRenderer {
 			}
 		}
 		if (!evaluation.keyExpressions().isEmpty()) {
-			text.add("");
+			addGap(text);
 			text.add("추천 표현");
 			for (KeyExpression expression : evaluation.keyExpressions()) {
 				text.add("• " + expression.expression()
@@ -49,6 +51,13 @@ public final class EvaluationSummaryRenderer {
 			}
 		}
 		return text.toString();
+	}
+
+	/** A blank line between sections, but none before the first one (coaching has no level header). */
+	private static void addGap(StringJoiner text) {
+		if (text.length() > 0) {
+			text.add("");
+		}
 	}
 
 	private static String correction(CorrectionItem c) {

@@ -3,6 +3,7 @@ package com.opicer.api.evaluation.application;
 import com.opicer.api.evaluation.domain.CompetencyDimension;
 import com.opicer.api.evaluation.domain.CorrectionCategory;
 import com.opicer.api.evaluation.domain.EvaluationGuideKind;
+import com.opicer.api.evaluation.domain.EvaluationMode;
 import com.opicer.api.evaluation.domain.SpeechSignalsCalculator;
 import com.opicer.api.goodanswer.application.ReferenceSample;
 import com.opicer.api.shared.domain.OpicLevel;
@@ -103,6 +104,34 @@ class EvaluationPromptBuilderTest {
 
 		assertThat(instructions.indexOf("</admin_guide>")).isEqualTo(instructions.lastIndexOf("</admin_guide>"));
 		assertThat(instructions).endsWith("</admin_guide>");
+	}
+
+	@Test
+	void coachingInstructionsAskForNoRatingsAndSkipScoringNotes() {
+		List<EvaluationGuideNote> guides = List.of(
+			new EvaluationGuideNote(EvaluationGuideKind.SCORING_NOTES, 1, "scoring note"),
+			new EvaluationGuideNote(EvaluationGuideKind.TIPS, 2, "coaching tip"));
+
+		EvaluationPrompt prompt = EvaluationPromptBuilder.build(input(TRANSCRIPT, OpicLevel.IM, List.of()), guides,
+			EvaluationMode.COACH);
+
+		assertThat(prompt.mode()).isEqualTo(EvaluationMode.COACH);
+		assertThat(prompt.instructions())
+			.startsWith(EvaluationPromptBuilder.COACH_INSTRUCTIONS)
+			.contains("Do not rate or grade")
+			.doesNotContain("Rubric")
+			.doesNotContain(CompetencyDimension.TASK.descriptor(OpicLevel.AL))
+			.doesNotContain("scoring note")
+			.contains("<admin_guide kind=\"TIPS\" version=\"2\">");
+		assertThat(prompt.input()).contains("<transcript>" + TRANSCRIPT + "</transcript>");
+	}
+
+	@Test
+	void coachingWithOnlyScoringNotesKeepsTheSharedConstant() {
+		String instructions = EvaluationPromptBuilder.instructions(
+			List.of(new EvaluationGuideNote(EvaluationGuideKind.SCORING_NOTES, 1, "scoring note")), EvaluationMode.COACH);
+
+		assertThat(instructions).isSameAs(EvaluationPromptBuilder.COACH_INSTRUCTIONS);
 	}
 
 	@Test

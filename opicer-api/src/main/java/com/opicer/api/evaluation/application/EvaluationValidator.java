@@ -4,6 +4,7 @@ import com.opicer.api.evaluation.application.EvaluationOutput.CorrectionItem;
 import com.opicer.api.evaluation.application.EvaluationOutput.DimensionRating;
 import com.opicer.api.evaluation.application.EvaluationOutput.KeyExpression;
 import com.opicer.api.evaluation.domain.CompetencyDimension;
+import com.opicer.api.evaluation.domain.EvaluationMode;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashSet;
@@ -28,13 +29,19 @@ public final class EvaluationValidator {
 	}
 
 	public static EvaluationOutput validate(EvaluationOutput output, String transcript) {
+		return validate(output, transcript, EvaluationMode.FULL);
+	}
+
+	/** COACH output carries no ratings or strengths; anything the model sent there anyway is dropped. */
+	public static EvaluationOutput validate(EvaluationOutput output, String transcript, EvaluationMode mode) {
 		if (output == null) {
 			throw EvaluationFailure.retryable("INVALID_OUTPUT", "empty evaluation");
 		}
 		String haystack = normalize(transcript);
+		boolean full = mode == EvaluationMode.FULL;
 		return new EvaluationOutput(
-			dimensions(output.dimensions(), haystack),
-			strengths(output.strengths()),
+			full ? dimensions(output.dimensions(), haystack) : List.of(),
+			full ? strengths(output.strengths()) : List.of(),
 			corrections(output.corrections(), haystack),
 			targetScript(output.targetScript(), transcript),
 			keyExpressions(output.keyExpressions())

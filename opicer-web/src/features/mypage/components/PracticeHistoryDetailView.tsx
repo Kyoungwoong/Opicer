@@ -8,13 +8,11 @@ import { ROUTES } from "@/lib/routes";
 import { TopNav } from "@/components/common/TopNav";
 import { PageShell } from "@/components/common/PageShell";
 import { Eyebrow, SectionHeader } from "@/components/common/SectionHeader";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TranscriptDiff } from "@/features/practice/components/TranscriptDiff";
 import { AnswerEvaluationPanel } from "@/features/practice/components/evaluation/AnswerEvaluationPanel";
 import { EvaluationStatusNotice } from "@/features/practice/components/evaluation/EvaluationStatusNotice";
-import { SessionReportCard } from "@/features/practice/components/evaluation/SessionReportCard";
 import { deletePracticeSession } from "@/features/practice/api";
 import type { OpicLevel, PracticeSessionAnswer } from "@/features/practice/types";
 import { formatDateTime } from "@/features/practice/history-format";
@@ -79,14 +77,7 @@ function AnswerCard({
   return (
     <li className={CARD}>
       <div className="flex flex-col gap-1.5">
-        <div className="flex items-center justify-between gap-2">
-          <Eyebrow>질문 {number}</Eyebrow>
-          {answer.overallLevel && (
-            <Badge variant="secondary" title="예상 레벨(참고용) · 공식 OPIc 점수가 아닙니다">
-              예상 {answer.overallLevel}
-            </Badge>
-          )}
-        </div>
+        <Eyebrow>질문 {number}</Eyebrow>
         <p className="font-semibold leading-7">{answer.questionText}</p>
       </div>
 
@@ -101,7 +92,12 @@ function AnswerCard({
 
       {answer.evaluation ? (
         <div className="border-t pt-5">
-          <AnswerEvaluationPanel evaluation={answer.evaluation} transcript={answer.transcript} targetLevel={targetLevel} />
+          <AnswerEvaluationPanel
+            evaluation={answer.evaluation}
+            transcript={answer.transcript}
+            targetLevel={targetLevel}
+            variant="coach"
+          />
         </div>
       ) : answer.evaluationStatus === "SKIPPED" ? (
         <p className="text-sm text-muted-foreground">답변이 비어 있거나 15단어보다 짧아서 평가하지 않았어요.</p>
@@ -186,7 +182,7 @@ export function PracticeHistoryDetailView({ sessionId, userLabel, onLogout }: Pr
                   className="rounded-full px-3"
                 >
                   <Download />
-                  리포트 저장
+                  피드백 저장
                 </Button>
                 <Button
                   type="button"
@@ -220,7 +216,6 @@ export function PracticeHistoryDetailView({ sessionId, userLabel, onLogout }: Pr
             />
           )}
 
-          {session.report && <SessionReportCard report={session.report} />}
 
           {session.answers.length === 0 ? (
             <div className={PLACEHOLDER}>저장된 답변이 없어요.</div>

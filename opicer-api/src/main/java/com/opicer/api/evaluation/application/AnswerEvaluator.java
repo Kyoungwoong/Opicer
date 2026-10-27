@@ -6,6 +6,7 @@ import com.opicer.api.evaluation.application.EvaluationOutput.DimensionRating;
 import com.opicer.api.evaluation.domain.AnswerAssessment;
 import com.opicer.api.evaluation.domain.AnswerAssessment.CorrectionSample;
 import com.opicer.api.evaluation.domain.CompetencyDimension;
+import com.opicer.api.evaluation.domain.EvaluationMode;
 import com.opicer.api.evaluation.domain.LevelAggregator;
 import com.opicer.api.evaluation.domain.LevelPolicy;
 import com.opicer.api.evaluation.domain.SpeechSignals;
@@ -58,6 +59,17 @@ public class AnswerEvaluator {
 	 * @throws EvaluationFailure when the model declines, errors, or returns unusable output
 	 */
 	public AnswerEvaluationResult evaluate(AnswerToEvaluate answer, List<EvaluationGuideNote> guides) {
+		return evaluate(answer, guides, EvaluationMode.FULL);
+	}
+
+	/**
+	 * COACH skips levels entirely: the result has no overall level or assessment, and the stored document has
+	 * no competency ratings.
+	 *
+	 * @throws EvaluationFailure when the model declines, errors, or returns unusable output
+	 */
+	public AnswerEvaluationResult evaluate(AnswerToEvaluate answer, List<EvaluationGuideNote> guides,
+		EvaluationMode mode) {
 		SpeechSignals signals = SpeechSignalsCalculator.calculate(answer.transcript(), answer.durationSeconds());
 		if (signals.wordCount() < MIN_WORDS) {
 			return AnswerEvaluationResult.skipped(signals);
@@ -67,11 +79,15 @@ public class AnswerEvaluator {
 			answer.structuralHint(), answer.keyExpressions(), answer.transcript(), answer.targetLevel(), signals, references);
 
 		EvaluationOutput evaluation = EvaluationValidator.validate(
-			model.evaluate(EvaluationPromptBuilder.build(input, guides)), answer.transcript());
+			model.evaluate(EvaluationPromptBuilder.build(input, guides, mode)), answer.transcript(), mode);
 
+		if (mode == EvaluationMode.COACH) {
+			return new AnswerEvaluationResult(false, signals, document(evaluation, null, signals, references, guides, mode),
+				null, EvaluationSummaryRenderer.render(evaluation, null), evaluation.targetScript(), null);
+		}
 		AnswerAssessment assessment = assessment(evaluation, signals);
 		OpicLevel overall = aggregator.answerLevel(assessment);
-		return new AnswerEvaluationResult(false, signals, document(evaluation, overall, signals, references, guides), overall,
+		return new AnswerEvaluationResult(false, signals, document(evaluation, overall, signals, references, guides, mode), overall,
 			EvaluationSummaryRenderer.render(evaluation, overall), evaluation.targetScript(), assessment);
 	}
 
@@ -96,9 +112,11 @@ public class AnswerEvaluator {
 		return new AnswerAssessment(levels, corrections, signals.wordCount());
 	}
 
+	/** COACH documents leave out the level, ratings and strengths rather than storing empty ones. */
 	private String document(EvaluationOutput evaluation, OpicLevel overall, SpeechSignals signals,
-		List<ReferenceSample> references, List<EvaluationGuideNote> guides) {
+		List<ReferenceSample> references, List<EvaluationGuideNote> guides, EvaluationMode mode) {
 		Map<String, Object> meta = new LinkedHashMap<>();
+		meta.put("mode", mode.name());
 		meta.put("provider", model.provider());
 		meta.put("model", model.model());
 		meta.put("promptVersion", EvaluationPromptBuilder.PROMPT_VERSION);
@@ -108,10 +126,15 @@ public class AnswerEvaluator {
 
 		Map<String, Object> doc = new LinkedHashMap<>();
 		doc.put("schemaVersion", SCHEMA_VERSION);
-		doc.put("overallLevel", overall);
+		doc.put("mode", mode.name());
+		if (mode == EvaluationMode.FULL) {
+			doc.put("overallLevel", overall);
+		}
 		doc.put("signals", signals);
-		doc.put("dimensions", evaluation.dimensions());
-		doc.put("strengths", evaluation.strengths());
+		if (mode == EvaluationMode.FULL) {
+			doc.put("dimensions", evaluation.dimensions());
+			doc.put("strengths", evaluation.strengths());
+		}
 		doc.put("corrections", evaluation.corrections());
 		doc.put("targetScript", evaluation.targetScript());
 		doc.put("keyExpressions", evaluation.keyExpressions());

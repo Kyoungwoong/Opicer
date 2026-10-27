@@ -12,6 +12,7 @@ import com.opicer.api.evaluation.application.AnswerEvaluationModel;
 import com.opicer.api.evaluation.application.EvaluationFailure;
 import com.opicer.api.evaluation.application.EvaluationPrompt;
 import com.opicer.api.evaluation.domain.EvaluationGuideKind;
+import com.opicer.api.evaluation.domain.EvaluationMode;
 import com.opicer.api.evaluationguide.application.EvaluationGuideCommandService;
 import com.opicer.api.evaluationguide.infrastructure.EvaluationGuideRepository;
 import com.opicer.api.practice.domain.AnswerEvaluationStatus;
@@ -117,32 +118,32 @@ class SessionEvaluationFlowTest {
 		});
 	}
 
+	/** Topic practice coaches each answer and settles the session without a level or report. */
 	@Test
-	void evaluatesEveryAnswerAndWritesTheSessionReport() throws Exception {
+	void coachesEveryAnswerWithoutALevelOrReport() throws Exception {
 		UUID sessionId = session(OpicLevel.IH, OK, OK, SHORT);
 
 		runner.runOnce();
 
 		PracticeSession session = sessionRepository.findById(sessionId).orElseThrow();
 		assertThat(session.getEvaluationStatus()).isEqualTo(SessionEvaluationStatus.DONE);
-		assertThat(session.getEstimatedLevel()).isEqualTo(OpicLevel.IM);
+		assertThat(session.getEstimatedLevel()).isNull();
+		assertThat(session.getReport()).isNull();
 		assertThat(session.getEvaluatedAt()).isNotNull();
-		JsonNode report = new ObjectMapper().readTree(session.getReport());
-		assertThat(report.path("estimatedLevel").asText()).isEqualTo("IM");
-		assertThat(report.path("targetLevel").asText()).isEqualTo("IH");
-		assertThat(report.path("gapToTarget").asInt()).isEqualTo(1);
-		assertThat(report.path("evaluatedAnswers").asInt()).isEqualTo(2);
-		assertThat(report.path("skippedAnswers").asInt()).isEqualTo(1);
-		assertThat(report.path("topIssues").get(0).path("category").asText()).isEqualTo("TENSE");
-		assertThat(report.path("disclaimer").asText()).contains("공식 OPIc 점수가 아닙니다");
+		assertThat(prompts).allSatisfy(p -> assertThat(p.mode()).isEqualTo(EvaluationMode.COACH));
 
 		List<PracticeAnswer> answers = answers(sessionId);
 		assertThat(answers).extracting(PracticeAnswer::getEvaluationStatus).containsExactly(
 			AnswerEvaluationStatus.DONE, AnswerEvaluationStatus.DONE, AnswerEvaluationStatus.SKIPPED);
-		assertThat(answers.get(0).getOverallLevel()).isEqualTo(OpicLevel.IM);
-		assertThat(answers.get(0).getAnalysis()).contains("예상 레벨: IM");
+		assertThat(answers.get(0).getOverallLevel()).isNull();
+		assertThat(answers.get(0).getAnalysis()).doesNotContain("예상 레벨").contains("고칠 점");
 		assertThat(answers.get(0).getImprovedScript()).startsWith("Last summer, I went");
-		assertThat(new ObjectMapper().readTree(answers.get(0).getEvaluation()).path("schemaVersion").asInt()).isEqualTo(1);
+		JsonNode evaluation = new ObjectMapper().readTree(answers.get(0).getEvaluation());
+		assertThat(evaluation.path("schemaVersion").asInt()).isEqualTo(1);
+		assertThat(evaluation.path("mode").asText()).isEqualTo("COACH");
+		assertThat(evaluation.has("overallLevel")).isFalse();
+		assertThat(evaluation.has("dimensions")).isFalse();
+		assertThat(evaluation.path("corrections").size()).isPositive();
 		assertThat(job(sessionId).getStatus()).isEqualTo(AiJobStatus.SUCCEEDED);
 	}
 
@@ -204,7 +205,7 @@ class SessionEvaluationFlowTest {
 
 		PracticeSession partial = sessionRepository.findById(flaky).orElseThrow();
 		assertThat(partial.getEvaluationStatus()).isEqualTo(SessionEvaluationStatus.PARTIAL);
-		assertThat(partial.getEstimatedLevel()).isEqualTo(OpicLevel.IM);
+		assertThat(partial.getEstimatedLevel()).isNull();
 		assertThat(answers(flaky)).extracting(PracticeAnswer::getEvaluationStatus)
 			.containsExactly(AnswerEvaluationStatus.DONE, AnswerEvaluationStatus.FAILED);
 		assertThat(calls.get("flaky").get()).isEqualTo(3);
@@ -222,7 +223,7 @@ class SessionEvaluationFlowTest {
 
 		PracticeSession settled = sessionRepository.findById(sessionId).orElseThrow();
 		assertThat(settled.getEvaluationStatus()).isEqualTo(SessionEvaluationStatus.PARTIAL);
-		assertThat(settled.getReport()).isNotNull();
+		assertThat(settled.getEvaluatedAt()).isNotNull();
 		assertThat(answers(sessionId)).extracting(PracticeAnswer::getEvaluationStatus)
 			.containsExactly(AnswerEvaluationStatus.DONE, AnswerEvaluationStatus.FAILED);
 	}
