@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,8 +22,8 @@ public final class SurveyCatalog {
 	/** The part whose choice decides the fallback combo topics (home and neighbourhood by default). */
 	public static final String RESIDENCE = "RESIDENCE";
 
-	public static final String HOME = "집/주거환경";
-	public static final String NEIGHBORHOOD = "이웃/동네";
+	private static final String HOME = "집/주거환경";
+	private static final String NEIGHBORHOOD = "이웃/동네";
 
 	public static final List<SurveyPart> PARTS = List.of(
 		single("OCCUPATION", "Part 1. 현재 귀하는 어느 분야에 종사하고 계십니까?",
@@ -163,13 +162,6 @@ public final class SurveyCatalog {
 
 	public static Optional<SurveyItem> findItem(String id) {
 		return Optional.ofNullable(ITEMS.get(id));
-	}
-
-	/** Every practice topic title some survey item points to. */
-	public static Set<String> linkedTopics() {
-		Set<String> topics = new LinkedHashSet<>();
-		ITEMS.values().forEach(item -> topics.addAll(item.defaultTopics()));
-		return Set.copyOf(topics);
 	}
 
 	/** A part sent as {@code null} counts as nothing chosen. */
