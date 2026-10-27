@@ -124,6 +124,7 @@ class MockTestInsightsTest {
 
 	@ParameterizedTest
 	@CsvSource({
+		"20, 1분도 쓰지 않았어요",
 		"600, 10분만 썼어요",
 		"1500, ",
 		"2350, 거의 다 썼어요"

@@ -209,8 +209,10 @@ public final class MockTestInsights {
 		}
 		int used = examSeconds != null ? examSeconds : part1 + part2;
 		List<String> notes = new ArrayList<>();
-		if (used < EXAM_LIMIT_SECONDS / 2) {
-			notes.add("40분 중 " + Math.max(1, Math.round(used / 60f)) + "분만 썼어요. 답변을 더 길게 이어 가도 시간이 남아요.");
+		if (used < 60) {
+			notes.add("40분 중 1분도 쓰지 않았어요. 짧게라도 문항마다 답해 보세요.");
+		} else if (used < EXAM_LIMIT_SECONDS / 2) {
+			notes.add("40분 중 " + Math.round(used / 60f) + "분만 썼어요. 답변을 더 길게 이어 가도 시간이 남아요.");
 		} else if (used >= EXAM_LIMIT_SECONDS - 60) {
 			notes.add("시간을 거의 다 썼어요. 한 문항에 너무 오래 머물지 않게 해 보세요.");
 		}
