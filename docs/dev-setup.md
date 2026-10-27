@@ -64,12 +64,14 @@ Claude Code의 미리보기 설정(`.claude/launch.json`)은 PC마다 경로가 
   - jar와 이미지는 바이너리로 둔다.
 - `.editorconfig`가 편집기의 저장 형식(UTF-8, LF, 마지막 줄바꿈, 들여쓰기)을 맞춘다.
   - VS Code는 EditorConfig 확장을 설치한다. IntelliJ는 기본으로 지원한다.
-- **이 설정 전에 받아 둔 작업 폴더**에는 CRLF 파일이 남아 있을 수 있다. WSL이나 맥 git에서 수정됨으로 보이면 아래를 한 번 실행한다.
+- **이 설정 전에 받아 둔 작업 폴더**에는 CRLF 파일이 남아 있을 수 있다. git은 이미 깨끗하게 보지만, 파일까지 LF로 맞추려면 아래 두 줄을 한 번 실행한다.
   - 먼저 변경을 커밋하거나 stash한다.
   - 이 명령은 추적 중인 파일을 저장소 내용으로 다시 써서, 커밋하지 않은 변경이 사라진다.
+  - 추적하지 않는 파일(`.env`, `plan.md`, `scripts/` 등)은 건드리지 않는다.
 
   ```bash
-  git checkout-index -f -a
+  git rm -r --cached -q .
+  git reset -q --hard
   ```
 
 - 실행 비트: `gradlew`와 `run-local.sh`는 저장소에 실행 권한(755)으로 들어 있다. 맥에서 권한 오류가 나면 `git checkout -- opicer-api/gradlew opicer-api/run-local.sh`로 다시 받는다.
