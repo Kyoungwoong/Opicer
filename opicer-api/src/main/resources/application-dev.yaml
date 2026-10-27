@@ -1,0 +1,32 @@
+# A deployed dev server. Connection details and secrets have no defaults: a missing variable stops startup
+# instead of running with a local or placeholder value. Activate with SPRING_PROFILES_ACTIVE=dev.
+spring:
+  datasource:
+    url: ${OPICER_DB_URL}
+    username: ${OPICER_DB_USER}
+    password: ${OPICER_DB_PASSWORD}
+  jpa:
+    hibernate:
+      # update until Flyway is introduced (roadmap 9); then validate.
+      ddl-auto: ${OPICER_JPA_DDL_AUTO:update}
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET}
+            redirect-uri: ${KAKAO_REDIRECT_URI}
+
+opicer:
+  auth:
+    jwt-secret: ${JWT_SECRET}
+    cookie-secure: ${JWT_COOKIE_SECURE:true}
+    frontend-base-url: ${FRONTEND_BASE_URL}
+  ai:
+    openai-api-key: ${OPENAI_API_KEY}
+    stt:
+      # Real speech recognition; a missing key fails loudly instead of serving canned transcripts.
+      provider: ${OPICER_STT_PROVIDER:openai}
+  naver-map:
+    client-secret: ${NAVER_MAP_CLIENT_SECRET:}
