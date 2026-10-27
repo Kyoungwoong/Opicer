@@ -35,7 +35,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { title: ko.common.topNav.items.guide, href: "/guide" },
   { title: ko.common.topNav.items.practice, href: "/practice" },
-  { title: ko.common.topNav.items.mock, href: "/mock", disabled: true },
+  { title: ko.common.topNav.items.mock, href: "/mock" },
 ];
 
 type Props = {
