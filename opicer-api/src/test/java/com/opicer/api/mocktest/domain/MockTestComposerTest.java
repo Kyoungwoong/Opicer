@@ -23,6 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MockTestComposerTest {
 
+	private static final List<String> HOME_AND_NEIGHBORHOOD = List.of("집/주거환경", "이웃/동네");
+
 	private final List<Candidate> bank = new ArrayList<>();
 
 	private Pool fullPool() {
@@ -56,7 +58,8 @@ class MockTestComposerTest {
 	void partOneIsASelfIntroductionThenTwoSurveyCombos() {
 		Pool pool = fullPool();
 
-		List<Candidate> part1 = new MockTestComposer(new Random(7)).part1(pool, List.of("음악 감상", "영화 감상"), OpicLevel.IM);
+		List<Candidate> part1 = new MockTestComposer(new Random(7))
+			.part1(pool, List.of("음악 감상", "영화 감상"), HOME_AND_NEIGHBORHOOD, OpicLevel.IM);
 
 		assertThat(part1).hasSize(MockTestComposer.PART1_SIZE);
 		assertThat(part1.get(0).topic()).isEqualTo("자기소개");
@@ -73,7 +76,7 @@ class MockTestComposerTest {
 		Pool pool = fullPool();
 		MockTestComposer composer = new MockTestComposer(new Random(7));
 		List<String> survey = List.of("음악 감상", "영화 감상");
-		List<Candidate> part1 = composer.part1(pool, survey, OpicLevel.IM);
+		List<Candidate> part1 = composer.part1(pool, survey, HOME_AND_NEIGHBORHOOD, OpicLevel.IM);
 
 		List<Candidate> part2 = composer.part2(pool, survey, part1, OpicLevel.IH);
 
@@ -99,17 +102,20 @@ class MockTestComposerTest {
 		Pool pool = fullPool();
 		List<String> survey = List.of("음악 감상", "영화 감상", "요리");
 
-		List<Candidate> first = new MockTestComposer(new Random(42)).part1(pool, survey, OpicLevel.IM);
-		List<Candidate> second = new MockTestComposer(new Random(42)).part1(pool, survey, OpicLevel.IM);
+		List<Candidate> first = new MockTestComposer(new Random(42))
+			.part1(pool, survey, HOME_AND_NEIGHBORHOOD, OpicLevel.IM);
+		List<Candidate> second = new MockTestComposer(new Random(42))
+			.part1(pool, survey, HOME_AND_NEIGHBORHOOD, OpicLevel.IM);
 
 		assertThat(first).extracting(Candidate::id).containsExactlyElementsOf(second.stream().map(Candidate::id).toList());
 	}
 
 	@Test
-	void surveyTopicsWithoutQuestionsFallBackToHomeAndNeighborhood() {
+	void surveyTopicsWithoutQuestionsFallBackToTheResidenceTopics() {
 		Pool pool = fullPool();
 
-		List<Candidate> part1 = new MockTestComposer(new Random(1)).part1(pool, List.of("캠핑", "수영"), OpicLevel.IM);
+		List<Candidate> part1 = new MockTestComposer(new Random(1))
+			.part1(pool, List.of("캠핑", "수영"), HOME_AND_NEIGHBORHOOD, OpicLevel.IM);
 
 		assertThat(Set.of(part1.get(1).topic(), part1.get(4).topic())).containsExactlyInAnyOrder("집/주거환경", "이웃/동네");
 	}
@@ -123,7 +129,7 @@ class MockTestComposerTest {
 		Pool pool = new Pool(bank, Set.of("물건 분실"), Set.of("음악 감상"));
 		MockTestComposer composer = new MockTestComposer(new Random(3));
 
-		List<Candidate> part1 = composer.part1(pool, List.of("음악 감상"), OpicLevel.IM);
+		List<Candidate> part1 = composer.part1(pool, List.of("음악 감상"), HOME_AND_NEIGHBORHOOD, OpicLevel.IM);
 		List<Candidate> part2 = composer.part2(pool, List.of("음악 감상"), part1, OpicLevel.IM);
 
 		List<Candidate> all = new ArrayList<>(part1);

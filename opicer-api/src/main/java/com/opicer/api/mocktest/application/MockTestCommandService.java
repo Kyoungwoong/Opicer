@@ -55,6 +55,7 @@ public class MockTestCommandService {
 	private final MockTestItemRepository items;
 	private final MockTestCreditChargeRepository charges;
 	private final QuestionPoolLoader pools;
+	private final SurveyTopicLinkService surveyLinks;
 	private final CreditBalanceQueryService creditQuery;
 	private final CreditBalanceCommandService creditCommand;
 	private final AiJobCommandService jobs;
@@ -64,13 +65,14 @@ public class MockTestCommandService {
 	private final ObjectMapper json = new ObjectMapper();
 
 	public MockTestCommandService(MockTestRepository tests, MockTestItemRepository items,
-		MockTestCreditChargeRepository charges, QuestionPoolLoader pools, CreditBalanceQueryService creditQuery,
-		CreditBalanceCommandService creditCommand, AiJobCommandService jobs, WorkerProperties workerProperties,
-		Clock clock) {
+		MockTestCreditChargeRepository charges, QuestionPoolLoader pools, SurveyTopicLinkService surveyLinks,
+		CreditBalanceQueryService creditQuery, CreditBalanceCommandService creditCommand, AiJobCommandService jobs,
+		WorkerProperties workerProperties, Clock clock) {
 		this.tests = tests;
 		this.items = items;
 		this.charges = charges;
 		this.pools = pools;
+		this.surveyLinks = surveyLinks;
 		this.creditQuery = creditQuery;
 		this.creditCommand = creditCommand;
 		this.jobs = jobs;
@@ -99,7 +101,8 @@ public class MockTestCommandService {
 		}
 		QuestionPoolLoader.LoadedPool pool = pools.load();
 		List<Candidate> part1 = new MockTestComposer(random)
-			.part1(pool.pool(), SurveyCatalog.topicsOf(survey), MockTestComposer.band(selfAssessment, null));
+			.part1(pool.pool(), surveyLinks.topicsOf(survey), surveyLinks.residenceTopics(survey),
+				MockTestComposer.band(selfAssessment, null));
 		if (part1.isEmpty()) {
 			throw new ApiException(ErrorCode.MOCK_TEST_NO_QUESTIONS);
 		}
@@ -121,7 +124,7 @@ public class MockTestCommandService {
 		QuestionPoolLoader.LoadedPool pool = pools.load();
 		List<MockTestItem> part1 = items.findByMockTestIdOrderByItemOrderAsc(test.getId());
 		List<Candidate> asked = part1.stream().map(item -> asCandidate(item, pool)).toList();
-		List<Candidate> part2 = new MockTestComposer(random).part2(pool.pool(), SurveyCatalog.topicsOf(read(test.getSurvey())),
+		List<Candidate> part2 = new MockTestComposer(random).part2(pool.pool(), surveyLinks.topicsOf(read(test.getSurvey())),
 			asked, MockTestComposer.band(test.getSelfAssessment(), adjustment));
 		test.adjust(adjustment);
 		return new Composed(test, saveItems(test.getId(), part2, part1.size() + 1, 2, pool));

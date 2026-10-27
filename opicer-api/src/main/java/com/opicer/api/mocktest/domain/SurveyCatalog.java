@@ -161,17 +161,6 @@ public final class SurveyCatalog {
 		return problems;
 	}
 
-	/** Practice topics the selections point to, in survey order and without repeats. */
-	public static List<String> topicsOf(Map<String, List<String>> selections) {
-		Set<String> topics = new LinkedHashSet<>();
-		for (SurveyPart part : PARTS) {
-			for (String id : chosen(selections, part.code())) {
-				Optional.ofNullable(ITEMS.get(id)).ifPresent(item -> topics.addAll(item.defaultTopics()));
-			}
-		}
-		return List.copyOf(topics);
-	}
-
 	public static Optional<SurveyItem> findItem(String id) {
 		return Optional.ofNullable(ITEMS.get(id));
 	}

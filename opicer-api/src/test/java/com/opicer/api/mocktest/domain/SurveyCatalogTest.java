@@ -70,14 +70,6 @@ class SurveyCatalogTest {
 		survey.put("HOBBY", null);
 
 		assertThat(SurveyCatalog.problems(survey)).anyMatch(p -> p.startsWith("4-2") && p.contains("1개 이상"));
-		assertThat(SurveyCatalog.topicsOf(survey)).doesNotContain("음악 감상");
-	}
-
-	@Test
-	void selectionsMapToPracticeTopicsWithoutRepeats() {
-		assertThat(SurveyCatalog.topicsOf(validSurvey())).containsExactly(
-			"집/주거환경", "이웃/동네", "영화 감상", "TV 시청", "쇼핑", "음악 감상", "독서", "조깅/걷기", "수영",
-			"국내 여행", "해외 여행");
 	}
 
 	@Test
