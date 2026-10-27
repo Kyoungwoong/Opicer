@@ -9,6 +9,8 @@ import { adminUi } from "@/features/admin/ui";
 const SURVEY_CATEGORY = "설문조사";
 /** A survey combo needs two unused questions of the topic (`MockTestComposer`). */
 const COMBO_MIN = 2;
+/** Occupation and student status are asked but not normally linked; they stay out of the counts. */
+const UNPICKED_PARTS = new Set(["OCCUPATION", "STUDENT"]);
 
 type Filter = "ALL" | "UNLINKED";
 
@@ -59,8 +61,8 @@ export function SurveyLinkTab() {
     return counts;
   }, [questions]);
 
-  const allItems = parts.flatMap((p) => p.items);
-  const linkedCount = allItems.filter((item) => item.topics.length > 0).length;
+  const pickingItems = parts.filter((p) => !UNPICKED_PARTS.has(p.code)).flatMap((p) => p.items);
+  const linkedCount = pickingItems.filter((item) => item.topics.length > 0).length;
 
   function startEdit(item: SurveyLinkItem) {
     setEditing(item.id);
@@ -153,7 +155,7 @@ export function SurveyLinkTab() {
         </p>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-medium text-foreground">
-            연결된 항목 {linkedCount} / 전체 {allItems.length}
+            연결된 항목 {linkedCount} / 전체 {pickingItems.length} (Part 3·4)
           </p>
           <label className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">보기</span>
@@ -171,11 +173,17 @@ export function SurveyLinkTab() {
       </div>
 
       {parts.map((part) => {
-        const items = part.items.filter((item) => filter === "ALL" || item.topics.length === 0);
+        const unpicked = UNPICKED_PARTS.has(part.code);
+        const items = part.items.filter((item) => filter === "ALL" || (!unpicked && item.topics.length === 0));
         if (items.length === 0) return null;
         return (
           <div key={part.code} className="flex flex-col gap-2">
-            <h3 className="text-sm font-semibold text-foreground">{part.title}</h3>
+            <h3 className="text-sm font-semibold text-foreground">
+              {part.title}
+              {unpicked ? (
+                <span className="ml-2 text-xs font-normal text-muted-foreground">보통 주제를 연결하지 않아요</span>
+              ) : null}
+            </h3>
             <div className={adminUi.tableWrap}>
               <table className={adminUi.table}>
                 <thead className={adminUi.thead}>
@@ -194,7 +202,9 @@ export function SurveyLinkTab() {
                           <span className="block text-xs font-normal text-muted-foreground">{item.id}</span>
                         </td>
                         <td className={adminUi.td}>
-                          {item.topics.length === 0 ? (
+                          {item.topics.length === 0 && unpicked ? (
+                            <span className="text-xs text-muted-foreground">없음</span>
+                          ) : item.topics.length === 0 ? (
                             <span className="rounded-full bg-highlight/20 px-2 py-0.5 text-xs font-medium text-foreground">
                               연결 안 됨
                             </span>
