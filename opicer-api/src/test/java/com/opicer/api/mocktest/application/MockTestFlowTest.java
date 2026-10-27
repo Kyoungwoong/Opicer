@@ -337,8 +337,8 @@ class MockTestFlowTest {
 	/** A role-play or advanced set; the bank has no seed for these, so each test run brings its own. */
 	private void ensureSet(String title, QuestionType... types) {
 		if (questionRepository.findByActiveTrueAndTopicOrderByCreatedAtAscIdAsc(title).isEmpty()) {
-			for (QuestionType type : types) {
-				questionRepository.saveAndFlush(new Question(title, type, title + " " + type, null, null,
+			for (int i = 0; i < types.length; i++) {
+				questionRepository.saveAndFlush(new Question(title, types[i], title + " " + (i + 1) + " " + types[i], null, null,
 					List.of(OpicLevel.IM, OpicLevel.IH), List.of()));
 			}
 		}
