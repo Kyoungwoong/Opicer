@@ -1,0 +1,30 @@
+# Line endings are decided here, not by each machine's core.autocrlf, so macOS, Windows and WSL
+# check out the same bytes and `git status` stays clean on all of them.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Shell scripts must stay LF to run on macOS/Linux.
+*.sh text eol=lf
+gradlew text eol=lf
+
+# Binary files: never convert or diff as text.
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.pdf binary
+*.mp3 binary
+*.wav binary
+*.webm binary
+*.m4a binary
+*.zip binary
