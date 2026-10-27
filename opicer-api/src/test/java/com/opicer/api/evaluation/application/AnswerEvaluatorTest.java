@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opicer.api.evaluation.application.AnswerEvaluator.AnswerToEvaluate;
 import com.opicer.api.evaluation.domain.CompetencyDimension;
+import com.opicer.api.evaluation.domain.EvaluationMode;
 import com.opicer.api.goodanswer.application.GoodAnswerSampleQueryService;
 import com.opicer.api.goodanswer.application.ReferenceSample;
 import com.opicer.api.shared.domain.OpicLevel;
@@ -47,6 +48,25 @@ class AnswerEvaluatorTest {
 	};
 
 	private final AnswerEvaluator evaluator = new AnswerEvaluator(model, references);
+
+	@Test
+	void coachingStoresNoLevelRatingsOrAssessment() throws Exception {
+		AnswerEvaluationResult result = evaluator.evaluate(answer(TRANSCRIPT), List.of(), EvaluationMode.COACH);
+
+		assertThat(result.skipped()).isFalse();
+		assertThat(result.overallLevel()).isNull();
+		assertThat(result.assessment()).isNull();
+		assertThat(result.summaryKo()).doesNotContain("예상 레벨").startsWith("고칠 점");
+		assertThat(prompts.get(0).mode()).isEqualTo(EvaluationMode.COACH);
+		JsonNode doc = new ObjectMapper().readTree(result.evaluationJson());
+		assertThat(doc.path("mode").asText()).isEqualTo("COACH");
+		assertThat(doc.path("meta").path("mode").asText()).isEqualTo("COACH");
+		assertThat(doc.has("overallLevel")).isFalse();
+		assertThat(doc.has("dimensions")).isFalse();
+		assertThat(doc.has("strengths")).isFalse();
+		assertThat(doc.path("corrections").size()).isEqualTo(3);
+		assertThat(doc.path("targetScript").asText()).startsWith("Last summer, I went");
+	}
 
 	@Test
 	void evaluatesAnAnswerIntoAStoredDocumentLevelSummaryAndAssessment() throws Exception {

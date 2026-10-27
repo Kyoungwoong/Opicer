@@ -6,6 +6,7 @@ import com.opicer.api.evaluation.application.EvaluationOutput.KeyExpression;
 import com.opicer.api.evaluation.domain.CompetencyDimension;
 import com.opicer.api.evaluation.domain.CorrectionCategory;
 import com.opicer.api.shared.domain.OpicLevel;
+import com.opicer.api.evaluation.domain.EvaluationMode;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class EvaluationValidatorTest {
+
+	@Test
+	void coachingNeedsNoRatingsAndDropsAnyThatWereSent() {
+		EvaluationOutput coached = new EvaluationOutput(null, null, validOutput().corrections(),
+			validOutput().targetScript(), validOutput().keyExpressions());
+
+		EvaluationOutput result = EvaluationValidator.validate(coached, TRANSCRIPT, EvaluationMode.COACH);
+		EvaluationOutput extra = EvaluationValidator.validate(validOutput(), TRANSCRIPT, EvaluationMode.COACH);
+
+		assertThat(result.dimensions()).isEmpty();
+		assertThat(result.strengths()).isEmpty();
+		assertThat(result.corrections()).hasSize(3);
+		assertThat(extra.dimensions()).isEmpty();
+		assertThat(extra.strengths()).isEmpty();
+	}
 
 	@Test
 	void keepsAValidEvaluationAndCapsStrengths() {

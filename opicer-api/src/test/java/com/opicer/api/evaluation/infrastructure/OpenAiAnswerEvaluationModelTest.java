@@ -9,6 +9,7 @@ import com.opicer.api.evaluation.application.EvaluationFailure;
 import com.opicer.api.evaluation.application.EvaluationOutput;
 import com.opicer.api.evaluation.application.EvaluationPrompt;
 import com.opicer.api.evaluation.domain.CompetencyDimension;
+import com.opicer.api.evaluation.domain.EvaluationMode;
 import com.opicer.api.shared.domain.OpicLevel;
 import java.util.Iterator;
 import java.util.Map;
@@ -89,6 +90,30 @@ class OpenAiAnswerEvaluationModelTest {
 	@Test
 	void schemaFollowsStrictModeRulesEverywhere() {
 		assertStrict(OpenAiAnswerEvaluationModel.SCHEMA);
+		assertStrict(OpenAiAnswerEvaluationModel.COACH_SCHEMA);
+	}
+
+	@Test
+	void coachingPromptsUseTheSmallerSchemaWithoutRatings() throws Exception {
+		server.expect(requestTo(properties.getOpenaiUrl()))
+			.andExpect(jsonPath("$.text.format.name").value("answer_coaching"))
+			.andExpect(jsonPath("$.text.format.strict").value(true))
+			.andExpect(jsonPath("$.text.format.schema.required.length()").value(3))
+			.andExpect(jsonPath("$.text.format.schema.properties.dimensions").doesNotExist())
+			.andExpect(jsonPath("$.text.format.schema.properties.strengths").doesNotExist())
+			.andExpect(jsonPath("$.text.format.schema.properties.corrections.items.properties.category.enum[0]").value("TENSE"))
+			.andRespond(withSuccess(response("""
+				{"corrections":[{"original":"I go","corrected":"I went","reasonKo":"과거","category":"TENSE"}],
+				 "targetScript":"I went there.",
+				 "keyExpressions":[{"expression":"Looking back","meaningKo":"돌이켜 보면"}]}
+				"""), MediaType.APPLICATION_JSON));
+
+		EvaluationOutput output = model.evaluate(new EvaluationPrompt("coach", "answer input", EvaluationMode.COACH));
+
+		assertThat(output.dimensions()).isNull();
+		assertThat(output.corrections()).hasSize(1);
+		assertThat(output.targetScript()).isEqualTo("I went there.");
+		server.verify();
 	}
 
 	@Test
