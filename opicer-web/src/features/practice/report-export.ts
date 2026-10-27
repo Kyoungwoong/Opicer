@@ -75,11 +75,16 @@ export function reportFileName(session: Pick<PracticeSessionDetail, "completedAt
 
 /** Saves the page through a temporary object URL. Browser only. */
 export function downloadReportHtml(session: PracticeSessionDetail, variant: ReportVariant = "coach"): void {
-  const blob = new Blob([renderReportHtml(session, new Date(), variant)], { type: "text/html;charset=utf-8" });
+  downloadHtml(renderReportHtml(session, new Date(), variant), reportFileName(session));
+}
+
+/** Saves an HTML string as a file through a temporary object URL. Browser only. */
+export function downloadHtml(html: string, fileName: string): void {
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = reportFileName(session);
+  link.download = fileName;
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -87,7 +92,7 @@ export function downloadReportHtml(session: PracticeSessionDetail, variant: Repo
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function reportSection(report: SessionReport): string {
+export function reportSection(report: SessionReport): string {
   const range =
     report.lowestLevel === report.highestLevel ? report.estimatedLevel : `${report.lowestLevel} ~ ${report.highestLevel}`;
   const dimensions = DIMENSION_ORDER.filter((code) => report.dimensionLevels[code])
@@ -119,7 +124,7 @@ function reportSection(report: SessionReport): string {
   </section>`;
 }
 
-function answerSection(
+export function answerSection(
   answer: PracticeSessionAnswer,
   number: number,
   targetLevel: string | null,
@@ -183,7 +188,7 @@ function fix(original: string, corrected: string): string {
   return `<del>${esc(original)}</del> → <ins>${esc(corrected)}</ins>`;
 }
 
-function formatDate(iso: string): string {
+export function formatDate(iso: string): string {
   return new Intl.DateTimeFormat("ko-KR", {
     timeZone: "Asia/Seoul",
     year: "numeric",
@@ -194,7 +199,7 @@ function formatDate(iso: string): string {
   }).format(new Date(iso));
 }
 
-function esc(value: unknown): string {
+export function esc(value: unknown): string {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -203,7 +208,7 @@ function esc(value: unknown): string {
     .replaceAll("'", "&#39;");
 }
 
-const STYLE = `
+export const STYLE = `
 :root{color-scheme:light;--fg:#1a1d1f;--muted:#5f6670;--line:#e4e7eb;--soft:#f5f7f8;--brand:#087a58;--accent:#e7f6f0;--del:#b42318;--ins:#0b7a52}
 *{box-sizing:border-box}
 body{margin:0;background:#fff;color:var(--fg);font:15px/1.65 -apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
