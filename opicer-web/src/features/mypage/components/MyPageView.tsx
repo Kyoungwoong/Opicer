@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchPracticeSessions } from "@/features/practice/api";
 import type { PracticeSessionSummary } from "@/features/practice/types";
+import { fetchMockTests } from "@/features/mock/api";
+import type { MockTestSummary } from "@/features/mock/types";
 import { HISTORY_STATUS_DOT, formatDateTime, historyPath, historyStatus } from "@/features/practice/history-format";
 
 type Props = {
@@ -22,10 +24,10 @@ type Props = {
 
 type PracticeHistoryType = "topic" | "mock";
 
-type HistoryState =
-  | { status: "loading" }
-  | { status: "error" }
-  | { status: "ready"; sessions: PracticeSessionSummary[] };
+type Loaded<T> = { status: "loading" } | { status: "error" } | { status: "ready"; sessions: T[] };
+
+type HistoryState = Loaded<PracticeSessionSummary>;
+type MockHistoryState = Loaded<MockTestSummary>;
 
 const HISTORY_LIMIT = 50;
 
@@ -36,7 +38,7 @@ const SECTION_META: Record<PracticeHistoryType, { label: string; helper: string 
   },
   mock: {
     label: "실전 연습하기",
-    helper: "시간 제한을 고려한 실전 연습 기록을 모아 보여줘요.",
+    helper: "제출한 실전연습의 예상 레벨(참고용)과 피드백을 모아 보여줘요.",
   },
 };
 
@@ -46,11 +48,11 @@ const PLACEHOLDER = "rounded-2xl border border-dashed bg-secondary px-4 py-4 tex
 function CategoryList({
   activeType,
   onChange,
-  topicCount,
+  counts,
 }: {
   activeType: PracticeHistoryType;
   onChange: (type: PracticeHistoryType) => void;
-  topicCount: string | null;
+  counts: Record<PracticeHistoryType, string | null>;
 }) {
   return (
     <nav aria-label="연습 종류" className="-mx-4 px-4 lg:mx-0 lg:rounded-3xl lg:border lg:bg-card lg:p-5 lg:shadow-card">
@@ -73,10 +75,8 @@ function CategoryList({
               >
                 <span className="flex items-center justify-between gap-3">
                   <span className="text-sm font-semibold">{SECTION_META[type].label}</span>
-                  {type === "mock" ? (
-                    <Badge variant="secondary">준비 중</Badge>
-                  ) : topicCount !== null ? (
-                    <Badge variant={isActive ? "default" : "secondary"}>{topicCount}건</Badge>
+                  {counts[type] !== null ? (
+                    <Badge variant={isActive ? "default" : "secondary"}>{counts[type]}건</Badge>
                   ) : null}
                 </span>
                 <span className="hidden text-sm text-muted-foreground lg:block">{SECTION_META[type].helper}</span>
@@ -149,25 +149,112 @@ function HistoryList({ state }: { state: HistoryState }) {
   );
 }
 
+function MockHistoryList({ state }: { state: MockHistoryState }) {
+  if (state.status === "loading") {
+    return (
+      <div className="flex flex-col gap-2" aria-busy="true">
+        {Array.from({ length: 3 }, (_, i) => (
+          <Skeleton key={i} className="h-20 rounded-2xl" />
+        ))}
+      </div>
+    );
+  }
+
+  if (state.status === "error") {
+    return <div className={PLACEHOLDER}>실전연습 기록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>;
+  }
+
+  if (state.sessions.length === 0) {
+    return (
+      <div className="flex flex-col items-start gap-3 rounded-2xl border border-dashed bg-secondary px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">아직 제출한 실전연습이 없어요.</p>
+        <Button asChild className="rounded-full px-5">
+          <Link href={ROUTES.mock}>첫 실전연습 시작하기</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <ul className="flex flex-col gap-2">
+      {state.sessions.map((test) => {
+        const status = historyStatus({ answerCount: test.itemCount, analyzedCount: 0, evaluationStatus: test.evaluationStatus });
+        return (
+          <li key={test.id}>
+            <Link
+              href={ROUTES.mockResult(test.id)}
+              className="group flex w-full items-center gap-4 rounded-2xl border bg-secondary px-4 py-4 transition-colors hover:border-primary/40 hover:bg-card"
+            >
+              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-accent text-lg font-extrabold text-primary-strong">
+                {test.estimatedLevel ?? "–"}
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col gap-2">
+                <span className="flex items-start justify-between gap-4">
+                  <span className="min-w-0 text-sm font-semibold text-foreground">
+                    실전연습{test.estimatedLevel ? ` · 예상 ${test.estimatedLevel}` : ""}
+                  </span>
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                    <span aria-hidden className={cn("size-2 rounded-full", HISTORY_STATUS_DOT[status.tone])} />
+                    {status.label}
+                  </span>
+                </span>
+                <span className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                  <span>
+                    {formatDateTime(test.submittedAt)} · {test.itemCount}문항{test.targetLevel ? ` · 목표 ${test.targetLevel}` : ""}
+                  </span>
+                  <span className="inline-flex shrink-0 items-center gap-0.5 font-medium text-primary-strong group-hover:underline">
+                    결과 보기
+                    <ChevronRight aria-hidden className="size-3.5" />
+                  </span>
+                </span>
+              </span>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/** The list is capped at HISTORY_LIMIT, so a full page means "at least that many". */
+function countLabel<T>(state: Loaded<T>): string | null {
+  return state.status === "ready" ? `${state.sessions.length}${state.sessions.length >= HISTORY_LIMIT ? "+" : ""}` : null;
+}
+
+/** `?tab=mock` opens the mock tab (links back from a mock result). This view renders on the client only. */
+function initialTab(): PracticeHistoryType {
+  try {
+    return new URLSearchParams(window.location.search).get("tab") === "mock" ? "mock" : "topic";
+  } catch {
+    return "topic";
+  }
+}
+
 export function MyPageView({ userLabel, onLogout }: Props) {
-  const [activeType, setActiveType] = useState<PracticeHistoryType>("topic");
+  const [activeType, setActiveType] = useState<PracticeHistoryType>(initialTab);
   const [history, setHistory] = useState<HistoryState>({ status: "loading" });
+  const [mockHistory, setMockHistory] = useState<MockHistoryState>({ status: "loading" });
 
   useEffect(() => {
     let alive = true;
     fetchPracticeSessions(HISTORY_LIMIT)
       .then((sessions) => alive && setHistory({ status: "ready", sessions }))
       .catch(() => alive && setHistory({ status: "error" }));
+    fetchMockTests(HISTORY_LIMIT)
+      .then((sessions) => alive && setMockHistory({ status: "ready", sessions }))
+      .catch(() => alive && setMockHistory({ status: "error" }));
     return () => {
       alive = false;
     };
   }, []);
 
-  // The list is capped at HISTORY_LIMIT, so a full page means "at least that many".
-  const topicCount =
-    history.status === "ready"
-      ? `${history.sessions.length}${history.sessions.length >= HISTORY_LIMIT ? "+" : ""}`
-      : null;
+  const counts = { topic: countLabel(history), mock: countLabel(mockHistory) };
+
+  const changeTab = (type: PracticeHistoryType) => {
+    setActiveType(type);
+    // Keep the tab when the learner comes back to this page.
+    window.history.replaceState(null, "", type === "mock" ? "?tab=mock" : window.location.pathname);
+  };
 
   return (
     <PageShell nav={<TopNav userLabel={userLabel} onLogout={onLogout} maxWidthClassName="max-w-6xl" />}>
@@ -181,7 +268,7 @@ export function MyPageView({ userLabel, onLogout }: Props) {
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
         <aside>
-          <CategoryList activeType={activeType} onChange={setActiveType} topicCount={topicCount} />
+          <CategoryList activeType={activeType} onChange={changeTab} counts={counts} />
         </aside>
 
         <section className={CARD}>
@@ -189,16 +276,12 @@ export function MyPageView({ userLabel, onLogout }: Props) {
             title={SECTION_META[activeType].label}
             description={SECTION_META[activeType].helper}
             action={
-              activeType === "topic" && topicCount !== null ? (
-                <span className="text-sm text-muted-foreground">{topicCount}건</span>
+              counts[activeType] !== null ? (
+                <span className="text-sm text-muted-foreground">{counts[activeType]}건</span>
               ) : undefined
             }
           />
-          {activeType === "topic" ? (
-            <HistoryList state={history} />
-          ) : (
-            <div className={PLACEHOLDER}>실전 연습은 준비 중이에요. 곧 만나요!</div>
-          )}
+          {activeType === "topic" ? <HistoryList state={history} /> : <MockHistoryList state={mockHistory} />}
         </section>
       </div>
     </PageShell>

@@ -3,10 +3,16 @@ import { AlertCircle, Info, LoaderCircle, RefreshCw, RotateCcw } from "lucide-re
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { isEvaluationInProgress } from "@/features/practice/use-session-evaluation";
-import type { PracticeSessionDetail } from "@/features/practice/types";
+import type { AnswerEvaluationStatus, SessionEvaluationStatus } from "@/features/practice/types";
+
+/** What the notice needs from a practice session or a mock test (whose items are passed as `answers`). */
+export type EvaluationProgress = {
+  evaluationStatus: SessionEvaluationStatus | null;
+  answers: { evaluationStatus: AnswerEvaluationStatus | null }[];
+};
 
 type Props = {
-  session: PracticeSessionDetail;
+  session: EvaluationProgress;
   timedOut: boolean;
   pollFailed: boolean;
   retrying: boolean;
