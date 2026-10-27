@@ -47,6 +47,18 @@
 
   ---
 
+## 💻 로컬 개발 (macOS · Windows)
+
+```bash
+docker compose up -d                    # 로컬 Postgres + pgvector
+./opicer-api/run-local.sh               # API (Windows: .\opicer-api\run-local.ps1)
+cd opicer-web && pnpm install && pnpm dev   # 웹
+```
+
+준비물, `.env` 설정, 테스트, 줄바꿈 규칙은 [docs/dev-setup.md](docs/dev-setup.md)에 있습니다.
+
+  ---
+
 ## 📌 Notes
 
 - Opicer는 **공식 OPIC 점수를 보장하지 않습니다.**
