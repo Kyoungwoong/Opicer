@@ -181,6 +181,9 @@ export function TopicTab() {
       <tr key={topic.id} className={adminUi.tr}>
         <td className={adminUi.tdStrong}>
           {topic.title}
+          {topic.mockLinked ? (
+            <span className="ml-1.5 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">실전 연결</span>
+          ) : null}
           <span className="block text-xs font-normal text-muted-foreground">{topic.englishTitle}</span>
         </td>
         <td className={adminUi.td}>
@@ -223,10 +226,16 @@ export function TopicTab() {
               required
               maxLength={255}
               value={form.title}
+              disabled={editing?.mockLinked}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               className={adminUi.control}
               placeholder="예: 박물관 관람"
             />
+            {editing?.mockLinked ? (
+              <span className="text-xs text-muted-foreground">
+                실전연습 설문·첫 문항과 이름으로 연결돼 있어 이름은 바꿀 수 없어요.
+              </span>
+            ) : null}
           </label>
           <label className={adminUi.field}>
             <span className={adminUi.labelText}>영문 이름</span>

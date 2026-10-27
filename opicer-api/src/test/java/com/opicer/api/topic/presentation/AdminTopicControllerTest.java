@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opicer.api.auth.application.JwtService;
 import com.opicer.api.auth.domain.AuthUserPrincipal;
 import com.opicer.api.config.AuthProperties;
+import com.opicer.api.mocktest.domain.SurveyCatalog;
+import com.opicer.api.topic.domain.Topic;
 import com.opicer.api.practice.domain.TopicSelection;
 import com.opicer.api.practice.infrastructure.TopicSelectionRepository;
 import com.opicer.api.question.domain.Question;
@@ -113,6 +115,23 @@ class AdminTopicControllerTest {
 
 		assertThat(questionRepository.findById(question.getId()).orElseThrow().getTopic()).isEqualTo(after);
 		assertThat(questionRepository.existsByTopic(before)).isFalse();
+	}
+
+	@Test
+	void aTopicTheMockTestFindsByTitleCannotBeRenamedButCanBeEdited() throws Exception {
+		Topic home = topicRepository.findByTitle(SurveyCatalog.HOME).orElseGet(() -> topicRepository.save(
+			new Topic(SurveyCatalog.HOME, "Home", Topic.CATEGORY_SURVEY, 1, 1, List.of(), true)));
+
+		mockMvc.perform(get(BASE).cookie(cookie(UserRole.ADMIN)))
+			.andExpect(jsonPath("$.data[?(@.title == '" + SurveyCatalog.HOME + "')].mockLinked").value(true));
+		mockMvc.perform(put(BASE + "/" + home.getId()).cookie(cookie(UserRole.ADMIN)).contentType(MediaType.APPLICATION_JSON)
+				.content(body(SurveyCatalog.HOME + " 2", "설문조사")))
+			.andExpect(status().isConflict())
+			.andExpect(jsonPath("$.code").value("TOPIC_TITLE_LOCKED"));
+		mockMvc.perform(put(BASE + "/" + home.getId()).cookie(cookie(UserRole.ADMIN)).contentType(MediaType.APPLICATION_JSON)
+				.content(body(SurveyCatalog.HOME, "설문조사")))
+			.andExpect(status().isOk());
+		assertThat(topicRepository.findById(home.getId()).orElseThrow().getTitle()).isEqualTo(SurveyCatalog.HOME);
 	}
 
 	@Test

@@ -26,11 +26,13 @@ export type AdminTopic = {
   topicOrder: number;
   badges: { label: string; count: number | null }[];
   active: boolean;
+  /** The mock test finds this topic by title (survey item or self-introduction), so it cannot be renamed. */
+  mockLinked: boolean;
   createdAt: string;
   updatedAt: string;
 };
 
-export type AdminTopicInput = Omit<AdminTopic, "id" | "createdAt" | "updatedAt">;
+export type AdminTopicInput = Omit<AdminTopic, "id" | "mockLinked" | "createdAt" | "updatedAt">;
 
 export type Question = {
   id: string;

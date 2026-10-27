@@ -2,6 +2,7 @@ package com.opicer.api.topic.application;
 
 import com.opicer.api.goodanswer.infrastructure.GoodAnswerSampleRepository;
 import com.opicer.api.mocktest.domain.MockTestComposer;
+import com.opicer.api.mocktest.domain.SurveyCatalog;
 import com.opicer.api.practice.infrastructure.PracticeSessionRepository;
 import com.opicer.api.practice.infrastructure.TopicSelectionRepository;
 import com.opicer.api.question.infrastructure.QuestionRepository;
@@ -51,12 +52,24 @@ public class TopicCommandService {
 			.map(existing -> {
 				String normalized = validated(title, category, id);
 				String previous = existing.getTitle();
+				if (!previous.equals(normalized) && isMockLinked(previous)) {
+					throw new ApiException(ErrorCode.TOPIC_TITLE_LOCKED,
+						"실전연습의 설문 항목이나 첫 문항과 이름으로 연결된 주제라 이름을 바꿀 수 없어요. 이름 외의 항목은 수정할 수 있어요.");
+				}
 				existing.update(normalized, englishTitle, category, categoryOrder, topicOrder, badges, active);
 				if (!previous.equals(normalized)) {
 					questionRepository.renameTopic(previous, normalized);
 				}
 				return topicRepository.save(existing);
 			});
+	}
+
+	/**
+	 * The mock test finds these topics by title in code (survey items in {@link SurveyCatalog} and the
+	 * self-introduction), so renaming one would quietly cut it off until that link moves to the admin screen.
+	 */
+	public static boolean isMockLinked(String title) {
+		return MockTestComposer.SELF_INTRO_TOPIC.equals(title) || SurveyCatalog.linkedTopics().contains(title);
 	}
 
 	/** Only an unused topic can go; one with questions or practice history is deactivated instead. */
