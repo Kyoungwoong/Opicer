@@ -8,6 +8,9 @@ import { adjustMockTest, submitMockTest } from "@/features/mock/api";
 import { EXAM_SECONDS, MAX_PLAYS, TRANSCRIBE_CONCURRENCY, createLimiter } from "@/features/mock/exam";
 import type { DifficultyAdjustment, MockItem, MockSubmitResult } from "@/features/mock/types";
 
+/** A question still "playing" after this long is treated as unplayable (speech that never reports its end). */
+const PLAYBACK_TIMEOUT_MS = 45_000;
+
 /**
  * - `playing`: the question is being read; recording starts when it ends.
  * - `answering`: the answer is being recorded (or the microphone failed and the learner can only move on).
@@ -34,6 +37,7 @@ export function useMockExam(testId: string, firstPart: MockItem[]) {
   const [adjusting, setAdjusting] = useState(false);
   const [recorded, setRecorded] = useState(0);
   const [transcribed, setTranscribed] = useState(0);
+  const [untranscribed, setUntranscribed] = useState(0);
   const [result, setResult] = useState<MockSubmitResult | null>(null);
 
   const { start: startRecorder, stop: stopRecorder, isActive, isRecording, micStream } = useAnswerRecorder();
@@ -47,7 +51,9 @@ export function useMockExam(testId: string, firstPart: MockItem[]) {
   const generationRef = useRef(0);
   /** Bumped whenever playback is started or abandoned, so a stale "ended" callback cannot start recording. */
   const playTokenRef = useRef(0);
-  /** Set when the exam should be submitted as soon as the current recording has stopped. */
+  /** Recordings that were stopped but whose clip has not been kept yet. */
+  const pendingClipsRef = useRef(0);
+  /** Set when the exam should be submitted as soon as every stopped recording has been kept. */
   const finishAfterStopRef = useRef(false);
   const finishedRef = useRef(false);
 
@@ -80,7 +86,10 @@ export function useMockExam(testId: string, firstPart: MockItem[]) {
   const keep = useCallback((item: MockItem, clip: RecordedClip) => {
     const transcript = limiterRef.current(() => transcribeAudio(clip.audioUrl, item.questionText))
       .then((text) => text?.trim() || null)
-      .catch(() => null)
+      .catch(() => {
+        setUntranscribed((n) => n + 1);
+        return null;
+      })
       .finally(() => {
         URL.revokeObjectURL(clip.audioUrl);
         setTranscribed((n) => n + 1);
@@ -91,6 +100,8 @@ export function useMockExam(testId: string, firstPart: MockItem[]) {
 
   const startRecording = useCallback(
     async (item: MockItem) => {
+      // A playback callback can still arrive after the clock ran out.
+      if (finishedRef.current) return;
       const generation = ++generationRef.current;
       setPhase("answering");
       const started = await startRecorder((clip) => {
@@ -99,7 +110,8 @@ export function useMockExam(testId: string, firstPart: MockItem[]) {
           return;
         }
         keep(item, clip);
-        if (finishAfterStopRef.current) {
+        pendingClipsRef.current = Math.max(0, pendingClipsRef.current - 1);
+        if (finishAfterStopRef.current && pendingClipsRef.current === 0) {
           finishAfterStopRef.current = false;
           void submit();
         }
@@ -109,19 +121,25 @@ export function useMockExam(testId: string, firstPart: MockItem[]) {
     [startRecorder, keep, submit]
   );
 
-  /** Stops everything and submits once the last recording (if any) has been kept. */
+  /** Stops the answer being recorded; its clip arrives a moment later through the recorder's callback. */
+  const stopAnswer = useCallback(() => {
+    if (isActive()) pendingClipsRef.current += 1;
+    stopRecorder();
+  }, [isActive, stopRecorder]);
+
+  /** Stops everything and submits once every stopped recording has been kept. */
   const finish = useCallback(() => {
     if (finishedRef.current) return;
     finishedRef.current = true;
     questionAudio.stop();
-    if (isActive()) {
+    stopAnswer();
+    if (pendingClipsRef.current > 0) {
       finishAfterStopRef.current = true;
       setPhase("submitting");
-      stopRecorder();
     } else {
       void submit();
     }
-  }, [questionAudio, isActive, stopRecorder, submit]);
+  }, [questionAudio, stopAnswer, submit]);
 
   // Read the question whenever a new one comes up; answering starts when it ends.
   useEffect(() => {
@@ -132,8 +150,12 @@ export function useMockExam(testId: string, firstPart: MockItem[]) {
       // A cancelled utterance may still report that it ended.
       if (playTokenRef.current === token) void startRecording(current);
     });
+    const watchdog = window.setTimeout(() => {
+      if (playTokenRef.current === token) setAudioFailed(true);
+    }, PLAYBACK_TIMEOUT_MS);
     return () => {
       playTokenRef.current += 1;
+      window.clearTimeout(watchdog);
       questionAudio.stop();
     };
     // Only a new question (or a replay, which sets `playing` again) should start playback.
@@ -190,7 +212,7 @@ export function useMockExam(testId: string, firstPart: MockItem[]) {
       finish();
       return;
     }
-    stopRecorder();
+    stopAnswer();
     setError(null);
     if (isLast) {
       setPhase("difficulty");
@@ -239,6 +261,7 @@ export function useMockExam(testId: string, firstPart: MockItem[]) {
     isLastQuestion: hasPart2 && index === items.length - 1,
     recorded,
     transcribed,
+    untranscribed,
     result,
     replay,
     next,

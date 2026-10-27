@@ -48,6 +48,11 @@ export function ExamScreen({ testId, firstPart }: Props) {
           description={`${exam.recorded}문항의 답변을 보냈어요. 평가에는 몇 분 정도 걸려요.`}
           className="justify-center"
         />
+        {exam.untranscribed > 0 ? (
+          <p className="text-sm text-destructive">
+            {exam.untranscribed}문항은 음성을 텍스트로 옮기지 못해 평가에서 빠져요.
+          </p>
+        ) : null}
         <p className="text-sm text-muted-foreground">
           {exam.result.alreadyCharged
             ? "이미 차감된 시험이라 크레딧은 다시 차감되지 않았어요."
@@ -114,6 +119,9 @@ export function ExamScreen({ testId, firstPart }: Props) {
               <p className="text-sm text-muted-foreground">
                 답변을 텍스트로 옮기고 있어요… ({exam.transcribed} / {exam.recorded})
               </p>
+              {exam.untranscribed > 0 ? (
+                <p className="text-sm text-destructive">{exam.untranscribed}문항은 텍스트로 옮기지 못했어요.</p>
+              ) : null}
             </>
           ) : (
             <Alert variant="destructive" className="max-w-md text-left">
