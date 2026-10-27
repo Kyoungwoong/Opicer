@@ -41,6 +41,17 @@ export function typeCounts(questions: Question[], topic: string): Partial<Record
   return counts;
 }
 
+/**
+ * Whether an advanced set can be asked as questions 14–15: `MockTestComposer` pairs a compare question with the
+ * opinion question registered right after it (bank order: created time, then id).
+ */
+export function hasAdvancedPair(questions: Question[], setTopic: string): boolean {
+  const set = questions
+    .filter((q) => q.active && q.topic === setTopic)
+    .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt) || a.id.localeCompare(b.id));
+  return set.some((q, i) => q.type === "COMPARE_CONTRAST" && set[i + 1]?.type === "OPINION");
+}
+
 export type Readiness = { tone: "ok" | "warn" | "off"; text: string };
 
 /**
