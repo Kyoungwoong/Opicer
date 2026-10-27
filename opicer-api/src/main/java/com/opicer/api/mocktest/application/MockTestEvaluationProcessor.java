@@ -1,5 +1,7 @@
 package com.opicer.api.mocktest.application;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opicer.api.aijob.application.AiJobProcessor;
 import com.opicer.api.aijob.domain.AiJobType;
 import com.opicer.api.evaluation.application.AnswerBatchEvaluator;
@@ -9,12 +11,14 @@ import com.opicer.api.evaluation.application.AnswerEvaluator.AnswerToEvaluate;
 import com.opicer.api.evaluation.application.EvaluationDocuments;
 import com.opicer.api.evaluation.application.EvaluationGuideNote;
 import com.opicer.api.evaluation.domain.AnswerAssessment;
+import com.opicer.api.evaluation.domain.AnswerAssessment.CorrectionSample;
 import com.opicer.api.evaluation.domain.EvaluationMode;
 import com.opicer.api.evaluation.domain.LevelAggregator;
 import com.opicer.api.evaluation.domain.LevelPolicy;
 import com.opicer.api.evaluation.domain.SessionReport;
 import com.opicer.api.evaluationguide.application.EvaluationGuideQueryService;
 import com.opicer.api.mocktest.domain.MockTest;
+import com.opicer.api.mocktest.domain.MockTestInsights;
 import com.opicer.api.mocktest.domain.MockTestItem;
 import com.opicer.api.mocktest.infrastructure.MockTestItemRepository;
 import com.opicer.api.mocktest.infrastructure.MockTestRepository;
@@ -46,11 +50,13 @@ public class MockTestEvaluationProcessor implements AiJobProcessor {
 	private final EvaluationGuideQueryService guides;
 	private final TransactionTemplate tx;
 	private final Clock clock;
+	private final QuestionPoolLoader pools;
 	private final LevelAggregator aggregator = new LevelAggregator(LevelPolicy.DEFAULT);
+	private final ObjectMapper json = new ObjectMapper();
 
 	public MockTestEvaluationProcessor(MockTestRepository tests, MockTestItemRepository items,
 		QuestionRepository questions, AnswerBatchEvaluator batch, EvaluationGuideQueryService guides,
-		PlatformTransactionManager transactionManager, Clock clock) {
+		PlatformTransactionManager transactionManager, Clock clock, QuestionPoolLoader pools) {
 		this.tests = tests;
 		this.items = items;
 		this.questions = questions;
@@ -58,6 +64,7 @@ public class MockTestEvaluationProcessor implements AiJobProcessor {
 		this.guides = guides;
 		this.tx = new TransactionTemplate(transactionManager);
 		this.clock = clock;
+		this.pools = pools;
 	}
 
 	@Override
@@ -138,18 +145,24 @@ public class MockTestEvaluationProcessor implements AiJobProcessor {
 		tx.executeWithoutResult(status -> items.findById(itemId).ifPresent(change));
 	}
 
-	/** One report over every evaluated answer, from this and earlier attempts. */
+	/** One report over every evaluated answer, from this and earlier attempts, plus the extra feedback. */
 	private void finish(UUID mockTestId) {
 		MockTest test = tests.findById(mockTestId).orElse(null);
 		if (test == null) {
 			return;
 		}
 		List<AnswerAssessment> assessments = new ArrayList<>();
+		List<MockTestInsights.Item> insightItems = new ArrayList<>();
 		int skipped = 0;
 		int failed = 0;
 		for (MockTestItem item : items.findByMockTestIdOrderByItemOrderAsc(mockTestId)) {
-			if (item.getEvaluationStatus() == AnswerEvaluationStatus.DONE && item.getEvaluation() != null) {
-				assessments.add(EvaluationDocuments.assessment(item.getEvaluation()));
+			boolean evaluated = item.getEvaluationStatus() == AnswerEvaluationStatus.DONE && item.getEvaluation() != null;
+			AnswerAssessment assessment = evaluated ? EvaluationDocuments.assessment(item.getEvaluation()) : null;
+			insightItems.add(new MockTestInsights.Item(item.getItemOrder(), item.getPart(), item.getQuestionType(),
+				item.getTranscript(), item.getDurationSeconds(), evaluated, item.getOverallLevel(),
+				assessment == null ? List.of() : assessment.corrections().stream().map(CorrectionSample::category).toList()));
+			if (evaluated) {
+				assessments.add(assessment);
 			} else if (item.getEvaluationStatus() == AnswerEvaluationStatus.SKIPPED) {
 				skipped++;
 			} else if (item.getEvaluationStatus() == AnswerEvaluationStatus.FAILED) {
@@ -157,13 +170,23 @@ public class MockTestEvaluationProcessor implements AiJobProcessor {
 			}
 		}
 		Instant now = Instant.now(clock);
+		// Time and habits need no evaluation, so the feedback is written even when no answer could be evaluated.
+		String insights = write(MockTestInsights.compute(insightItems, test.getExamSeconds(), pools.load().topicsByType()));
 		if (assessments.isEmpty()) {
-			test.completeEvaluation(SessionEvaluationStatus.FAILED, null, null, null, now);
+			test.completeEvaluation(SessionEvaluationStatus.FAILED, null, null, insights, now);
 			return;
 		}
 		SessionReport report = aggregator.aggregate(assessments, test.getTargetLevel());
 		test.completeEvaluation(failed > 0 ? SessionEvaluationStatus.PARTIAL : SessionEvaluationStatus.DONE,
-			report.estimatedLevel(), EvaluationDocuments.report(report, skipped, failed), null, now);
+			report.estimatedLevel(), EvaluationDocuments.report(report, skipped, failed), insights, now);
+	}
+
+	private String write(MockTestInsights.Insights insights) {
+		try {
+			return json.writeValueAsString(insights);
+		} catch (JsonProcessingException e) {
+			throw new IllegalStateException("mock test insights are not serialisable", e);
+		}
 	}
 
 	private record Snapshot(List<Pending> pending, List<EvaluationGuideNote> guides) {}

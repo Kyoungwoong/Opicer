@@ -24,7 +24,7 @@ public interface MockTestRepository extends JpaRepository<MockTest, UUID> {
 
 	List<MockTest> findByUserIdAndStatusOrderBySubmittedAtDesc(UUID userId, MockTestStatus status, Pageable page);
 
-	/** Earlier submitted tests, newest first, for the progress trend. */
-	List<MockTest> findByUserIdAndStatusAndSubmittedAtBeforeOrderBySubmittedAtDesc(UUID userId, MockTestStatus status,
-		Instant before, Pageable page);
+	/** Earlier submitted tests that have a level, newest first, for the progress trend. */
+	List<MockTest> findByUserIdAndStatusAndEstimatedLevelIsNotNullAndSubmittedAtBeforeOrderBySubmittedAtDesc(UUID userId,
+		MockTestStatus status, Instant before, Pageable page);
 }
