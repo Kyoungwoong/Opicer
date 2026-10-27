@@ -1,5 +1,6 @@
 package com.opicer.api.mocktest.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -10,14 +11,17 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * The Background Survey of the mock test (docs/opic/mock-test-spec.md §4) and how its items map to the practice
- * topics the question bank is organised by. Items without a matching topic are kept in the survey but not used to
- * pick questions. The single source of truth for both the API and the screen.
+ * The Background Survey of the mock test (docs/opic/mock-test-spec.md §4): its parts, items and selection rules,
+ * the single source of truth for both the API and the screen. Which practice topics an item points to is kept in
+ * {@link SurveyTopicLink} and edited on the admin screen; the topics listed here only seed an empty link table.
  */
 public final class SurveyCatalog {
 
 	/** Part 4 (4-1 to 4-4) needs at least this many selections in total. */
 	public static final int PART4_MIN_TOTAL = 12;
+
+	/** The part whose choice decides the fallback combo topics (home and neighbourhood by default). */
+	public static final String RESIDENCE = "RESIDENCE";
 
 	public static final String HOME = "집/주거환경";
 	public static final String NEIGHBORHOOD = "이웃/동네";
@@ -31,7 +35,7 @@ public final class SurveyCatalog {
 		single("STUDENT", "Part 2. 현재 당신은 학생입니까?",
 			item("student.yes", "예"),
 			item("student.no", "아니오(수강 후 5년 이상 지남)")),
-		single("RESIDENCE", "Part 3. 현재 귀하는 어디에 살고 계십니까?",
+		single(RESIDENCE, "Part 3. 현재 귀하는 어디에 살고 계십니까?",
 			item("residence.alone", "개인주택이나 아파트에 홀로 거주", HOME, NEIGHBORHOOD),
 			item("residence.roommates", "친구나 룸메이트와 함께 주택이나 아파트에 거주", HOME, NEIGHBORHOOD),
 			item("residence.family", "가족과 함께 주택이나 아파트에 거주", HOME, NEIGHBORHOOD),
@@ -162,16 +166,20 @@ public final class SurveyCatalog {
 		Set<String> topics = new LinkedHashSet<>();
 		for (SurveyPart part : PARTS) {
 			for (String id : chosen(selections, part.code())) {
-				Optional.ofNullable(ITEMS.get(id)).ifPresent(item -> topics.addAll(item.topics()));
+				Optional.ofNullable(ITEMS.get(id)).ifPresent(item -> topics.addAll(item.defaultTopics()));
 			}
 		}
 		return List.copyOf(topics);
 	}
 
+	public static Optional<SurveyItem> findItem(String id) {
+		return Optional.ofNullable(ITEMS.get(id));
+	}
+
 	/** Every practice topic title some survey item points to. */
 	public static Set<String> linkedTopics() {
 		Set<String> topics = new LinkedHashSet<>();
-		ITEMS.values().forEach(item -> topics.addAll(item.topics()));
+		ITEMS.values().forEach(item -> topics.addAll(item.defaultTopics()));
 		return Set.copyOf(topics);
 	}
 
@@ -206,6 +214,6 @@ public final class SurveyCatalog {
 		}
 	}
 
-	/** @param topics practice topic titles this item points to; empty when no topic covers it */
-	public record SurveyItem(String id, String label, List<String> topics) {}
+	/** @param defaultTopics practice topic titles the link table starts with; not sent to the screen */
+	public record SurveyItem(String id, String label, @JsonIgnore List<String> defaultTopics) {}
 }
