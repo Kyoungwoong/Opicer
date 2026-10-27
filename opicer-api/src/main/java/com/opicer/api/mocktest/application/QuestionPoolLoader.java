@@ -9,6 +9,7 @@ import com.opicer.api.topic.domain.Topic;
 import com.opicer.api.topic.infrastructure.TopicRepository;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +78,7 @@ public class QuestionPoolLoader {
 
 		/** Practice topics (survey and unexpected categories) that have questions of each type, in bank order. */
 		Map<String, List<TopicLink>> topicsByType() {
-			Map<String, Set<String>> titles = new java.util.LinkedHashMap<>();
+			Map<String, Set<String>> titles = new LinkedHashMap<>();
 			for (Candidate c : pool.questions()) {
 				boolean practiceTopic = pool.surveyCategoryTopics().contains(c.topic()) || pool.unexpectedTopics().contains(c.topic());
 				if (practiceTopic && c.type() != null && topicIds.containsKey(c.topic())) {
