@@ -9,4 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface TopicRepository extends JpaRepository<Topic, UUID> {
 	List<Topic> findByActiveTrueOrderByCategoryOrderAscTopicOrderAscIdAsc();
 	Optional<Topic> findByTitle(String title);
+
+	boolean existsByTitle(String title);
+
+	boolean existsByTitleAndIdNot(String title, UUID id);
 }

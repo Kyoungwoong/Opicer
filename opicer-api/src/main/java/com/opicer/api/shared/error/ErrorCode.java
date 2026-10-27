@@ -12,6 +12,8 @@ public enum ErrorCode {
 		"Universal sentences not ready for daily set"),
 	TOPIC_NOT_FOUND("TOPIC_NOT_FOUND", HttpStatus.NOT_FOUND, "Topic not found"),
 	TOPIC_INACTIVE("TOPIC_INACTIVE", HttpStatus.CONFLICT, "Topic is inactive"),
+	TOPIC_TITLE_DUPLICATE("TOPIC_TITLE_DUPLICATE", HttpStatus.CONFLICT, "A topic with this title already exists"),
+	TOPIC_IN_USE("TOPIC_IN_USE", HttpStatus.CONFLICT, "The topic is used by questions or practice history"),
 	VALIDATION_ERROR("VALIDATION_ERROR", HttpStatus.BAD_REQUEST, "Validation failed"),
 	BAD_REQUEST("BAD_REQUEST", HttpStatus.BAD_REQUEST, "Bad request"),
 	UNAUTHORIZED("UNAUTHORIZED", HttpStatus.UNAUTHORIZED, "Sign-in required"),

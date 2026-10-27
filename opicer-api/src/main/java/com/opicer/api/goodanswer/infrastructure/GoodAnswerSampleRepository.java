@@ -9,4 +9,6 @@ public interface GoodAnswerSampleRepository extends JpaRepository<GoodAnswerSamp
 	GoodAnswerSampleRepositoryCustom {
 
 	List<GoodAnswerSample> findByTopicId(UUID topicId);
+
+	boolean existsByTopicId(UUID topicId);
 }
