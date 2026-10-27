@@ -161,6 +161,21 @@ class AdminTopicControllerTest {
 	}
 
 	@Test
+	void aTopicLeavingTheSurveyCategoryDropsItsLinks() throws Exception {
+		String title = unique("SNS");
+		UUID id = create(title, "설문조사");
+		surveyTopicLinkService.replace("leisure.sns", List.of(id));
+
+		mockMvc.perform(put(BASE + "/" + id).cookie(cookie(UserRole.ADMIN)).contentType(MediaType.APPLICATION_JSON)
+				.content(body(title, "돌발질문")))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.mockLinked").value(false));
+
+		assertThat(surveyTopicLinkRepository.existsByTopicId(id)).isFalse();
+		assertThat(surveyTopicLinkService.topicsOf(Map.of("LEISURE", List.of("leisure.sns")))).doesNotContain(title);
+	}
+
+	@Test
 	void deletingASurveyLinkedTopicDropsItsLinks() throws Exception {
 		UUID id = create(unique("해변"), "설문조사");
 		surveyTopicLinkService.replace("leisure.beach", List.of(id));

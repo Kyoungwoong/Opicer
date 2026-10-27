@@ -46,7 +46,10 @@ public class TopicCommandService {
 		return topicRepository.save(topic);
 	}
 
-	/** A new title carries the topic's questions along, since questions point at their topic by title. */
+	/**
+	 * A new title carries the topic's questions along, since questions point at their topic by title. A topic leaving
+	 * the 설문조사 category loses its survey links, which only survey topics may have.
+	 */
 	@Transactional
 	public Optional<Topic> update(UUID id, String title, String englishTitle, String category, int categoryOrder,
 		int topicOrder, List<TopicBadge> badges, boolean active) {
@@ -54,6 +57,8 @@ public class TopicCommandService {
 			.map(existing -> {
 				String normalized = validated(title, category, id);
 				String previous = existing.getTitle();
+				boolean leavesSurvey = Topic.CATEGORY_SURVEY.equals(existing.getCategory())
+					&& !Topic.CATEGORY_SURVEY.equals(category);
 				if (!previous.equals(normalized) && isTitleLocked(previous)) {
 					throw new ApiException(ErrorCode.TOPIC_TITLE_LOCKED,
 						"실전연습 첫 문항을 이 이름으로 찾기 때문에 이름을 바꿀 수 없어요. 이름 외의 항목은 수정할 수 있어요.");
@@ -61,6 +66,9 @@ public class TopicCommandService {
 				existing.update(normalized, englishTitle, category, categoryOrder, topicOrder, badges, active);
 				if (!previous.equals(normalized)) {
 					questionRepository.renameTopic(previous, normalized);
+				}
+				if (leavesSurvey) {
+					surveyTopicLinkRepository.deleteByTopicId(id);
 				}
 				return topicRepository.save(existing);
 			});
