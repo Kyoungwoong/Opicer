@@ -205,6 +205,55 @@ class MockTestFlowTest {
 		assertThat(evaluated.get(0).getOverallLevel()).isEqualTo(OpicLevel.IM);
 		assertThat(new ObjectMapper().readTree(evaluated.get(0).getEvaluation()).path("mode").asText()).isEqualTo("FULL");
 		assertThat(evaluated.subList(13, 15)).allMatch(i -> i.getEvaluationStatus() == AnswerEvaluationStatus.SKIPPED);
+
+		JsonNode insights = new ObjectMapper().readTree(test.getInsights());
+		assertThat(insights.path("schemaVersion").asInt()).isEqualTo(1);
+		assertThat(insights.path("questionTypes").size()).isPositive();
+		assertThat(insights.path("time").path("usedSeconds").asInt()).isEqualTo(1800);
+		assertThat(insights.path("time").path("shortAnswers")).extracting(JsonNode::asInt).containsExactly(14);
+		assertThat(insights.path("time").path("unanswered")).extracting(JsonNode::asInt).containsExactly(15);
+		assertThat(insights.path("habits").path("connectors").size()).isPositive();
+		assertThat(queryService.get(userId, id).trend()).singleElement().satisfies(point -> {
+			assertThat(point.id()).isEqualTo(id);
+			assertThat(point.estimatedLevel()).isEqualTo(OpicLevel.IM);
+			assertThat(point.dimensionLevels()).isNotEmpty();
+		});
+	}
+
+	@Test
+	void nothingAnsweredFailsTheReportButStillWritesTimeFeedback() throws Exception {
+		UUID userId = userWithCredits(10);
+		UUID id = commandService.start(userId, survey(), 3, OpicLevel.IM).test().getId();
+		commandService.submit(userId, id, List.of(), 120);
+
+		runner.runOnce();
+
+		MockTest test = testRepository.findById(id).orElseThrow();
+		assertThat(test.getEvaluationStatus()).isEqualTo(SessionEvaluationStatus.FAILED);
+		assertThat(test.getReport()).isNull();
+		JsonNode insights = new ObjectMapper().readTree(test.getInsights());
+		assertThat(insights.path("time").path("unanswered").size()).isEqualTo(7);
+		assertThat(queryService.get(userId, id).trend()).isEmpty();
+	}
+
+	@Test
+	void trendShowsEarlierEvaluatedTestsOfTheSameUserOldestFirst() {
+		UUID userId = userWithCredits(30);
+		UUID first = evaluatedTest(userId, OpicLevel.IL, "{\"dimensionLevels\":{\"TASK\":\"IL\"}}");
+		submittedTest(userId);
+		UUID second = evaluatedTest(userId, OpicLevel.IM, null);
+		UUID current = evaluatedTest(userId, OpicLevel.IH, "{\"dimensionLevels\":{\"TASK\":\"IH\"}}");
+		UUID later = evaluatedTest(userId, OpicLevel.AL, null);
+		evaluatedTest(userWithCredits(10), OpicLevel.NL, null);
+
+		List<MockTestQueryService.TrendPoint> trend = queryService.get(userId, current).trend();
+
+		assertThat(trend).extracting(MockTestQueryService.TrendPoint::id).containsExactly(first, second, current)
+			.doesNotContain(later);
+		assertThat(trend).extracting(MockTestQueryService.TrendPoint::estimatedLevel)
+			.containsExactly(OpicLevel.IL, OpicLevel.IM, OpicLevel.IH);
+		assertThat(trend.get(0).dimensionLevels()).containsEntry("TASK", "IL");
+		assertThat(trend.get(1).dimensionLevels()).isEmpty();
 	}
 
 	@Test
@@ -236,6 +285,20 @@ class MockTestFlowTest {
 		assertThat(testRepository.findById(id)).isEmpty();
 		assertThat(itemRepository.findByMockTestIdOrderByItemOrderAsc(id)).isEmpty();
 		assertThat(jobRepository.count()).isZero();
+	}
+
+	private UUID submittedTest(UUID userId) {
+		UUID id = commandService.start(userId, survey(), 3, OpicLevel.IM).test().getId();
+		commandService.submit(userId, id, List.of(), 60);
+		return id;
+	}
+
+	private UUID evaluatedTest(UUID userId, OpicLevel level, String reportJson) {
+		UUID id = submittedTest(userId);
+		MockTest test = testRepository.findById(id).orElseThrow();
+		test.completeEvaluation(SessionEvaluationStatus.DONE, level, reportJson, null, test.getSubmittedAt());
+		testRepository.save(test);
+		return id;
 	}
 
 	private static Map<String, List<String>> survey() {

@@ -2,6 +2,7 @@ package com.opicer.api.mocktest.application;
 
 import com.opicer.api.mocktest.domain.MockTestComposer.Candidate;
 import com.opicer.api.mocktest.domain.MockTestComposer.Pool;
+import com.opicer.api.mocktest.domain.MockTestInsights.TopicLink;
 import com.opicer.api.question.domain.Question;
 import com.opicer.api.question.infrastructure.QuestionRepository;
 import com.opicer.api.topic.domain.Topic;
@@ -72,6 +73,20 @@ public class QuestionPoolLoader {
 
 		Optional<Candidate> candidate(UUID questionId) {
 			return pool.questions().stream().filter(c -> c.id().equals(questionId)).findFirst();
+		}
+
+		/** Practice topics (survey and unexpected categories) that have questions of each type, in bank order. */
+		Map<String, List<TopicLink>> topicsByType() {
+			Map<String, Set<String>> titles = new java.util.LinkedHashMap<>();
+			for (Candidate c : pool.questions()) {
+				boolean practiceTopic = pool.surveyCategoryTopics().contains(c.topic()) || pool.unexpectedTopics().contains(c.topic());
+				if (practiceTopic && c.type() != null && topicIds.containsKey(c.topic())) {
+					titles.computeIfAbsent(c.type().name(), t -> new LinkedHashSet<>()).add(c.topic());
+				}
+			}
+			Map<String, List<TopicLink>> links = new HashMap<>();
+			titles.forEach((type, set) -> links.put(type, set.stream().map(t -> new TopicLink(topicIds.get(t), t)).toList()));
+			return links;
 		}
 	}
 }

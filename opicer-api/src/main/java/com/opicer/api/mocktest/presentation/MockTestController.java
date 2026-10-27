@@ -95,7 +95,8 @@ public class MockTestController {
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<DetailResponse>> get(Authentication authentication, @PathVariable UUID id) {
 		MockTestQueryService.Detail detail = queryService.get(userId(authentication), id);
-		return ResponseEntity.ok(ApiResponse.ok("MOCK_TEST", DetailResponse.from(detail.test(), detail.items())));
+		return ResponseEntity.ok(ApiResponse.ok("MOCK_TEST", DetailResponse.from(detail.test(), detail.items(),
+			detail.trend())));
 	}
 
 	@PostMapping("/{id}/evaluation/retry")
@@ -168,12 +169,13 @@ public class MockTestController {
 	public record DetailResponse(UUID id, MockTestStatus status, @JsonRawValue String survey, int selfAssessment,
 		DifficultyAdjustment adjustment, OpicLevel targetLevel, Instant startedAt, Instant submittedAt, Integer examSeconds,
 		SessionEvaluationStatus evaluationStatus, OpicLevel estimatedLevel, @JsonRawValue String report,
-		@JsonRawValue String insights, Instant evaluatedAt, List<ItemDetailResponse> items) {
-		static DetailResponse from(MockTest t, List<MockTestItem> items) {
+		@JsonRawValue String insights, Instant evaluatedAt, List<ItemDetailResponse> items,
+		List<MockTestQueryService.TrendPoint> trend) {
+		static DetailResponse from(MockTest t, List<MockTestItem> items, List<MockTestQueryService.TrendPoint> trend) {
 			return new DetailResponse(t.getId(), t.getStatus(), t.getSurvey(), t.getSelfAssessment(), t.getAdjustment(),
 				t.getTargetLevel(), t.getStartedAt(), t.getSubmittedAt(), t.getExamSeconds(), t.getEvaluationStatus(),
 				t.getEstimatedLevel(), t.getReport(), t.getInsights(), t.getEvaluatedAt(),
-				items.stream().map(ItemDetailResponse::from).toList());
+				items.stream().map(ItemDetailResponse::from).toList(), trend);
 		}
 	}
 
