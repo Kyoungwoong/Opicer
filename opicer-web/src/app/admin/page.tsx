@@ -11,6 +11,7 @@ import { PageShell } from "@/components/common/PageShell";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { Button } from "@/components/ui/button";
 import { QuestionTab } from "@/features/admin/QuestionTab";
+import { TopicTab } from "@/features/admin/TopicTab";
 import { DailySentenceTab } from "@/features/admin/DailySentenceTab";
 import { PromptVersionTab } from "@/features/admin/PromptVersionTab";
 import { EvaluationGuideTab } from "@/features/admin/EvaluationGuideTab";
@@ -19,6 +20,7 @@ import { GoodAnswerTab } from "@/features/admin/GoodAnswerTab";
 import { OpicCenterTab } from "@/features/admin/OpicCenterTab";
 
 type Tab =
+  | "topics"
   | "questions"
   | "daily-sentences"
   | "prompts"
@@ -28,6 +30,7 @@ type Tab =
   | "opic-centers";
 
 const TABS: { id: Tab; label: string }[] = [
+  { id: "topics", label: "주제 관리" },
   { id: "questions", label: "질문 관리" },
   { id: "daily-sentences", label: "오늘의 문장" },
   { id: "universal-sentences", label: "만능 문장" },
@@ -40,7 +43,7 @@ const TABS: { id: Tab; label: string }[] = [
 export default function AdminPage() {
   const auth = useAuthState();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<Tab>("questions");
+  const [activeTab, setActiveTab] = useState<Tab>("topics");
 
   useEffect(() => {
     if (auth.status === "unauthenticated") {
@@ -109,6 +112,7 @@ export default function AdminPage() {
 
       {/* Tab Content */}
       <div>
+        {activeTab === "topics" && <TopicTab />}
         {activeTab === "questions" && <QuestionTab />}
         {activeTab === "daily-sentences" && <DailySentenceTab />}
         {activeTab === "universal-sentences" && <UniversalSentenceTab />}

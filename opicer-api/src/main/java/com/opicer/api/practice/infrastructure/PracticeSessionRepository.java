@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PracticeSessionRepository extends JpaRepository<PracticeSession, UUID> {
 	Optional<PracticeSession> findByTopicSelectionId(UUID topicSelectionId);
 
+	boolean existsByTopicId(UUID topicId);
+
 	Optional<PracticeSession> findByIdAndUserId(UUID id, UUID userId);
 
 	List<PracticeSession> findByUserIdOrderByCompletedAtDesc(UUID userId, Pageable pageable);

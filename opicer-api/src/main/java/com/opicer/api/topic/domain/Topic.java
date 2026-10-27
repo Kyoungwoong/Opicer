@@ -21,6 +21,12 @@ import java.util.UUID;
 @Table(name = "topic")
 public class Topic {
 
+	public static final String CATEGORY_SELF_INTRO = "자기소개";
+	public static final String CATEGORY_SURVEY = "설문조사";
+	public static final String CATEGORY_UNEXPECTED = "돌발질문";
+	/** The categories a topic can be saved with; the screens group topics by them. */
+	public static final List<String> CATEGORIES = List.of(CATEGORY_SELF_INTRO, CATEGORY_SURVEY, CATEGORY_UNEXPECTED);
+
 	@Id
 	@GeneratedValue
 	private UUID id;

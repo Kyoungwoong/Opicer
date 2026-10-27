@@ -16,6 +16,24 @@ export type UniversalSentenceType =
   | "COMPARE_CONTRAST"
   | "UNEXPECTED_SITUATION";
 
+/** A practice topic; questions belong to it by `title`. */
+export type AdminTopic = {
+  id: string;
+  title: string;
+  englishTitle: string;
+  category: string;
+  categoryOrder: number;
+  topicOrder: number;
+  badges: { label: string; count: number | null }[];
+  active: boolean;
+  /** The mock test finds this topic by title (survey item or self-introduction), so it cannot be renamed. */
+  mockLinked: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminTopicInput = Omit<AdminTopic, "id" | "mockLinked" | "createdAt" | "updatedAt">;
+
 export type Question = {
   id: string;
   topic: string;

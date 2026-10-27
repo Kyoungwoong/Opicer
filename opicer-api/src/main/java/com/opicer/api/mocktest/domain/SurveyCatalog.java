@@ -168,6 +168,13 @@ public final class SurveyCatalog {
 		return List.copyOf(topics);
 	}
 
+	/** Every practice topic title some survey item points to. */
+	public static Set<String> linkedTopics() {
+		Set<String> topics = new LinkedHashSet<>();
+		ITEMS.values().forEach(item -> topics.addAll(item.topics()));
+		return Set.copyOf(topics);
+	}
+
 	/** A part sent as {@code null} counts as nothing chosen. */
 	private static List<String> chosen(Map<String, List<String>> selections, String code) {
 		List<String> chosen = selections.get(code);

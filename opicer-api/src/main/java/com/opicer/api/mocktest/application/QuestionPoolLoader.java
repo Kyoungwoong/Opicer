@@ -23,8 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class QuestionPoolLoader {
 
-	static final String CATEGORY_SURVEY = "설문조사";
-	static final String CATEGORY_UNEXPECTED = "돌발질문";
+	static final String CATEGORY_SURVEY = Topic.CATEGORY_SURVEY;
+	static final String CATEGORY_UNEXPECTED = Topic.CATEGORY_UNEXPECTED;
 
 	private final QuestionRepository questions;
 	private final TopicRepository topics;

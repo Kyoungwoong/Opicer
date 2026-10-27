@@ -1,4 +1,6 @@
 import type {
+  AdminTopic,
+  AdminTopicInput,
   AdminOpicCenter,
   AdminOpicCenterInput,
   AdminOpicCenterReview,
@@ -59,6 +61,16 @@ async function requestForm<T>(path: string, formData: FormData): Promise<T> {
   const body = JSON.parse(text) as ApiResponse<T>;
   return body.data;
 }
+
+// ── Topics ────────────────────────────────────────────────
+
+export const topicApi = {
+  list: () => request<AdminTopic[]>("topics"),
+  create: (data: AdminTopicInput) => request<AdminTopic>("topics", { method: "POST", body: JSON.stringify(data) }),
+  update: (id: string, data: AdminTopicInput) =>
+    request<AdminTopic>(`topics/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  delete: (id: string) => request<void>(`topics/${id}`, { method: "DELETE" }),
+};
 
 // ── Questions ─────────────────────────────────────────────
 

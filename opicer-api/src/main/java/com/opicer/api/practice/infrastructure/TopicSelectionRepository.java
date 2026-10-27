@@ -12,6 +12,8 @@ import org.springframework.data.repository.query.Param;
 public interface TopicSelectionRepository extends JpaRepository<TopicSelection, UUID> {
 	Optional<TopicSelection> findByIdAndUserId(UUID id, UUID userId);
 
+	boolean existsByTopicId(UUID topicId);
+
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("select t from TopicSelection t where t.id = :id and t.userId = :userId")
 	Optional<TopicSelection> findLockedByIdAndUserId(@Param("id") UUID id, @Param("userId") UUID userId);

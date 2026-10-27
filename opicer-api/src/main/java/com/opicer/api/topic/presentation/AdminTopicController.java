@@ -120,6 +120,8 @@ public class AdminTopicController {
 		int topicOrder,
 		List<TopicBadgeResponse> badges,
 		boolean active,
+		/** The mock test refers to this topic by title, so it cannot be renamed. */
+		boolean mockLinked,
 		Instant createdAt,
 		Instant updatedAt
 	) {
@@ -136,6 +138,7 @@ public class AdminTopicController {
 				topic.getTopicOrder(),
 				badgeResponses,
 				topic.isActive(),
+				TopicCommandService.isMockLinked(topic.getTitle()),
 				topic.getCreatedAt(),
 				topic.getUpdatedAt()
 			);
