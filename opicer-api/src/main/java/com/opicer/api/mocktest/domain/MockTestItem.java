@@ -51,6 +51,10 @@ public class MockTestItem {
 	@Column(name = "question_type", length = 32)
 	private String questionType;
 
+	/** Uploaded question audio, if any; otherwise the screen reads the text aloud. */
+	@Column(name = "prompt_audio_url", length = 1000)
+	private String promptAudioUrl;
+
 	@Column(name = "topic_title")
 	private String topicTitle;
 
@@ -80,13 +84,14 @@ public class MockTestItem {
 	}
 
 	public MockTestItem(UUID mockTestId, int itemOrder, int part, UUID questionId, String questionText,
-		String questionType, String topicTitle, UUID topicId) {
+		String questionType, String promptAudioUrl, String topicTitle, UUID topicId) {
 		this.mockTestId = mockTestId;
 		this.itemOrder = itemOrder;
 		this.part = part;
 		this.questionId = questionId;
 		this.questionText = questionText;
 		this.questionType = questionType;
+		this.promptAudioUrl = promptAudioUrl;
 		this.topicTitle = topicTitle;
 		this.topicId = topicId;
 	}
@@ -123,6 +128,7 @@ public class MockTestItem {
 	public UUID getQuestionId() { return questionId; }
 	public String getQuestionText() { return questionText; }
 	public String getQuestionType() { return questionType; }
+	public String getPromptAudioUrl() { return promptAudioUrl; }
 	public String getTopicTitle() { return topicTitle; }
 	public UUID getTopicId() { return topicId; }
 	public String getTranscript() { return transcript; }
