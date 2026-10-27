@@ -6,4 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface QuestionRepository extends JpaRepository<Question, UUID> {
 	java.util.List<Question> findByActiveTrueAndTopicOrderByCreatedAtAscIdAsc(String topic);
+
+	/** The whole active bank in insertion order; small enough to compose a mock test in memory. */
+	java.util.List<Question> findByActiveTrueOrderByCreatedAtAscIdAsc();
+
+	boolean existsByTopicAndPromptText(String topic, String promptText);
 }
