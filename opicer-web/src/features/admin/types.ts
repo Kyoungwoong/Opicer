@@ -174,3 +174,26 @@ export type AdminOpicCenterReviewInput = {
   sourceLabel?: string;
   visible: boolean;
 };
+
+/** One exam round on the schedule calendar; `source` is "manual" or a permitted import's name. */
+export type AdminOpicSchedule = {
+  id: string;
+  examDate: string;
+  registrationStart: string | null;
+  registrationEnd: string | null;
+  scoreReleaseDate: string | null;
+  roundName: string;
+  earlyRelease: boolean;
+  source: string;
+  updatedAt: string;
+};
+
+/** Dates are YYYY-MM-DD; only `examDate` and `roundName` are required. */
+export type AdminOpicScheduleInput = {
+  examDate: string;
+  registrationStart?: string;
+  registrationEnd?: string;
+  scoreReleaseDate?: string;
+  roundName: string;
+  earlyRelease: boolean;
+};
