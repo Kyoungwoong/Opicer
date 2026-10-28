@@ -18,5 +18,41 @@ services:
       timeout: 5s
       retries: 10
 
+  # Optional: run the API and web as containers too (same images CI builds and CD pushes).
+  #   docker compose --profile app up -d --build
+  # Day to day, run only the DB here and start the API and web directly (see docs/dev-setup.md).
+  api:
+    profiles: ["app"]
+    build: ./opicer-api
+    container_name: opicer-api
+    env_file:
+      - path: opicer-api/.env
+        required: false
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      OPICER_DB_URL: jdbc:postgresql://postgres:5432/opicer
+    ports:
+      - "8080:8080"
+    volumes:
+      - opicer-storage:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    profiles: ["app"]
+    build:
+      context: ./opicer-web
+      args:
+        NEXT_PUBLIC_NAVER_MAP_CLIENT_ID: ${NEXT_PUBLIC_NAVER_MAP_CLIENT_ID:-}
+    container_name: opicer-web
+    environment:
+      OPICER_API_BASE_URL: http://api:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
 volumes:
   opicer-pgdata:
+  opicer-storage:

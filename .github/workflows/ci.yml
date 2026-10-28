@@ -1,0 +1,181 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      api: ${{ github.event_name != 'pull_request' || steps.filter.outputs.api == 'true' }}
+      web: ${{ github.event_name != 'pull_request' || steps.filter.outputs.web == 'true' }}
+      docker: ${{ github.event_name != 'pull_request' || steps.filter.outputs.docker == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'opicer-api/**'
+              - '.github/workflows/ci.yml'
+            web:
+              - 'opicer-web/**'
+              - '.github/workflows/ci.yml'
+            docker:
+              - 'opicer-api/**'
+              - 'opicer-web/**'
+              - 'docker-compose.yml'
+              - '.github/workflows/**'
+
+  backend:
+    name: Backend tests
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OPICER_DB_USER: opicer
+      OPICER_DB_PASSWORD: ci-only-password
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: opicer_test
+          POSTGRES_USER: opicer
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U opicer -d opicer_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: opicer-api
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable pgvector
+        run: psql -h localhost -U opicer -d opicer_test -c "CREATE EXTENSION IF NOT EXISTS vector"
+        env:
+          PGPASSWORD: ci-only-password
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Test
+        run: ./gradlew test --no-daemon
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: opicer-api/build/reports/tests/test
+          retention-days: 7
+
+  web:
+    name: Web lint, types and build
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: opicer-web
+    steps:
+      - uses: actions/checkout@v4
+      # Reads the pnpm version from package.json "packageManager".
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: opicer-web/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: opicer-web/.nvmrc
+          cache: pnpm
+          cache-dependency-path: opicer-web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm build
+
+  docker-build:
+    name: Docker image builds (${{ matrix.component }})
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: api
+            context: opicer-api
+          - component: web
+            context: opicer-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: false
+          cache-from: type=gha,scope=${{ matrix.component }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component }}
+
+  pr-rules:
+    name: PR title and branch name
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check conventions
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          types='feat|fix|refactor|docs|chore|test'
+          ok=true
+          if ! [[ "$TITLE" =~ ^($types)(\([a-z0-9._-]+\))?!?:\ .+ ]]; then
+            echo "::error::PR title must look like '<type>(<scope>): <subject>' with type in $types. Got: $TITLE"
+            ok=false
+          fi
+          if ! [[ "$BRANCH" =~ ^[a-z0-9._-]+/($types)/[0-9]+-[a-z0-9._-]+$ ]]; then
+            echo "::error::Branch must look like '<prefix>/<type>/<issue>-<description>', e.g. opicer-ai/feat/12-topic-tab. Got: $BRANCH"
+            ok=false
+          fi
+          $ok
+
+  # The single required status check for main. Skipped jobs count as passed, so it stays green
+  # when a PR touches only one side, and new jobs only need to be added to `needs`.
+  ci-pass:
+    name: ci-pass
+    needs: [changes, backend, web, docker-build, pr-rules]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: All required jobs passed or were skipped
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "::error::A required job failed or was cancelled."
+          exit 1
+      - run: echo "CI passed."

@@ -43,6 +43,22 @@ DB 데이터(문항 은행 등)는 저장소에 없다. 각 PC의 로컬 DB는 �
 | 웹 | `cd opicer-web && pnpm dev` | `cd opicer-web; pnpm dev` |
 | 백엔드 테스트 (DB 필요) | `cd opicer-api && ./gradlew test` | `cd opicer-api; .\gradlew.bat test` |
 | 웹 검사 | `pnpm lint && pnpm exec tsc --noEmit && pnpm build` | 같음 |
+| 세 개 모두 컨테이너로(선택) | `docker compose --profile app up -d --build` | 같음 |
+
+- **평소에는 DB만 컨테이너로** 띄우고 API와 웹은 직접 실행한다. 코드 변경이 바로 반영되고 디버깅이 쉽다.
+- `--profile app`은 CI가 빌드하고 Docker Hub에 올리는 이미지와 같은 이미지로 API(8080)와 웹(3000)을 띄운다.
+  - 배포 형태로 확인할 때 쓴다.
+  - API는 `opicer-api/.env`를 읽고 DB 주소만 컨테이너용으로 바꾼다.
+  - 내릴 때: `docker compose --profile app stop api web`
+- 이미지·CI·배포는 [ci-cd.md](ci-cd.md)를 본다.
+
+## 설정 프로필
+
+| 파일 | 언제 | 내용 |
+|---|---|---|
+| `application.yaml` | 항상 | 공통 설정. 아무 프로필도 주지 않으면 `local`이 켜진다 |
+| `application-local.yaml` | 기본(내 PC) | localhost DB, `ddl-auto: update`, STT mock, 개발용 기본값. 실제 키는 `opicer-api/.env`에 둔다 |
+| `application-dev.yaml` | `SPRING_PROFILES_ACTIVE=dev`(배포 서버) | 접속 정보와 비밀값은 환경변수에서만 받는다. 하나라도 없으면 없는 변수 이름을 알려 주고 시작하지 않는다 |
 
 Claude Code의 미리보기 설정(`.claude/launch.json`)은 PC마다 경로가 달라 저장소에 두지 않는다. 맥에서는 예를 들어 아래처럼 만든다.
 

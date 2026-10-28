@@ -1,29 +1,19 @@
+# Shared by every environment. Environment-specific values live in application-<profile>.yaml:
+# local (default, your machine) and dev (a deployed server, values from environment variables).
 spring:
   application:
     name: opicer-api
   profiles:
-    active: default
+    default: local
   datasource:
-    url: ${OPICER_DB_URL:jdbc:postgresql://localhost:5432/opicer}
     driver-class-name: org.postgresql.Driver
-    username: ${OPICER_DB_USER:opicer}
-    password: ${OPICER_DB_PASSWORD:opicer}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
   security:
     oauth2:
       client:
         registration:
           kakao:
-            client-id: ${KAKAO_CLIENT_ID:dummy}
-            client-secret: ${KAKAO_CLIENT_SECRET:dummy}
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
-            redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8080/login/oauth2/code/kakao}
             scope:
               - profile_nickname
               - account_email
@@ -40,19 +30,13 @@ spring:
 
 opicer:
   auth:
-    jwt-secret: ${JWT_SECRET:change-me-please-change-me-please-32bytes}
     jwt-ttl-seconds: ${JWT_TTL_SECONDS:3600}
     cookie-name: OPICER_AUTH
-    cookie-secure: ${JWT_COOKIE_SECURE:false}
     admin-allowlist: ${ADMIN_EMAIL_ALLOWLIST:}
-    frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:3000}
   ai:
-    openai-api-key: ${OPENAI_API_KEY:}
     openai-embedding-model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
     openai-embedding-dimension: ${OPENAI_EMBEDDING_DIMENSION:1536}
     stt:
-      # mock = canned transcripts, no network (default for now). openai = Whisper (needs OPENAI_API_KEY).
-      provider: ${OPICER_STT_PROVIDER:mock}
       openai-model: ${OPICER_STT_OPENAI_MODEL:whisper-1}
     evaluation:
       # Answer evaluation (structured output). Provider is swappable; openai uses OPENAI_API_KEY.
@@ -62,7 +46,7 @@ opicer:
       max-output-tokens: ${OPICER_EVAL_MAX_OUTPUT_TOKENS:16000}
       timeout-seconds: ${OPICER_EVAL_TIMEOUT_SECONDS:90}
     worker:
-      # Background evaluation worker (ai_job). On locally; the postgres profile turns it off until the UI ships.
+      # Background evaluation worker (ai_job).
       enabled: ${OPICER_AI_WORKER_ENABLED:true}
       poll-interval-ms: ${OPICER_AI_WORKER_POLL_MS:2000}
       concurrency: ${OPICER_AI_WORKER_CONCURRENCY:3}
@@ -81,7 +65,6 @@ opicer:
   # NAVER Cloud Platform Maps, for geocoding admin-entered test center addresses (optional).
   naver-map:
     client-id: ${NAVER_MAP_CLIENT_ID:}
-    client-secret: ${NAVER_MAP_CLIENT_SECRET:}
   credit:
     unsafe-delay-ms: ${OPICER_CREDIT_UNSAFE_DELAY_MS:0}
     idempotency-ttl-hours: ${OPICER_CREDIT_IDEMPOTENCY_TTL_HOURS:24}

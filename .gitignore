@@ -40,8 +40,6 @@ target/
 
 # Spring Boot
 *.log
-application-local.yml
-application-test.yml
 
 # Node / Next.js
 node_modules/

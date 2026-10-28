@@ -1,0 +1,34 @@
+# Your machine (default profile). Defaults point at docker-compose.yml's Postgres and need no secrets;
+# put real keys in opicer-api/.env (loaded by run-local.sh / run-local.ps1).
+spring:
+  datasource:
+    url: ${OPICER_DB_URL:jdbc:postgresql://localhost:5432/opicer}
+    username: ${OPICER_DB_USER:opicer}
+    password: ${OPICER_DB_PASSWORD:opicer}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID:dummy}
+            client-secret: ${KAKAO_CLIENT_SECRET:dummy}
+            redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8080/login/oauth2/code/kakao}
+
+opicer:
+  auth:
+    jwt-secret: ${JWT_SECRET:change-me-please-change-me-please-32bytes}
+    cookie-secure: ${JWT_COOKIE_SECURE:false}
+    frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:3000}
+  ai:
+    openai-api-key: ${OPENAI_API_KEY:}
+    stt:
+      # mock = canned transcripts, no network. openai = Whisper (needs OPENAI_API_KEY).
+      provider: ${OPICER_STT_PROVIDER:mock}
+  naver-map:
+    client-secret: ${NAVER_MAP_CLIENT_SECRET:}

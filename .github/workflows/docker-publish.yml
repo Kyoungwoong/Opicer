@@ -1,0 +1,98 @@
+name: Docker publish
+
+# Builds the API and web images and pushes them to Docker Hub, one repository with component tags:
+#   main:    youngwoong/opicer:api-<sha7>, api-main / web-<sha7>, web-main
+#   v1.2.3:  youngwoong/opicer:api-1.2.3 / web-1.2.3
+# Deploy with the immutable sha or version tags, not *-main. Needs the DOCKERHUB_USERNAME and DOCKERHUB_TOKEN
+# secrets (docs/ci-cd.md); without them the images are still built but not pushed.
+# A later deploy job (e.g. AWS) goes after this one.
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+concurrency:
+  group: docker-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: docker.io/${{ vars.DOCKERHUB_REPOSITORY || 'youngwoong/opicer' }}
+
+jobs:
+  publish:
+    name: Publish ${{ matrix.component }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: api
+            context: opicer-api
+          - component: web
+            context: opicer-web
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # main only receives commits that passed ci-pass (branch ruleset); a tag can point anywhere, so a release
+      # tag must be on main too.
+      - name: Release tags must point at a commit on main
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::$GITHUB_REF_NAME points at a commit that is not on main; tag a merged commit."
+            exit 1
+          fi
+
+      - name: Check Docker Hub credentials
+        id: creds
+        env:
+          USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          if [ -n "$USERNAME" ] && [ -n "$TOKEN" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::DOCKERHUB_USERNAME / DOCKERHUB_TOKEN are not set; building without pushing."
+          fi
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: steps.creds.outputs.ready == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          flavor: latest=false
+          tags: |
+            type=sha,prefix=${{ matrix.component }}-,format=short
+            type=raw,value=${{ matrix.component }}-main,enable={{is_default_branch}}
+            type=semver,pattern={{version}},prefix=${{ matrix.component }}-
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: ${{ steps.creds.outputs.ready == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_NAVER_MAP_CLIENT_ID=${{ vars.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID }}
+          cache-from: type=gha,scope=${{ matrix.component }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component }}
