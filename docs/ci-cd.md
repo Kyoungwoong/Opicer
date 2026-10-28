@@ -51,7 +51,9 @@ main push, `v*` 태그, 수동 실행에서 돈다. API와 웹 이미지를 **�
 | 태그 `v1.2.3` | `api-1.2.3` | `web-1.2.3` |
 
 - 배포에는 바뀌지 않는 `api-<sha>` 또는 `api-1.2.3`을 쓴다. `*-main`은 계속 바뀌는 태그이고 `latest`는 만들지 않는다.
-- 버전 배포: `git tag v1.0.0 && git push origin v1.0.0`. 태그는 main의 커밋에 단다.
+- 버전 배포: `git tag v1.0.0 && git push origin v1.0.0`
+  - 태그는 main에 있는 커밋에만 단다.
+  - main에 없는 커밋(머지 안 한 브랜치 등)에 단 태그는 CI를 거치지 않았으므로 workflow가 실패시킨다.
 - 웹 이미지에는 빌드할 때 `NEXT_PUBLIC_NAVER_MAP_CLIENT_ID`가 들어간다. 공개되는 값이므로 GitHub **Variables**에 둔다.
 
 ### 처음 한 번 (사용자가 직접)
