@@ -74,6 +74,17 @@ public class OpicExamSchedule {
 		this.source = source;
 	}
 
+	/** Admin edit; {@code source} stays as it was. */
+	public void update(LocalDate examDate, LocalDate registrationStart, LocalDate registrationEnd,
+		LocalDate scoreReleaseDate, String roundName, boolean earlyRelease) {
+		this.examDate = examDate;
+		this.registrationStart = registrationStart;
+		this.registrationEnd = registrationEnd;
+		this.scoreReleaseDate = scoreReleaseDate;
+		this.roundName = roundName;
+		this.earlyRelease = earlyRelease;
+	}
+
 	@PrePersist
 	void onCreate() {
 		createdAt = Instant.now();
