@@ -7,6 +7,22 @@ description: Run an Opicer unit of work through the multi-agent harness (opicer-
 
 You, the main session, orchestrate. The agents work in fresh contexts and talk through files in `.harness/<id>/` (gitignored). The harness sits inside AGENTS.md §3.5: the plan gate, issue, branch, PR, GitHub review loop and merge stay exactly as they are. Background: `docs/harness.md`.
 
+## Commands the user can give (follow them over the defaults below)
+| User says (any wording to this effect) | Do |
+|---|---|
+| `/opicer-harness <request>`, "하네스로 해줘" | Pick the size (§0), say which and why, then run it |
+| "하네스 없이", "S로" | Normal §3.5, no agents |
+| "M으로" / "L로" | Force that size |
+| "기획만 해줘" | Planner only → `spec.md` summary; no code |
+| "계약서만 써줘" | §2 only (contract until AGREED); no code |
+| "QA만 돌려줘", "PR #N QA해줘" | Evaluator QA mode on the current branch or that PR; report only |
+| "QA 한 번만", "QA 최대 N번" | Cap QA rounds at that number (default 3) |
+| "고치지 말고 보고만" | On FAIL, show the report; do not spawn the builder |
+| "계약서 보여줘", "QA 보고서 보여줘" | Summarize the latest file in `.harness/<id>/` |
+| "비용 알려줘" | Report tokens and time per agent run (from each run's usage) |
+| "평가자가 놓쳤어: …" | Add the pattern to the evaluator's calibration list (PR) |
+| "평가 기준 바꿔줘: …" | Change the criteria in `opicer-evaluator.md` and `docs/harness.md` (PR) |
+
 ## 0. Size the task
 | Size | When | Flow |
 |---|---|---|
