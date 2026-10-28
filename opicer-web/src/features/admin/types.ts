@@ -36,11 +36,14 @@ export type AdminTopic = {
 
 export type AdminTopicInput = Omit<AdminTopic, "id" | "mockLinked" | "titleLocked" | "createdAt" | "updatedAt">;
 
-/** One Background Survey item and the practice topics it points to (by id, so renames follow). */
+/**
+ * One Background Survey item and the practice topics it points to (by id, so renames follow). `category` flags a
+ * link to a topic outside 설문조사; the mock test never uses those.
+ */
 export type SurveyLinkItem = {
   id: string;
   label: string;
-  topics: { id: string; title: string; active: boolean }[];
+  topics: { id: string; title: string; category: string; active: boolean }[];
 };
 
 export type SurveyLinkPart = { code: string; title: string; items: SurveyLinkItem[] };

@@ -50,4 +50,5 @@ export const adminUi = {
   pillOn: "rounded-full bg-success-subtle px-2 py-0.5 text-xs font-semibold text-success",
   pillOff: "rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground",
   pillPrimary: "rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground",
+  pillWarn: "rounded-full bg-warning-subtle px-2 py-0.5 text-xs font-semibold text-warning",
 } as const;

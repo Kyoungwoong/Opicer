@@ -13,6 +13,13 @@ const COMBO_MIN = 2;
 const UNPICKED_PARTS = new Set(["OCCUPATION", "STUDENT"]);
 
 type Filter = "ALL" | "UNLINKED";
+type LinkedTopic = SurveyLinkItem["topics"][number];
+
+/** Survey items only link to 설문조사 topics; a link to any other category is a leftover the mock test ignores. */
+const isSurveyTopic = (topic: LinkedTopic) => topic.category === SURVEY_CATEGORY;
+
+/** The mock test only picks active 설문조사 topics, so only those make an item count as linked. */
+const hasUsableTopic = (item: SurveyLinkItem) => item.topics.some((t) => t.active && isSurveyTopic(t));
 
 /**
  * Which practice topics each Background Survey item points to. The mock test picks its part-1 combos from the
@@ -62,11 +69,15 @@ export function SurveyLinkTab() {
   }, [questions]);
 
   const pickingItems = parts.filter((p) => !UNPICKED_PARTS.has(p.code)).flatMap((p) => p.items);
-  const linkedCount = pickingItems.filter((item) => item.topics.length > 0).length;
+  const linkedCount = pickingItems.filter(hasUsableTopic).length;
 
+  /**
+   * The draft keeps every linked 설문조사 topic, inactive ones too, so saving only drops the links that break the
+   * rule. Filtering by active as well would silently unlink inactive topics.
+   */
   function startEdit(item: SurveyLinkItem) {
     setEditing(item.id);
-    setDraft(new Set(item.topics.map((t) => t.id)));
+    setDraft(new Set(item.topics.filter(isSurveyTopic).map((t) => t.id)));
     setError(null);
   }
 
@@ -98,52 +109,65 @@ export function SurveyLinkTab() {
     }
   }
 
-  const editor = (item: SurveyLinkItem) => (
-    <tr>
-      <td colSpan={3} className="bg-muted/30 px-4 py-4">
-        <fieldset className="flex flex-col gap-3">
-          <legend className={`${adminUi.labelText} mb-2`}>&lsquo;{item.label}&rsquo;에 연결할 설문조사 주제</legend>
-          {surveyTopics.length === 0 ? (
-            <p className="text-sm text-muted-foreground">설문조사 분류의 주제가 없어요. 주제 관리 탭에서 먼저 만들어 주세요.</p>
-          ) : (
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {surveyTopics.map((topic) => {
-                const count = activeCounts.get(topic.title) ?? 0;
-                return (
-                  <label key={topic.id} className={adminUi.checkRow}>
-                    <input
-                      type="checkbox"
-                      className={adminUi.checkbox}
-                      checked={draft.has(topic.id)}
-                      onChange={() => toggle(topic.id)}
-                    />
-                    <span className={topic.active ? "" : "text-muted-foreground"}>
-                      {topic.title}
-                      <span className="ml-1 text-xs text-muted-foreground">
-                        문항 {count}
-                        {topic.active ? "" : " · 비활성"}
+  const editor = (item: SurveyLinkItem) => {
+    const misfiled = item.topics.filter((t) => !isSurveyTopic(t));
+    return (
+      <tr>
+        <td colSpan={3} className="bg-muted/30 px-4 py-4">
+          <fieldset className="flex flex-col gap-3">
+            <legend className={`${adminUi.labelText} mb-2`}>&lsquo;{item.label}&rsquo;에 연결할 설문조사 주제</legend>
+            {misfiled.length > 0 ? (
+              <ul className="flex flex-col gap-1 rounded-lg bg-warning-subtle px-3 py-2 text-sm text-warning">
+                {misfiled.map((topic) => (
+                  <li key={topic.id}>
+                    <span className="font-semibold">{topic.title}</span> ({topic.category}): 설문조사 주제가 아님 —
+                    저장하면 연결이 풀려요
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {surveyTopics.length === 0 ? (
+              <p className="text-sm text-muted-foreground">설문조사 분류의 주제가 없어요. 주제 관리 탭에서 먼저 만들어 주세요.</p>
+            ) : (
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {surveyTopics.map((topic) => {
+                  const count = activeCounts.get(topic.title) ?? 0;
+                  return (
+                    <label key={topic.id} className={adminUi.checkRow}>
+                      <input
+                        type="checkbox"
+                        className={adminUi.checkbox}
+                        checked={draft.has(topic.id)}
+                        onChange={() => toggle(topic.id)}
+                      />
+                      <span className={topic.active ? "" : "text-muted-foreground"}>
+                        {topic.title}
+                        <span className="ml-1 text-xs text-muted-foreground">
+                          문항 {count}
+                          {topic.active ? "" : " · 비활성"}
+                        </span>
+                        {topic.active && count < COMBO_MIN ? (
+                          <span className="ml-1 text-xs text-destructive">실전 콤보에 부족</span>
+                        ) : null}
                       </span>
-                      {topic.active && count < COMBO_MIN ? (
-                        <span className="ml-1 text-xs text-destructive">실전 콤보에 부족</span>
-                      ) : null}
-                    </span>
-                  </label>
-                );
-              })}
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+            <div className={adminUi.actions}>
+              <button type="button" disabled={saving} onClick={() => void save(item.id)} className={adminUi.smallButton}>
+                {saving ? "저장 중…" : "저장"}
+              </button>
+              <button type="button" onClick={() => setEditing(null)} className={adminUi.smallButton}>
+                취소
+              </button>
             </div>
-          )}
-          <div className={adminUi.actions}>
-            <button type="button" disabled={saving} onClick={() => void save(item.id)} className={adminUi.smallButton}>
-              {saving ? "저장 중…" : "저장"}
-            </button>
-            <button type="button" onClick={() => setEditing(null)} className={adminUi.smallButton}>
-              취소
-            </button>
-          </div>
-        </fieldset>
-      </td>
-    </tr>
-  );
+          </fieldset>
+        </td>
+      </tr>
+    );
+  };
 
   return (
     <section className={adminUi.section}>
@@ -169,12 +193,15 @@ export function SurveyLinkTab() {
             </select>
           </label>
         </div>
+        <p className="text-xs text-muted-foreground">
+          활성 설문조사 주제가 하나 이상 연결된 항목만 연결된 것으로 세요.
+        </p>
         {error ? <p className={adminUi.error}>{error}</p> : null}
       </div>
 
       {parts.map((part) => {
         const unpicked = UNPICKED_PARTS.has(part.code);
-        const items = part.items.filter((item) => filter === "ALL" || (!unpicked && item.topics.length === 0));
+        const items = part.items.filter((item) => filter === "ALL" || (!unpicked && !hasUsableTopic(item)));
         if (items.length === 0) return null;
         return (
           <div key={part.code} className="flex flex-col gap-2">
@@ -211,15 +238,13 @@ export function SurveyLinkTab() {
                           ) : (
                             <span className="flex flex-wrap gap-1">
                               {item.topics.map((topic) => (
-                                <span
-                                  key={topic.id}
-                                  className={topic.active ? adminUi.pillPrimary : adminUi.pillOff}
-                                  title={topic.active ? undefined : "비활성: 출제에 쓰지 않아요"}
-                                >
-                                  {topic.title}
-                                  {topic.active ? "" : " (비활성)"}
-                                </span>
+                                <TopicChip key={topic.id} topic={topic} />
                               ))}
+                              {hasUsableTopic(item) ? null : (
+                                <span className="rounded-full bg-highlight/20 px-2 py-0.5 text-xs font-medium text-foreground">
+                                  출제 가능한 주제 없음
+                                </span>
+                              )}
                             </span>
                           )}
                         </td>
@@ -239,5 +264,25 @@ export function SurveyLinkTab() {
         );
       })}
     </section>
+  );
+}
+
+/** A linked topic. One outside 설문조사, or an inactive one, is styled as not used by the mock test. */
+function TopicChip({ topic }: { topic: LinkedTopic }) {
+  if (!isSurveyTopic(topic)) {
+    return (
+      <span className={adminUi.pillWarn} title={`${topic.category} 주제예요. 설문조사 주제가 아니라 출제에 쓰지 않아요`}>
+        {topic.title} (분류 불일치)
+      </span>
+    );
+  }
+  return (
+    <span
+      className={topic.active ? adminUi.pillPrimary : adminUi.pillOff}
+      title={topic.active ? undefined : "비활성: 출제에 쓰지 않아요"}
+    >
+      {topic.title}
+      {topic.active ? "" : " (비활성)"}
+    </span>
   );
 }
