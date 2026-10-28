@@ -55,7 +55,9 @@ docker compose up -d                    # 로컬 Postgres + pgvector
 cd opicer-web && pnpm install && pnpm dev   # 웹
 ```
 
-준비물, `.env` 설정, 테스트, 줄바꿈 규칙은 [docs/dev-setup.md](docs/dev-setup.md)에 있습니다.
+세 개를 모두 컨테이너로 띄우려면 `docker compose --profile app up -d --build`를 씁니다.
+
+준비물, `.env` 설정, 프로필(local/dev), 테스트, 줄바꿈 규칙은 [docs/dev-setup.md](docs/dev-setup.md)에 있습니다. CI, Docker Hub 이미지, 브랜치 규칙은 [docs/ci-cd.md](docs/ci-cd.md)에 있습니다.
 
   ---
 
