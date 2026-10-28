@@ -83,6 +83,8 @@ export function SurveyLinkTab() {
 
   const pickingItems = parts.filter((p) => !UNPICKED_PARTS.has(p.code)).flatMap((p) => p.items);
   const linkedCount = pickingItems.filter(hasUsableTopic).length;
+  /** The count and filter only mean something once a load has succeeded. */
+  const loaded = !loading && loadError === null;
 
   /**
    * The draft keeps every linked 설문조사 topic, inactive ones too, so saving only drops the links that break the
@@ -127,14 +129,18 @@ export function SurveyLinkTab() {
     }
   }
 
+  /**
+   * The edit row spans the whole table, which scrolls sideways on narrow screens. Its content is sized to the
+   * visible width of the table's scroll box (`100cqw`) and stuck to its left edge, so it wraps on a phone.
+   */
   const editor = (item: SurveyLinkItem) => {
     const misfiled = item.topics.filter((t) => !isSurveyTopic(t));
     const saving = savingId === item.id;
     const error = saveError?.itemId === item.id ? saveError.message : null;
     return (
       <tr>
-        <td colSpan={3} className="bg-muted/30 px-4 py-4">
-          <fieldset className="flex flex-col gap-3">
+        <td colSpan={3} className="bg-muted/30 p-0">
+          <fieldset className="sticky left-0 flex w-[100cqw] min-w-0 flex-col gap-3 px-4 py-4">
             <legend className={`${adminUi.labelText} mb-2`}>&lsquo;{item.label}&rsquo;에 연결할 설문조사 주제</legend>
             {misfiled.length > 0 ? (
               <ul className="flex flex-col gap-1 rounded-lg bg-warning-subtle px-3 py-2 text-sm text-warning">
@@ -202,25 +208,29 @@ export function SurveyLinkTab() {
           실전연습 설문에서 고른 항목에 연결된 주제로 1부 콤보 문제를 내요. Part 3(거주) 항목에 연결된 주제는 고른
           주제의 문항이 부족할 때 대신 쓰여요. 설문조사 분류의 주제만 연결할 수 있고, 비활성 주제는 출제에서 빠져요.
         </p>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-medium text-foreground">
-            연결된 항목 {linkedCount} / 전체 {pickingItems.length} (Part 3·4)
-          </p>
-          <label className="flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">보기</span>
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value as Filter)}
-              className={`${adminUi.control} w-auto`}
-            >
-              <option value="ALL">전체</option>
-              <option value="UNLINKED">연결 안 됨</option>
-            </select>
-          </label>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          활성 설문조사 주제가 하나 이상 연결된 항목만 연결된 것으로 세요.
-        </p>
+        {loaded ? (
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm font-medium text-foreground">
+                연결된 항목 {linkedCount} / 전체 {pickingItems.length} (Part 3·4)
+              </p>
+              <label className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">보기</span>
+                <select
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value as Filter)}
+                  className={`${adminUi.control} w-auto`}
+                >
+                  <option value="ALL">전체</option>
+                  <option value="UNLINKED">연결 안 됨</option>
+                </select>
+              </label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              활성 설문조사 주제가 하나 이상 연결된 항목만 연결된 것으로 세요.
+            </p>
+          </>
+        ) : null}
         {loading ? <p className="text-sm text-muted-foreground">불러오는 중…</p> : null}
         {loadError ? (
           <div className="flex flex-wrap items-center gap-2">
@@ -246,7 +256,7 @@ export function SurveyLinkTab() {
                 <span className="ml-2 text-xs font-normal text-muted-foreground">보통 주제를 연결하지 않아요</span>
               ) : null}
             </h3>
-            <div className={adminUi.tableWrap}>
+            <div className={`${adminUi.tableWrap} @container`}>
               <table className={adminUi.table}>
                 <thead className={adminUi.thead}>
                   <tr>
