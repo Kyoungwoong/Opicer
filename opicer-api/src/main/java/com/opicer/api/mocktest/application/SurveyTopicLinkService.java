@@ -38,7 +38,7 @@ public class SurveyTopicLinkService {
 		this.topics = topics;
 	}
 
-	/** Titles of the active topics the chosen items link to, in survey order and without repeats. */
+	/** Titles of the active survey topics the chosen items link to, in survey order and without repeats. */
 	@Transactional(readOnly = true)
 	public List<String> topicsOf(Map<String, List<String>> selections) {
 		List<String> chosen = new ArrayList<>();
@@ -48,7 +48,7 @@ public class SurveyTopicLinkService {
 		return activeTitles(chosen);
 	}
 
-	/** Titles of the active topics the chosen residence links to; part 1 falls back to these combos. */
+	/** Titles of the active survey topics the chosen residence links to; part 1 falls back to these combos. */
 	@Transactional(readOnly = true)
 	public List<String> residenceTopics(Map<String, List<String>> selections) {
 		return activeTitles(chosen(selections, SurveyCatalog.RESIDENCE));
@@ -97,12 +97,16 @@ public class SurveyTopicLinkService {
 		return links.existsByTopicId(topicId);
 	}
 
+	/**
+	 * Only active topics of the 설문조사 category are picked. {@link #replace} already refuses other categories, but a
+	 * link stored before that rule, or a topic moved to another category later, must not reach the mock test.
+	 */
 	private List<String> activeTitles(List<String> itemIds) {
 		Map<String, List<Topic>> linked = linkedTopics(itemIds);
 		Set<String> titles = new LinkedHashSet<>();
 		for (String itemId : itemIds) {
 			linked.getOrDefault(itemId, List.of()).stream()
-				.filter(Topic::isActive)
+				.filter(topic -> topic.isActive() && Topic.CATEGORY_SURVEY.equals(topic.getCategory()))
 				.forEach(topic -> titles.add(topic.getTitle()));
 		}
 		return List.copyOf(titles);
@@ -136,10 +140,11 @@ public class SurveyTopicLinkService {
 
 		static ItemLinks of(SurveyItem item, List<Topic> topics) {
 			return new ItemLinks(item.id(), item.label(), topics.stream()
-				.map(topic -> new LinkedTopic(topic.getId(), topic.getTitle(), topic.isActive()))
+				.map(topic -> new LinkedTopic(topic.getId(), topic.getTitle(), topic.getCategory(), topic.isActive()))
 				.toList());
 		}
 	}
 
-	public record LinkedTopic(UUID id, String title, boolean active) {}
+	/** {@code category} lets the screen flag a link to a topic outside the 설문조사 category. */
+	public record LinkedTopic(UUID id, String title, String category, boolean active) {}
 }
