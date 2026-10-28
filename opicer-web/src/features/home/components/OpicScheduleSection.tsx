@@ -1,11 +1,11 @@
 import { SectionShell } from "@/features/home/components/SectionShell";
-import { OpicOfficialSchedule } from "@/components/opic/OpicOfficialSchedule";
+import { OpicCalendar } from "@/components/opic/OpicCalendar";
 import { ko } from "@/locales/ko";
 
 export function OpicScheduleSection() {
   return (
     <SectionShell title={ko.home.opicSchedule.description}>
-      <OpicOfficialSchedule size="compact" />
+      <OpicCalendar size="compact" />
     </SectionShell>
   );
 }
