@@ -146,6 +146,7 @@ class SurveyTopicLinkServiceTest {
 		String category = camping.getCategory();
 		int categoryOrder = camping.getCategoryOrder();
 		recategorize(camping.getId(), Topic.CATEGORY_UNEXPECTED, 2);
+		List<SurveyTopicLink> before = links.findAll();
 		try {
 			links.deleteAll();
 
@@ -156,12 +157,12 @@ class SurveyTopicLinkServiceTest {
 			assertThat(output).contains("outside the survey category, left unlinked: [캠핑]");
 		} finally {
 			links.deleteAll();
+			links.saveAll(before.stream().map(link -> new SurveyTopicLink(link.getItemId(), link.getTopicId())).toList());
 			if (existing.isPresent()) {
 				recategorize(camping.getId(), category, categoryOrder);
 			} else {
 				topicRepository.deleteById(camping.getId());
 			}
-			runner.run(null);
 		}
 	}
 
