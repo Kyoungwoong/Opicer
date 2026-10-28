@@ -1,0 +1,9 @@
+build
+.gradle
+out
+storage
+data
+.env
+.env.*
+*.log
+run-local.*
