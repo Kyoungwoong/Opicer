@@ -25,6 +25,6 @@
    wsl -e docker exec -i opicer-postgres psql -U opicer -d opicer -v ON_ERROR_STOP=1 < scripts/opic-schedules.sql
    ```
 
-3. 또는 DBeaver로 `opic_schedule` 테이블에 직접 넣는다. `id`는 `gen_random_uuid()`, `source`는 `manual`이다.
+3. 또는 DBeaver로 `opic_schedule` 테이블에 직접 넣는다. `id`는 `gen_random_uuid()`, `source`는 `manual`, `created_at`·`updated_at`은 `now()`다. 이 두 칸은 DB 기본값이 없어서 비우면 저장이 실패한다.
 
 관리자 화면의 입력 탭은 다음 단계에서 만든다.
