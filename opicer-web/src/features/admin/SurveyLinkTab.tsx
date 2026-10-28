@@ -33,7 +33,9 @@ export function SurveyLinkTab() {
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -45,14 +47,23 @@ export function SurveyLinkTab() {
       setParts(loadedParts);
       setTopics(loadedTopics);
       setQuestions(loadedQuestions);
+      setLoadError(null);
     } catch (err) {
-      setError(parseAdminError(err).message);
+      setLoadError(parseAdminError(err).message);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  function retry() {
+    setLoading(true);
+    setLoadError(null);
+    void load();
+  }
 
   const surveyTopics = useMemo(
     () =>
@@ -78,7 +89,12 @@ export function SurveyLinkTab() {
   function startEdit(item: SurveyLinkItem) {
     setEditing(item.id);
     setDraft(new Set(item.topics.filter(isSurveyTopic).map((t) => t.id)));
-    setError(null);
+    setSaveError(null);
+  }
+
+  function cancelEdit() {
+    setEditing(null);
+    setSaveError(null);
   }
 
   function toggle(topicId: string) {
@@ -92,7 +108,7 @@ export function SurveyLinkTab() {
 
   async function save(itemId: string) {
     setSaving(true);
-    setError(null);
+    setSaveError(null);
     try {
       const updated = await surveyLinkApi.replace(itemId, [...draft]);
       setParts((current) =>
@@ -103,7 +119,7 @@ export function SurveyLinkTab() {
       );
       setEditing(null);
     } catch (err) {
-      setError(parseAdminError(err).message);
+      setSaveError(parseAdminError(err).message);
     } finally {
       setSaving(false);
     }
@@ -155,11 +171,16 @@ export function SurveyLinkTab() {
                 })}
               </div>
             )}
+            {saveError ? (
+              <p role="alert" className={adminUi.error}>
+                {saveError}
+              </p>
+            ) : null}
             <div className={adminUi.actions}>
               <button type="button" disabled={saving} onClick={() => void save(item.id)} className={adminUi.smallButton}>
                 {saving ? "저장 중…" : "저장"}
               </button>
-              <button type="button" onClick={() => setEditing(null)} className={adminUi.smallButton}>
+              <button type="button" onClick={cancelEdit} className={adminUi.smallButton}>
                 취소
               </button>
             </div>
@@ -196,7 +217,17 @@ export function SurveyLinkTab() {
         <p className="text-xs text-muted-foreground">
           활성 설문조사 주제가 하나 이상 연결된 항목만 연결된 것으로 세요.
         </p>
-        {error ? <p className={adminUi.error}>{error}</p> : null}
+        {loading ? <p className="text-sm text-muted-foreground">불러오는 중…</p> : null}
+        {loadError ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <p role="alert" className={adminUi.error}>
+              {loadError}
+            </p>
+            <button type="button" onClick={retry} className={adminUi.smallButton}>
+              다시 시도
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {parts.map((part) => {
