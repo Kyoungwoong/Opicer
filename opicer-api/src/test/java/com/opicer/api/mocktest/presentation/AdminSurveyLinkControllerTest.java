@@ -67,9 +67,12 @@ class AdminSurveyLinkControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.id").value("leisure.museum"))
 			.andExpect(jsonPath("$.data.topics[0].title").value(museum.getTitle()))
+			.andExpect(jsonPath("$.data.topics[0].category").value(Topic.CATEGORY_SURVEY))
 			.andExpect(jsonPath("$.data.topics[0].active").value(true));
 		mockMvc.perform(get(BASE).cookie(cookie(UserRole.ADMIN)))
-			.andExpect(jsonPath("$.data[3].items[?(@.id == 'leisure.museum')].topics[0].id").value(museum.getId().toString()));
+			.andExpect(jsonPath("$.data[3].items[?(@.id == 'leisure.museum')].topics[0].id").value(museum.getId().toString()))
+			.andExpect(jsonPath("$.data[3].items[?(@.id == 'leisure.museum')].topics[0].category")
+				.value(Topic.CATEGORY_SURVEY));
 		mockMvc.perform(get("/api/admin/topics").cookie(cookie(UserRole.ADMIN)))
 			.andExpect(jsonPath("$.data[?(@.id == '" + museum.getId() + "')].mockLinked").value(true))
 			.andExpect(jsonPath("$.data[?(@.id == '" + museum.getId() + "')].titleLocked").value(false));

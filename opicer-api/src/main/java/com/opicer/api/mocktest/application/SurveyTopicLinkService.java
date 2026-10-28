@@ -140,10 +140,11 @@ public class SurveyTopicLinkService {
 
 		static ItemLinks of(SurveyItem item, List<Topic> topics) {
 			return new ItemLinks(item.id(), item.label(), topics.stream()
-				.map(topic -> new LinkedTopic(topic.getId(), topic.getTitle(), topic.isActive()))
+				.map(topic -> new LinkedTopic(topic.getId(), topic.getTitle(), topic.getCategory(), topic.isActive()))
 				.toList());
 		}
 	}
 
-	public record LinkedTopic(UUID id, String title, boolean active) {}
+	/** {@code category} lets the screen flag a link to a topic outside the 설문조사 category. */
+	public record LinkedTopic(UUID id, String title, String category, boolean active) {}
 }
