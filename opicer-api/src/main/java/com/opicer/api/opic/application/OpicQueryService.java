@@ -1,9 +1,12 @@
 package com.opicer.api.opic.application;
 
+import com.opicer.api.opic.domain.OpicExamSchedule;
 import com.opicer.api.opic.domain.OpicTestCenter;
 import com.opicer.api.opic.infrastructure.OpicCenterReviewRepository;
 import com.opicer.api.opic.infrastructure.OpicCenterReviewRepository.ReviewStats;
+import com.opicer.api.opic.infrastructure.OpicExamScheduleRepository;
 import com.opicer.api.opic.infrastructure.OpicTestCenterRepository;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -18,13 +21,21 @@ public class OpicQueryService {
 
 	private final OpicTestCenterRepository centerRepository;
 	private final OpicCenterReviewRepository reviewRepository;
+	private final OpicExamScheduleRepository scheduleRepository;
 
 	public OpicQueryService(
 		OpicTestCenterRepository centerRepository,
-		OpicCenterReviewRepository reviewRepository
+		OpicCenterReviewRepository reviewRepository,
+		OpicExamScheduleRepository scheduleRepository
 	) {
 		this.centerRepository = centerRepository;
 		this.reviewRepository = reviewRepository;
+		this.scheduleRepository = scheduleRepository;
+	}
+
+	/** Exam rounds whose exam date falls in {@code month}, by date then round name. */
+	public List<OpicExamSchedule> schedules(YearMonth month) {
+		return scheduleRepository.findByExamDateBetweenOrderByExamDateAscRoundNameAsc(month.atDay(1), month.atEndOfMonth());
 	}
 
 	/** Active centers with their visible-review stats; {@code region} (e.g. "서울") narrows the list when given. */

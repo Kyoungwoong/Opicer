@@ -7,6 +7,7 @@ import com.opicer.api.opic.application.OpicCenterReviewQueryService;
 import com.opicer.api.opic.application.OpicQueryService;
 import com.opicer.api.opic.application.OpicQueryService.CenterSummary;
 import com.opicer.api.opic.domain.OpicCenterReview;
+import com.opicer.api.opic.domain.OpicExamSchedule;
 import com.opicer.api.opic.domain.OpicTestCenter;
 import com.opicer.api.shared.error.ApiException;
 import com.opicer.api.shared.error.ErrorCode;
@@ -14,6 +15,9 @@ import com.opicer.api.user.domain.AuthProvider;
 import com.opicer.api.user.domain.UserRole;
 import jakarta.servlet.http.Cookie;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -100,11 +104,39 @@ class OpicControllerTest {
 			.andExpect(jsonPath("$.code").value("OPIC_CENTER_NOT_FOUND"));
 	}
 
-	/** Nothing is collected from opic.or.kr any more: schedules and the admin sync are gone. */
 	@Test
-	void removedScheduleAndSyncEndpointsAreNotServed() throws Exception {
+	void schedulesOfAMonthArePublic() throws Exception {
+		when(opicQueryService.schedules(YearMonth.of(2026, 11))).thenReturn(List.of(
+			new OpicExamSchedule(LocalDate.of(2026, 11, 8), LocalDate.of(2026, 10, 1), LocalDate.of(2026, 11, 1),
+				LocalDate.of(2026, 11, 13), "261102 정기 평가", true, OpicExamSchedule.SOURCE_MANUAL)));
+
+		mockMvc.perform(get("/api/opic/schedules").param("month", "2026-11"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.month").value("2026-11"))
+			.andExpect(jsonPath("$.data.schedules[0].examDate").value("2026-11-08"))
+			.andExpect(jsonPath("$.data.schedules[0].registrationEnd").value("2026-11-01"))
+			.andExpect(jsonPath("$.data.schedules[0].roundName").value("261102 정기 평가"))
+			.andExpect(jsonPath("$.data.schedules[0].earlyRelease").value(true))
+			.andExpect(jsonPath("$.data.schedules[0].source").doesNotExist());
+	}
+
+	@Test
+	void schedulesDefaultToThisMonthInSeoulAndRejectABadMonth() throws Exception {
+		YearMonth thisMonth = YearMonth.now(ZoneId.of("Asia/Seoul"));
+		when(opicQueryService.schedules(thisMonth)).thenReturn(List.of());
+
 		mockMvc.perform(get("/api/opic/schedules"))
-			.andExpect(status().isNotFound());
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.month").value(thisMonth.toString()))
+			.andExpect(jsonPath("$.data.schedules").isEmpty());
+		mockMvc.perform(get("/api/opic/schedules").param("month", "2026-13"))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+	}
+
+	/** Nothing is collected from opic.or.kr: the admin sync stays gone. */
+	@Test
+	void theRemovedSyncEndpointIsNotServed() throws Exception {
 		mockMvc.perform(post("/api/admin/opic-sync").cookie(cookie(UserRole.ADMIN)))
 			.andExpect(status().isNotFound());
 	}
