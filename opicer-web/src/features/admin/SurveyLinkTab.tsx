@@ -140,7 +140,8 @@ export function SurveyLinkTab() {
     return (
       <tr>
         <td colSpan={3} className="bg-muted/30 p-0">
-          <fieldset className="sticky left-0 flex w-[100cqw] min-w-0 flex-col gap-3 px-4 py-4">
+          {/* Locked while saving: the request already carries the selection, so later clicks would be lost. */}
+          <fieldset disabled={saving} className="sticky left-0 flex w-[100cqw] min-w-0 flex-col gap-3 px-4 py-4">
             <legend className={`${adminUi.labelText} mb-2`}>&lsquo;{item.label}&rsquo;에 연결할 설문조사 주제</legend>
             {misfiled.length > 0 ? (
               <ul className="flex flex-col gap-1 rounded-lg bg-warning-subtle px-3 py-2 text-sm text-warning">
