@@ -277,7 +277,7 @@ export function SurveyLinkTab() {
                           {item.topics.length === 0 && unpicked ? (
                             <span className="text-xs text-muted-foreground">없음</span>
                           ) : item.topics.length === 0 ? (
-                            <span className="rounded-full bg-highlight/20 px-2 py-0.5 text-xs font-medium text-foreground">
+                            <span className={adminUi.pillHighlight}>
                               연결 안 됨
                             </span>
                           ) : (
@@ -286,7 +286,7 @@ export function SurveyLinkTab() {
                                 <TopicChip key={topic.id} topic={topic} />
                               ))}
                               {hasUsableTopic(item) ? null : (
-                                <span className="rounded-full bg-highlight/20 px-2 py-0.5 text-xs font-medium text-foreground">
+                                <span className={adminUi.pillHighlight}>
                                   출제 가능한 주제 없음
                                 </span>
                               )}
