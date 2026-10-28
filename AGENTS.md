@@ -77,6 +77,14 @@ Priority order:
 Every unit of work, whether feature, fix, refactor, docs or chore, goes through this exact loop.
 Each step is listed with the FSM state from §4 that it belongs to.
 
+For M and L feature work, run steps 2 and 6–8 through the multi-agent harness (`.claude/skills/opicer-harness/SKILL.md`, `docs/harness.md`):
+- planner for the plan (L)
+- an agreed sprint contract before code
+- builder for the implementation
+- a skeptical evaluator QA loop before the PR
+
+The gate, issue, branch, GitHub review loop and merge below do not change.
+
 1. **Analyze** (Problem Interpretation)
     - Do a *fresh* analysis of the current state: code, running app, docs, and the last merged result.
     - Do not reuse assumptions from the previous cycle without re-checking them.

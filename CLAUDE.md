@@ -158,6 +158,7 @@ Read the relevant skill file **before** starting work in that area. Skills are l
 | JPA entity / repository design       | `.agents/skills/jpa-patterns/SKILL.md`                      |
 | Architecture decisions               | `.agents/skills/backend-patterns/references/BEST_PRACTICES.md` |
 | Risk / timebox assessment            | `.agents/skills/assessment-checklists/SKILL.md`             |
+| M or L feature work (multi-agent)    | `.claude/skills/opicer-harness/SKILL.md` (see `docs/harness.md`) |
 
 **Skill precedence (highest → lowest):**
 1. git-conventions
