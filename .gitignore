@@ -75,3 +75,12 @@ scripts/
 
 # worklog
 worklog/
+
+# Claude Code: agents and skills are shared; per-machine settings are not
+.claude/launch.json
+.claude/run-api.ps1
+.claude/settings.local.json
+.claude/worktrees/
+
+# Multi-agent harness working files (docs/harness.md)
+.harness/
