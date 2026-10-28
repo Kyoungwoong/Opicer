@@ -7,6 +7,8 @@ import type {
   AdminOpicCenterInput,
   AdminOpicCenterReview,
   AdminOpicCenterReviewInput,
+  AdminOpicSchedule,
+  AdminOpicScheduleInput,
   DailySentence,
   EvaluationGuide,
   EvaluationGuideKind,
@@ -295,4 +297,13 @@ export const opicCenterReviewApi = {
     }),
   delete: (id: string) =>
     request<void>(`opic-center-reviews/${id}`, { method: "DELETE" }),
+};
+
+export const opicScheduleApi = {
+  list: () => request<AdminOpicSchedule[]>("opic-schedules"),
+  create: (data: AdminOpicScheduleInput) =>
+    request<AdminOpicSchedule>("opic-schedules", { method: "POST", body: JSON.stringify(data) }),
+  update: (id: string, data: AdminOpicScheduleInput) =>
+    request<AdminOpicSchedule>(`opic-schedules/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  delete: (id: string) => request<void>(`opic-schedules/${id}`, { method: "DELETE" }),
 };
