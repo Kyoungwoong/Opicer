@@ -32,10 +32,12 @@ export function SurveyLinkTab() {
   const [filter, setFilter] = useState<Filter>("ALL");
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState<Set<string>>(new Set());
-  const [saving, setSaving] = useState(false);
+  /** The item whose save is in flight; other rows cannot be opened until it settles. */
+  const [savingId, setSavingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  /** A failed save belongs to the item it was for, so it never shows in another row. */
+  const [saveError, setSaveError] = useState<{ itemId: string; message: string } | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -107,7 +109,7 @@ export function SurveyLinkTab() {
   }
 
   async function save(itemId: string) {
-    setSaving(true);
+    setSavingId(itemId);
     setSaveError(null);
     try {
       const updated = await surveyLinkApi.replace(itemId, [...draft]);
@@ -117,16 +119,18 @@ export function SurveyLinkTab() {
           items: part.items.map((item) => (item.id === updated.id ? updated : item)),
         }))
       );
-      setEditing(null);
+      setEditing((current) => (current === itemId ? null : current));
     } catch (err) {
-      setSaveError(parseAdminError(err).message);
+      setSaveError({ itemId, message: parseAdminError(err).message });
     } finally {
-      setSaving(false);
+      setSavingId(null);
     }
   }
 
   const editor = (item: SurveyLinkItem) => {
     const misfiled = item.topics.filter((t) => !isSurveyTopic(t));
+    const saving = savingId === item.id;
+    const error = saveError?.itemId === item.id ? saveError.message : null;
     return (
       <tr>
         <td colSpan={3} className="bg-muted/30 px-4 py-4">
@@ -171,16 +175,16 @@ export function SurveyLinkTab() {
                 })}
               </div>
             )}
-            {saveError ? (
+            {error ? (
               <p role="alert" className={adminUi.error}>
-                {saveError}
+                {error}
               </p>
             ) : null}
             <div className={adminUi.actions}>
               <button type="button" disabled={saving} onClick={() => void save(item.id)} className={adminUi.smallButton}>
                 {saving ? "저장 중…" : "저장"}
               </button>
-              <button type="button" onClick={cancelEdit} className={adminUi.smallButton}>
+              <button type="button" disabled={saving} onClick={cancelEdit} className={adminUi.smallButton}>
                 취소
               </button>
             </div>
@@ -280,7 +284,13 @@ export function SurveyLinkTab() {
                           )}
                         </td>
                         <td className={adminUi.td}>
-                          <button type="button" onClick={() => startEdit(item)} className={adminUi.linkButton}>
+                          <button
+                            type="button"
+                            disabled={savingId !== null}
+                            title={savingId !== null ? "저장이 끝난 뒤에 수정할 수 있어요" : undefined}
+                            onClick={() => startEdit(item)}
+                            className={`${adminUi.linkButton} disabled:cursor-not-allowed disabled:opacity-50`}
+                          >
                             수정
                           </button>
                         </td>
