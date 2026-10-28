@@ -67,23 +67,25 @@ export function UniversalSentencesSection() {
         </span>
       }
     >
-      <div className="flex min-h-[200px] flex-1 flex-col gap-4">
-        <p className="text-sm font-semibold text-accent-foreground">
-          {current?.title ?? ko.home.universalSentences.titleLoading}
-        </p>
-        <p className="text-xl leading-relaxed font-bold break-words text-foreground sm:text-2xl">
-          {current ? `“${current.sentence}”` : ko.home.universalSentences.sentenceLoading}
-        </p>
-
-        <div className="flex flex-wrap gap-2">
-          {current?.tags?.map((tag) => (
-            <span key={tag} className="rounded-full bg-card px-2.5 py-0.5 text-xs font-medium text-accent-foreground">
-              #{tag}
-            </span>
-          ))}
+      <div className="flex flex-1 flex-col gap-6">
+        {/* Centered in whatever height the row gives; the quote keeps three lines so slides don't jump. */}
+        <div className="flex flex-1 flex-col justify-center gap-3">
+          <p className="text-sm font-semibold text-accent-foreground">
+            {current?.title ?? ko.home.universalSentences.titleLoading}
+          </p>
+          <p className="min-h-[3lh] text-xl leading-relaxed font-bold break-words text-foreground sm:text-2xl lg:text-[26px]">
+            {current ? `“${current.sentence}”` : ko.home.universalSentences.sentenceLoading}
+          </p>
+          <div className="flex min-h-6 flex-wrap gap-2">
+            {current?.tags?.map((tag) => (
+              <span key={tag} className="rounded-full bg-card px-2.5 py-0.5 text-xs font-medium text-accent-foreground">
+                #{tag}
+              </span>
+            ))}
+          </div>
         </div>
 
-        <div className="mt-auto flex items-center justify-between gap-3 pt-2">
+        <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-1.5">
             {sentences.map((item, dotIndex) => (
               <button

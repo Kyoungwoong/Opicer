@@ -212,7 +212,7 @@ function OpicCalendarBody({ today, size, className }: Required<Pick<Props, "size
         {state.status === "error" ? (
           <div className="flex flex-col gap-3">
             <p className="text-sm text-muted-foreground">일정을 불러오지 못했어요. 공식 사이트에서 확인해 주세요.</p>
-            <OpicOfficialSchedule size={size} className="bg-card" />
+            {size === "comfortable" && <OpicOfficialSchedule size={size} className="bg-card" />}
           </div>
         ) : state.status === "loading" ? (
           <Skeleton className="h-12 rounded-lg" />
@@ -243,7 +243,7 @@ function OpicCalendarBody({ today, size, className }: Required<Pick<Props, "size
         ) : (
           <div className="flex flex-col gap-3">
             <p className="text-sm text-muted-foreground">이 달에 등록된 시험 일정이 아직 없어요.</p>
-            <OpicOfficialSchedule size={size} className="bg-card" />
+            {size === "comfortable" && <OpicOfficialSchedule size={size} className="bg-card" />}
           </div>
         )}
       </div>

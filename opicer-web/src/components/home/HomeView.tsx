@@ -54,12 +54,12 @@ export function HomeView({
         </div>
       </section>
 
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+      <RecentActivitySection />
+
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
         <UniversalSentencesSection />
         <OpicScheduleSection />
       </div>
-
-      <RecentActivitySection />
     </PageShell>
   );
 }
